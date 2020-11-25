@@ -28,7 +28,9 @@ public class SceneManager : ModuleRules
             "Slate",
             "SlateCore",
 			// ... add private dependencies that you statically link with here ...	
-		});
+            "EditorStyle",
+            "WorkspaceMenuStructure",
+        });
 
 
         DynamicallyLoadedModuleNames.AddRange(new string[] {

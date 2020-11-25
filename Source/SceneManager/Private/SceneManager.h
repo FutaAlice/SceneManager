@@ -4,11 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
+#include "Templates/UniquePtr.h"
 
 class FSceneManagerModule : public IModuleInterface
 {
 public:
+    FSceneManagerModule();
+
     /** IModuleInterface implementation */
     virtual void StartupModule() override;
     virtual void ShutdownModule() override;
+private:
+    TUniquePtr<struct FSceneManagerImpl> Impl;
 };
