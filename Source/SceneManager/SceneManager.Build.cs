@@ -29,6 +29,7 @@ public class SceneManager : ModuleRules
             "SlateCore",
 			// ... add private dependencies that you statically link with here ...	
             "EditorStyle",
+            "InputCore",
             "WorkspaceMenuStructure",
         });
 
