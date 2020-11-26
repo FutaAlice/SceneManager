@@ -76,7 +76,7 @@ struct FSceneManagerImpl
     FSceneManagerImpl();
     ~FSceneManagerImpl();
 
-    /** Function registered with tab manager to create the bluepring debugger */
+    /** Function registered with tab manager to create the scene manager window */
     TSharedRef<SDockTab> CreateSceneManagerTab(const FSpawnTabArgs& Args);
 
     TSharedPtr<FTabManager> ToolsTabManager;
@@ -101,7 +101,7 @@ FSceneManagerImpl::FSceneManagerImpl()
         .SetDisplayName(LOCTEXT("FSceneManagerTabTitle", "Scene Manager"))
         .SetTooltipText(LOCTEXT("TooltipText", "Open the Scene Manager tab."))
         .SetGroup(MenuStructure.GetDeveloperToolsMiscCategory())
-        .SetIcon(FSlateIcon(FEditorStyle::GetStyleSetName(), "BlueprintDebugger.TabIcon")); // TODO
+        .SetIcon(FSlateIcon(FEditorStyle::GetStyleSetName(), "BlueprintDebugger.TabIcon")); // TODO: change icon
 }
 
 FSceneManagerImpl::~FSceneManagerImpl()
@@ -122,7 +122,7 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
 {
     const TSharedRef<SDockTab> NomadTab = SNew(SDockTab)
         .TabRole(ETabRole::NomadTab)
-        .Label(LOCTEXT("TabTitle", "Blueprint Debugger"));
+        .Label(LOCTEXT("TabTitle", "Scene Manager"));
 
     if (!ToolsTabManager.IsValid()) {
         ToolsTabManager = FGlobalTabmanager::Get()->NewTabManager(NomadTab);
@@ -226,15 +226,9 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
 
     CommandList->MapAction(
         FSceneManagerCommands::Get().TabAction_Settings,
-        FExecuteAction::CreateStatic(
-            ToggleTabVisibility, ToolsManagerWeak, TabName_Settings
-        ),
-        FCanExecuteAction::CreateStatic(
-            []() { return true; }
-        ),
-        FIsActionChecked::CreateStatic(
-            IsTabVisible, ToolsManagerWeak, TabName_Settings
-        )
+        FExecuteAction::CreateStatic(ToggleTabVisibility, ToolsManagerWeak, TabName_Settings),
+        FCanExecuteAction::CreateStatic([] { return true; }),
+        FIsActionChecked::CreateStatic(IsTabVisible, ToolsManagerWeak, TabName_Settings)
     );
 
     TWeakPtr<SWidget> OwningWidgetWeak = NomadTab;
