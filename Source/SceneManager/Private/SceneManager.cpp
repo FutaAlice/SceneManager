@@ -166,18 +166,17 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
                 [](const FSpawnTabArgs&)->TSharedRef<SDockTab> {
                     return SNew(SDockTab)
                         .TabRole(ETabRole::PanelTab)
-                        .Label(NSLOCTEXT("Settings tab page 1", "TabTitle", "Settings tab page 2"))
+                        .Label(LOCTEXT("TabTitle", "Settings"))
                         [
                              SNew(SSettingsView)
                         ];
                 }
-            )
-        )
-            .SetDisplayName(NSLOCTEXT("BlueprintDebugger", "ExecutionFlowTabTitle", "Blueprint Execution Flow"))
-            .SetTooltipText(NSLOCTEXT("BlueprintDebugger", "ExecutionFlowTooltipText", "Open the Blueprint Execution Flow tab."));
+            ))
+            .SetDisplayName(LOCTEXT("SettingsTabTitle", "Scenc manager settings"))
+            .SetTooltipText(LOCTEXT("SettingsTooltipText", "Open the Scenc manager setting tab."));
 
-            //CallStackViewer::RegisterTabSpawner(*DebuggingToolsTabManager);
-            //WatchViewer::RegisterTabSpawner(*DebuggingToolsTabManager);
+        //CallStackViewer::RegisterTabSpawner(*DebuggingToolsTabManager);
+        //WatchViewer::RegisterTabSpawner(*DebuggingToolsTabManager);
 
         SceneManagerLayout = FTabManager::NewLayout("Standalone_SceneManager_Layout_v1");
         SceneManagerLayout->AddArea(
@@ -187,8 +186,8 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
                 FTabManager::NewStack()
                 ->SetSizeCoefficient(.4f)
                 ->SetHideTabWell(true)
-                //->AddTab(Action_AName, ETabState::OpenedTab)
-                //->AddTab(Action_BName, ETabState::OpenedTab)
+                ->AddTab(Action_AName, ETabState::OpenedTab)
+                ->AddTab(Action_BName, ETabState::OpenedTab)
                 ->AddTab(TabName_Settings, ETabState::OpenedTab)
                 ->SetForegroundTab(Action_AName)
             )
@@ -228,17 +227,13 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
     CommandList->MapAction(
         FSceneManagerCommands::Get().TabAction_Settings,
         FExecuteAction::CreateStatic(
-            ToggleTabVisibility,
-            ToolsManagerWeak,
-            TabName_Settings
+            ToggleTabVisibility, ToolsManagerWeak, TabName_Settings
         ),
         FCanExecuteAction::CreateStatic(
             []() { return true; }
         ),
         FIsActionChecked::CreateStatic(
-            IsTabVisible,
-            ToolsManagerWeak,
-            TabName_Settings
+            IsTabVisible, ToolsManagerWeak, TabName_Settings
         )
     );
 
