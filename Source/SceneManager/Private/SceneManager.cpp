@@ -44,7 +44,7 @@ struct FSceneManagerCommands : public TCommands<FSceneManagerCommands>
     FSceneManagerCommands()
         : TCommands<FSceneManagerCommands>(
             TEXT("SceneManager"), // Context name for fast lookup
-            NSLOCTEXT("Contexts", "SceneManager", "SceneManager Plugin"), // Localized context name for displaying
+            LOCTEXT("SceneManager", "SceneManager Plugin"), // Localized context name for displaying
             NAME_None, // Parent
             FCoreStyle::Get().GetStyleSetName() // Icon Style Set
             )
@@ -107,7 +107,7 @@ FSceneManagerImpl::FSceneManagerImpl()
 
     FSceneManagerCommands::Register();
     FGlobalTabmanager::Get()->RegisterNomadTabSpawner(SceneManagerName, FOnSpawnTab::CreateRaw(this, &FSceneManagerImpl::CreateSceneManagerTab))
-        .SetDisplayName(LOCTEXT("FSceneManagerTabTitle", "Scene Manager"))
+        .SetDisplayName(LOCTEXT("TabTitle", "Scene Manager"))
         .SetTooltipText(LOCTEXT("TooltipText", "Open the Scene Manager tab."))
         .SetGroup(MenuStructure.GetDeveloperToolsMiscCategory())
         .SetIcon(FSlateIcon(FEditorStyle::GetStyleSetName(), "BlueprintDebugger.TabIcon")); // TODO: change icon
@@ -179,7 +179,7 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
                 [](const FSpawnTabArgs&)->TSharedRef<SDockTab> {
                     return SNew(SDockTab)
                         .TabRole(ETabRole::PanelTab)
-                        .Label(LOCTEXT("TabTitle", "Settings"))
+                        .Label(NSLOCTEXT("SceneManagerSettings", "TabTitle", "Settings"))
                         [
                              SNew(SSettingsView)
                         ];
