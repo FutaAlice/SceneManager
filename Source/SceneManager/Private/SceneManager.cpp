@@ -55,15 +55,24 @@ struct FSceneManagerCommands : public TCommands<FSceneManagerCommands>
     virtual void RegisterCommands() override;
     // End of TCommand<> interface
 
-    TSharedPtr<FUICommandInfo> Action_A;
-    TSharedPtr<FUICommandInfo> Action_B;
+    TSharedPtr<FUICommandInfo> TabAction_Meterial;
+    TSharedPtr<FUICommandInfo> TabAction_SceneLighting;
+    TSharedPtr<FUICommandInfo> TabAction_CharacterLighting;
+    TSharedPtr<FUICommandInfo> TabAction_PostProcessing;
+    TSharedPtr<FUICommandInfo> TabAction_Wind;
+    TSharedPtr<FUICommandInfo> TabAction_Misc;
     TSharedPtr<FUICommandInfo> TabAction_Settings;
 };
 
 void FSceneManagerCommands::RegisterCommands()
 {
-    UI_COMMAND(Action_A, "Call ", "Toggles visibility of the Call Stack window", EUserInterfaceActionType::Check, FInputChord());
-    UI_COMMAND(Action_B, "Watches", "Toggles visibility of the Watches window", EUserInterfaceActionType::Check, FInputChord());
+    // tab pages name
+    UI_COMMAND(TabAction_Meterial, "Meterial", "TODO", EUserInterfaceActionType::Check, FInputChord());
+    UI_COMMAND(TabAction_SceneLighting, "Scene Lighting", "TODO", EUserInterfaceActionType::Check, FInputChord());
+    UI_COMMAND(TabAction_CharacterLighting, "Character Lighting", "TODO", EUserInterfaceActionType::Check, FInputChord());
+    UI_COMMAND(TabAction_PostProcessing, "Character Lighting", "TODO", EUserInterfaceActionType::Check, FInputChord());
+    UI_COMMAND(TabAction_Wind, "Wind", "TODO", EUserInterfaceActionType::Check, FInputChord());
+    UI_COMMAND(TabAction_Misc, "Misc", "TODO", EUserInterfaceActionType::Check, FInputChord());
     UI_COMMAND(TabAction_Settings, "Settings", "Scene manager settings", EUserInterfaceActionType::Check, FInputChord());
 }
 
@@ -155,8 +164,12 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
         }
         , ToolsTabManagerWeak));
 
-    const FName Action_AName = FName(TEXT("My Action A"));
-    const FName Action_BName = FName(TEXT("My Action B"));
+    const FName TabName_Meterial = FName(TEXT("Meterial"));
+    const FName TabName_SceneLighting = FName(TEXT("Scene Lighting"));
+    const FName TabName_CharacterLighting = FName(TEXT("CharacterLighting"));
+    const FName TabName_PostProcessing = FName(TEXT("Post-Process"));
+    const FName TabName_Wind = FName(TEXT("Wind"));
+    const FName TabName_Misc = FName(TEXT("CharacterLighting"));
     const FName TabName_Settings = FName(TEXT("Settings"));
 
     if (!SceneManagerLayout.IsValid()) {
@@ -178,7 +191,7 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
         //CallStackViewer::RegisterTabSpawner(*DebuggingToolsTabManager);
         //WatchViewer::RegisterTabSpawner(*DebuggingToolsTabManager);
 
-        SceneManagerLayout = FTabManager::NewLayout("Standalone_SceneManager_Layout_v1");
+        SceneManagerLayout = FTabManager::NewLayout("Standalone_SceneManager_Layout_v2");
         SceneManagerLayout->AddArea(
             FTabManager::NewPrimaryArea()
             ->SetOrientation(Orient_Vertical)
@@ -186,10 +199,14 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
                 FTabManager::NewStack()
                 ->SetSizeCoefficient(.4f)
                 ->SetHideTabWell(true)
-                ->AddTab(Action_AName, ETabState::OpenedTab)
-                ->AddTab(Action_BName, ETabState::OpenedTab)
+                ->AddTab(TabName_Meterial, ETabState::OpenedTab)
+                ->AddTab(TabName_SceneLighting, ETabState::OpenedTab)
+                ->AddTab(TabName_CharacterLighting, ETabState::OpenedTab)
+                ->AddTab(TabName_PostProcessing, ETabState::OpenedTab)
+                ->AddTab(TabName_Wind, ETabState::OpenedTab)
+                ->AddTab(TabName_Misc, ETabState::OpenedTab)
                 ->AddTab(TabName_Settings, ETabState::OpenedTab)
-                ->SetForegroundTab(Action_AName)
+                ->SetForegroundTab(TabName_Settings)
             )
         );
     }
@@ -246,9 +263,14 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
                         if (InOwner.IsValid()) {
                             FMenuBuilder MenuBuilder(true, InCommandList);
 
+                            // add tab pages
                             MenuBuilder.PushCommandList(InCommandList.ToSharedRef());
-                            MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().Action_A);
-                            MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().Action_B);
+                            MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_Meterial);
+                            MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_SceneLighting);
+                            MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_CharacterLighting);
+                            MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_PostProcessing);
+                            MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_Wind);
+                            MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_Misc);
                             MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_Settings);
                             MenuBuilder.PopCommandList();
 
