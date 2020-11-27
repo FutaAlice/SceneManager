@@ -70,7 +70,7 @@ void FSceneManagerCommands::RegisterCommands()
     UI_COMMAND(TabAction_Meterial, "Meterial", "TODO", EUserInterfaceActionType::Check, FInputChord());
     UI_COMMAND(TabAction_SceneLighting, "Scene Lighting", "TODO", EUserInterfaceActionType::Check, FInputChord());
     UI_COMMAND(TabAction_CharacterLighting, "Character Lighting", "TODO", EUserInterfaceActionType::Check, FInputChord());
-    UI_COMMAND(TabAction_PostProcessing, "Character Lighting", "TODO", EUserInterfaceActionType::Check, FInputChord());
+    UI_COMMAND(TabAction_PostProcessing, "Post-Processing", "TODO", EUserInterfaceActionType::Check, FInputChord());
     UI_COMMAND(TabAction_Wind, "Wind", "TODO", EUserInterfaceActionType::Check, FInputChord());
     UI_COMMAND(TabAction_Misc, "Misc", "TODO", EUserInterfaceActionType::Check, FInputChord());
     UI_COMMAND(TabAction_Settings, "Settings", "Scene manager settings", EUserInterfaceActionType::Check, FInputChord());
@@ -140,7 +140,7 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
             FTabManager::FOnPersistLayout::CreateStatic(
                 [](const TSharedRef<FTabManager::FLayout>& InLayout) {
                     if (InLayout->GetPrimaryArea().Pin().IsValid()) {
-                        FLayoutSaveRestore::SaveToConfig(GEditorLayoutIni, InLayout);
+                        // FLayoutSaveRestore::SaveToConfig(GEditorLayoutIni, InLayout);
                     }
                 }
             )
@@ -158,7 +158,7 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
         [](TSharedRef<SDockTab> Self, TWeakPtr<FTabManager> TabManager) {
             TSharedPtr<FTabManager> OwningTabManager = TabManager.Pin();
             if (OwningTabManager.IsValid()) {
-                FLayoutSaveRestore::SaveToConfig(GEditorLayoutIni, OwningTabManager->PersistLayout());
+                // FLayoutSaveRestore::SaveToConfig(GEditorLayoutIni, OwningTabManager->PersistLayout());
                 OwningTabManager->CloseAllAreas();
             }
         }
@@ -166,10 +166,10 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
 
     const FName TabName_Meterial = FName(TEXT("Meterial"));
     const FName TabName_SceneLighting = FName(TEXT("Scene Lighting"));
-    const FName TabName_CharacterLighting = FName(TEXT("CharacterLighting"));
-    const FName TabName_PostProcessing = FName(TEXT("Post-Process"));
+    const FName TabName_CharacterLighting = FName(TEXT("Character Lighting"));
+    const FName TabName_PostProcessing = FName(TEXT("Post-Processing"));
     const FName TabName_Wind = FName(TEXT("Wind"));
-    const FName TabName_Misc = FName(TEXT("CharacterLighting"));
+    const FName TabName_Misc = FName(TEXT("Miscellaneous"));
     const FName TabName_Settings = FName(TEXT("Settings"));
 
     if (!SceneManagerLayout.IsValid()) {
@@ -191,7 +191,7 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
         //CallStackViewer::RegisterTabSpawner(*DebuggingToolsTabManager);
         //WatchViewer::RegisterTabSpawner(*DebuggingToolsTabManager);
 
-        SceneManagerLayout = FTabManager::NewLayout("Standalone_SceneManager_Layout_v2");
+        SceneManagerLayout = FTabManager::NewLayout("Standalone_SceneManager_Layout_v3");
         SceneManagerLayout->AddArea(
             FTabManager::NewPrimaryArea()
             ->SetOrientation(Orient_Vertical)
