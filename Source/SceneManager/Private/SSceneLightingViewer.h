@@ -3,9 +3,9 @@
 
 class FTabManager;
 
-namespace MaterialViewer {
+namespace SceneLightingViewer {
 
 FName GetTabName();
 void RegisterTabSpawner(FTabManager& TabManager);
 
-} // namespace MaterialViewer
+} // namespace SceneLightingViewer

@@ -1,9 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 #include "SMaterialViewer.h"
 
-#include "CoreMinimal.h"
 #include "EditorStyleSet.h" // FEditorStyle
 #include "Framework/Docking/TabManager.h"   // FTabManager, FSpawnTabArgs
+#include "Widgets/SCompoundWidget.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/Docking/SDockTab.h"   // SDockTab
 #include "Widgets/Input/SCheckBox.h"    // SCheckBox
@@ -12,10 +11,10 @@
 #include "Widgets/Layout/SSpacer.h" // SSpacer
 #include "SlateOptMacros.h"
 
-#define LOCTEXT_NAMESPACE "CallStackViewer"
+#define LOCTEXT_NAMESPACE "MaterialViewer"
 
 /**
- *
+ * Material Viewer
  */
 class SMaterialViewer : public SCompoundWidget
 {
@@ -115,7 +114,6 @@ void RegisterTabSpawner(FTabManager& TabManager)
     TabManager.RegisterTabSpawner(MaterialViewer::GetTabName(), FOnSpawnTab::CreateStatic(SpawnMaterialViewTab))
         .SetDisplayName(LOCTEXT("TabTitle", "Material"))
         .SetTooltipText(LOCTEXT("TooltipText", "Open the Material tab"));
-
 }
 
 } // namespace MaterialViewer

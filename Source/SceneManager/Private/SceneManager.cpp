@@ -16,6 +16,7 @@
 
 #include "SSettingsView.h"
 #include "SMaterialViewer.h"
+#include "SSceneLightingViewer.h"
 
 
 #define LOCTEXT_NAMESPACE "FSceneManagerModule"
@@ -166,7 +167,7 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
         , ToolsTabManagerWeak));
 
     const FName TabName_Meterial = MaterialViewer::GetTabName();
-    const FName TabName_SceneLighting = FName(TEXT("Scene Lighting"));
+    const FName TabName_SceneLighting = SceneLightingViewer::GetTabName();
     const FName TabName_CharacterLighting = FName(TEXT("Character Lighting"));
     const FName TabName_PostProcessing = FName(TEXT("Post-Processing"));
     const FName TabName_Wind = FName(TEXT("Wind"));
@@ -190,6 +191,7 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
             .SetTooltipText(LOCTEXT("SettingsTooltipText", "Open the Scenc manager setting tab."));
 
         MaterialViewer::RegisterTabSpawner(*ToolsTabManager);
+        SceneLightingViewer::RegisterTabSpawner(*ToolsTabManager);
         //WatchViewer::RegisterTabSpawner(*DebuggingToolsTabManager);
 
         SceneManagerLayout = FTabManager::NewLayout("Standalone_SceneManager_Layout_v3");
