@@ -250,40 +250,40 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
     );
 
     TWeakPtr<SWidget> OwningWidgetWeak = NomadTab;
-    TabContents->SetOnMouseButtonUp(
-        FPointerEventHandler::CreateStatic(
-            [](
-                const FGeometry&,   // The geometry of the widget
-                const FPointerEvent& PointerEvent,  // The Mouse Event that we are processing
-                TWeakPtr<SWidget> InOwnerWeak,
-                TSharedPtr<FUICommandList> InCommandList) -> FReply {
-                    if (PointerEvent.GetEffectingButton() == EKeys::RightMouseButton) {
-                        // if the tab manager is still available then make a context window that allows users to
-                        // show and hide tabs:
-                        TSharedPtr<SWidget> InOwner = InOwnerWeak.Pin();
-                        if (InOwner.IsValid()) {
-                            FMenuBuilder MenuBuilder(true, InCommandList);
+    //TabContents->SetOnMouseButtonUp(
+    //    FPointerEventHandler::CreateStatic(
+    //        [](
+    //            const FGeometry&,   // The geometry of the widget
+    //            const FPointerEvent& PointerEvent,  // The Mouse Event that we are processing
+    //            TWeakPtr<SWidget> InOwnerWeak,
+    //            TSharedPtr<FUICommandList> InCommandList) -> FReply {
+    //                if (PointerEvent.GetEffectingButton() == EKeys::RightMouseButton) {
+    //                    // if the tab manager is still available then make a context window that allows users to
+    //                    // show and hide tabs:
+    //                    TSharedPtr<SWidget> InOwner = InOwnerWeak.Pin();
+    //                    if (InOwner.IsValid()) {
+    //                        FMenuBuilder MenuBuilder(true, InCommandList);
 
-                            // add tab pages
-                            MenuBuilder.PushCommandList(InCommandList.ToSharedRef());
-                            MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_Meterial);
-                            MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_SceneLighting);
-                            MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_CharacterLighting);
-                            MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_PostProcessing);
-                            MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_Wind);
-                            MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_Misc);
-                            MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_Settings);
-                            MenuBuilder.PopCommandList();
+    //                        // add tab pages
+    //                        MenuBuilder.PushCommandList(InCommandList.ToSharedRef());
+    //                        MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_Meterial);
+    //                        MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_SceneLighting);
+    //                        MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_CharacterLighting);
+    //                        MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_PostProcessing);
+    //                        MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_Wind);
+    //                        MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_Misc);
+    //                        MenuBuilder.AddMenuEntry(FSceneManagerCommands::Get().TabAction_Settings);
+    //                        MenuBuilder.PopCommandList();
 
-                            FWidgetPath WidgetPath = PointerEvent.GetEventPath() != nullptr ? *PointerEvent.GetEventPath() : FWidgetPath();
-                            FSlateApplication::Get().PushMenu(InOwner.ToSharedRef(), WidgetPath, MenuBuilder.MakeWidget(), PointerEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
+    //                        FWidgetPath WidgetPath = PointerEvent.GetEventPath() != nullptr ? *PointerEvent.GetEventPath() : FWidgetPath();
+    //                        FSlateApplication::Get().PushMenu(InOwner.ToSharedRef(), WidgetPath, MenuBuilder.MakeWidget(), PointerEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
 
-                            return FReply::Handled();
-                        }
-                    }
-                    return FReply::Unhandled();
-            }
-            , OwningWidgetWeak , CommandList));
+    //                        return FReply::Handled();
+    //                    }
+    //                }
+    //                return FReply::Unhandled();
+    //        }
+    //        , OwningWidgetWeak , CommandList));
 
     NomadTab->SetContent(
         SNew(SBorder)

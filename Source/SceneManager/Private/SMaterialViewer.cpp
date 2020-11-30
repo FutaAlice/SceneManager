@@ -57,7 +57,8 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
                 .VAlign(VAlign_Center)
                 [
                     SNew(STextBlock)
-                    .Text(LOCTEXT("SolutionIndex", "FUCK"))
+                    .Text(LOCTEXT("FUCK", "FUCK"))
+                    .ToolTipText(LOCTEXT("FUCK1", "FUCK1"))
                 ]
 
                 + SOverlay::Slot()
