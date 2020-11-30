@@ -11,6 +11,38 @@
 
 #include "Engine.h" // GEngine
 
+#define LOCTEXT_NAMESPACE "SolutionSelectorCommands"
+
+/**
+ * @brief A set of actions of Scene Manager main frame
+ *
+ */
+struct FSolutionSelectorCommands : public TCommands<FSolutionSelectorCommands>
+{
+    FSolutionSelectorCommands()
+        : TCommands<FSolutionSelectorCommands>(
+            TEXT("SolutionSelector"), // Context name for fast lookup
+            LOCTEXT("SolutionSelector FUCK", "SolutionSelector SHIT"), // Localized context name for displaying
+            NAME_None, // Parent
+            FCoreStyle::Get().GetStyleSetName() // Icon Style Set
+            )
+    {
+    }
+
+    // TCommand<> interface
+    virtual void RegisterCommands() override;
+    // End of TCommand<> interface
+
+    TSharedPtr<FUICommandInfo> Action_Rename;
+    TSharedPtr<FUICommandInfo> Action_Remove;
+};
+
+void FSolutionSelectorCommands::RegisterCommands()
+{
+    UI_COMMAND(Action_Rename, "Action_Rename", "TODO", EUserInterfaceActionType::Check, FInputChord());
+    UI_COMMAND(Action_Remove, "Action_Remove", "TODO", EUserInterfaceActionType::Check, FInputChord());
+}
+
 SolutionSelector::SolutionSelector()
     : SolutionTabContainer(SNew(SVerticalBox))
 {    
@@ -62,6 +94,43 @@ void SolutionSelector::AddSolution(FString SolutionName, FString SolutionToolTip
             ]
         ];
 
+    // build command list for tab restoration menu:
+    TSharedPtr<FUICommandList> CommandList = MakeShareable(new FUICommandList());
+    TWeakPtr<SCheckBox> OwningWidgetWeak = CheckBox;
+
+
+    CheckBox->SetOnMouseButtonUp(
+        FPointerEventHandler::CreateStatic(
+            [](
+                const FGeometry&,   // The geometry of the widget
+                const FPointerEvent& PointerEvent,  // The Mouse Event that we are processing
+                TWeakPtr<SCheckBox> InOwnerWeak,
+                TSharedPtr<FUICommandList> InCommandList) -> FReply {
+
+                    GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("Append Index %d"), 1212));
+
+                    if (PointerEvent.GetEffectingButton() == EKeys::RightMouseButton) {
+                        // if the tab manager is still available then make a context window that allows users to
+                        // show and hide tabs:
+                        TSharedPtr<SCheckBox> InOwner = InOwnerWeak.Pin();
+                        if (InOwner.IsValid()) {
+                            FMenuBuilder MenuBuilder(true, InCommandList);
+
+                            MenuBuilder.PushCommandList(InCommandList.ToSharedRef());
+                            MenuBuilder.AddMenuEntry(FSolutionSelectorCommands::Get().Action_Rename);
+                            MenuBuilder.AddMenuEntry(FSolutionSelectorCommands::Get().Action_Remove);
+                            MenuBuilder.PopCommandList();
+
+                            FWidgetPath WidgetPath = PointerEvent.GetEventPath() != nullptr ? *PointerEvent.GetEventPath() : FWidgetPath();
+                            FSlateApplication::Get().PushMenu(InOwner.ToSharedRef(), WidgetPath, MenuBuilder.MakeWidget(), PointerEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
+
+                            return FReply::Handled();
+                        }
+                    }
+                    return FReply::Unhandled();
+            }
+            , OwningWidgetWeak , CommandList));
+
     // update slate UI
     SolutionTabContainer->InsertSlot(SolutionIndex).AutoHeight()[CheckBox];
 
@@ -85,3 +154,5 @@ void SolutionSelector::AppendButtons()
         });
     SolutionTabContainer->AddSlot().AutoHeight()[ShitButton];
 }
+
+#undef LOCTEXT_NAMESPACE

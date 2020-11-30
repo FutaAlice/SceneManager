@@ -244,12 +244,12 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
         return false;
     };
 
-    CommandList->MapAction(
-        FSceneManagerCommands::Get().TabAction_Settings,
-        FExecuteAction::CreateStatic(ToggleTabVisibility, ToolsManagerWeak, TabName_Settings),
-        FCanExecuteAction::CreateStatic([] { return true; }),
-        FIsActionChecked::CreateStatic(IsTabVisible, ToolsManagerWeak, TabName_Settings)
-    );
+    //CommandList->MapAction(
+    //    FSceneManagerCommands::Get().TabAction_Settings,
+    //    FExecuteAction::CreateStatic(ToggleTabVisibility, ToolsManagerWeak, TabName_Settings),
+    //    FCanExecuteAction::CreateStatic([] { return true; }),
+    //    FIsActionChecked::CreateStatic(IsTabVisible, ToolsManagerWeak, TabName_Settings)
+    //);
 
     TWeakPtr<SWidget> OwningWidgetWeak = NomadTab;
     //TabContents->SetOnMouseButtonUp(
