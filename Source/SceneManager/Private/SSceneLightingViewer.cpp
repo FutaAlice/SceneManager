@@ -8,6 +8,7 @@
 #include "Widgets/Docking/SDockTab.h"   // SDockTab
 #include "SlateOptMacros.h"
 
+#include "Engine.h" // GEngine
 #include "SolutionSelector.h"
 
 #define LOCTEXT_NAMESPACE "SceneLightViewer"
@@ -33,6 +34,16 @@ public:
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SSceneLightingViewer::Construct(const FArguments& InArgs)
 {
+    leftside.CB_Append = [](int index) {
+        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("Append Index %d"), index));
+    };
+    leftside.CB_Remove = [](int index) {
+        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Remove Index %d"), index));
+    };
+    leftside.CB_Active = [](int index) {
+        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Active Index %d"), index));
+    };
+
     ChildSlot
     [
         SNew(SBorder)

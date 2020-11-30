@@ -1,5 +1,6 @@
 #include "SolutionSelector.h"
 
+#include "Misc/Guid.h"  // FGuid
 #include "EditorStyleSet.h" // FEditorStyle
 #include "Widgets/SBoxPanel.h"  // SVerticalBox
 #include "Widgets/Input/SButton.h"  // SButton
@@ -23,11 +24,17 @@ TSharedRef<SWidget> SolutionSelector::Self()
 
 void SolutionSelector::AddSolution(FString SolutionName, FString SolutionToolTip)
 {
-    TSharedRef<SWidget> CheckBox = SNew(SCheckBox)
+    int SolutionIndex = SolutionTabContainer->NumSlots() - 1;
+
+    TSharedRef<SCheckBox> CheckBox = SNew(SCheckBox)
         .Style(FEditorStyle::Get(), "PlacementBrowser.Tab")
-        .OnCheckStateChanged_Lambda([](ECheckBoxState CheckState) {
-            GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-                FString::Printf(TEXT("World delta for current frame equals %d"), (int)CheckState));
+        .OnCheckStateChanged_Lambda([&, SolutionIndex](ECheckBoxState CheckState) {
+            for (auto w : Widgets) {
+                w->SetIsChecked(ECheckBoxState::Unchecked);
+            }
+            Widgets[SolutionIndex]->SetIsChecked(ECheckBoxState::Checked);
+            ensure(CB_Active);
+            CB_Active(SolutionIndex);
         })
         [
             SNew(SOverlay)
@@ -55,7 +62,16 @@ void SolutionSelector::AddSolution(FString SolutionName, FString SolutionToolTip
             ]
         ];
 
-    SolutionTabContainer->AddSlot().AutoHeight()[CheckBox];
+    // update slate UI
+    SolutionTabContainer->InsertSlot(SolutionIndex).AutoHeight()[CheckBox];
+
+    // add ref to container
+    ensure(Widgets.Num() == SolutionIndex);
+    Widgets.Push(CheckBox);
+
+    // Callback
+    ensure(CB_Append);
+    CB_Append(SolutionIndex);
 }
 
 void SolutionSelector::AppendButtons()
@@ -63,9 +79,8 @@ void SolutionSelector::AppendButtons()
     TSharedRef<SWidget> ShitButton = SNew(SButton)
         .Text(FText::FromString("ADD"))
         .OnClicked_Lambda([&]() -> FReply {
+            // SolutionTabContainer.ClearChildren();
             AddSolution("FUCK", "SHIT");
-            GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow,
-                FString::Printf(TEXT("World delta for current frame equals %f"), 0.2f));
             return FReply::Handled();
         });
     SolutionTabContainer->AddSlot().AutoHeight()[ShitButton];

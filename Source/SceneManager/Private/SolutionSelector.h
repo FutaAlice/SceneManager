@@ -1,7 +1,9 @@
 #pragma once
+#include <Functional>
 #include "CoreMinimal.h"
 
-class SWidget;
+class SCheckBox;
+class SVerticalBox;
 
 class SolutionSelector
 {
@@ -14,7 +16,13 @@ public:
 private:
     void AppendButtons();
 
-
 private:
-    TSharedRef<class SVerticalBox> SolutionTabContainer;
+    TSharedRef<SVerticalBox> SolutionTabContainer;
+    TArray<TSharedRef<SCheckBox>> Widgets;
+
+public:
+    std::function<void(int)> CB_Append;
+    std::function<void(int)> CB_Remove;
+    std::function<void(int)> CB_Rename;
+    std::function<void(int)> CB_Active;
 };
