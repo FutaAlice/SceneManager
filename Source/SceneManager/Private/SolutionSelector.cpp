@@ -29,54 +29,78 @@ TSharedRef<SWidget> SolutionSelector::Self()
     return MainLayout;
 }
 
+void SolutionSelector::AddSolution()
+{
+    FString SolutionName = FString::Printf(TEXT("Solution %d"), SlateWidgetRef.Num() + 1);
+    FString SolutionToolTip = FString::Printf(TEXT("The %d-th Solution"), SlateWidgetRef.Num() + 1);
+    AddSolution(SolutionName, SolutionToolTip);
+}
+
 void SolutionSelector::AddSolution(FString SolutionName, FString SolutionToolTip)
 {
-    // The new solution index
-    const int SolutionIndex = SlateWidgetRef.Num();
-
     TSharedRef<SCheckBox> CheckBox = SNew(SCheckBox)
         .Style(FEditorStyle::Get(), "PlacementBrowser.Tab")
         .OnCheckStateChanged_Lambda([this](ECheckBoxState CheckState) {
             // Set box check state
             int Index = InferClickedButtonIndex(CheckState);
             UpdateClickButtonState(Index);
-        })
-        [
-            SNew(SOverlay)
-            + SOverlay::Slot()
-            .VAlign(VAlign_Center)
-            [
-                SNew(SSpacer)
-                .Size(FVector2D(1, 30))
-            ]
-            + SOverlay::Slot()
-            .Padding(FMargin(6, 0, 15, 0))
-            .VAlign(VAlign_Center)
-            [
-                SNew(STextBlock)
-                .Text(FText::FromString(SolutionName))
-                .ToolTipText(FText::FromString(SolutionToolTip))
-            ]
+        });
 
-            + SOverlay::Slot()
-            .VAlign(VAlign_Fill)
-            .HAlign(HAlign_Left)
-            [
-                SNew(SImage)
-                .Image(FEditorStyle::GetBrush("PlacementBrowser.ActiveTabBar"))
-            ]
-        ];
+    TSharedRef<STextBlock> TextBlock = SNew(STextBlock);
+    TextBlock->SetText(FText::FromString(SolutionName));
+    TextBlock->SetToolTipText(FText::FromString(SolutionToolTip));
+
+    CheckBox->SetContent(
+        SNew(SOverlay)
+        + SOverlay::Slot()
+        .VAlign(VAlign_Center)
+        [
+            SNew(SSpacer)
+            .Size(FVector2D(1, 30))
+        ]
+        + SOverlay::Slot()
+        .Padding(FMargin(6, 0, 15, 0))
+        .VAlign(VAlign_Center)
+        [
+            TextBlock
+        ]
+        + SOverlay::Slot()
+        .VAlign(VAlign_Fill)
+        .HAlign(HAlign_Left)
+        [
+            SNew(SImage)
+            .Image(FEditorStyle::GetBrush("PlacementBrowser.ActiveTabBar"))
+        ]
+    );
 
     // update slate UI
-    SolutionWidgetContainer->InsertSlot(SolutionIndex).AutoHeight()[CheckBox];
+    SolutionWidgetContainer->AddSlot().AutoHeight()[CheckBox];
 
-    // add ref to container
+    // add ref to container and mapping
     SlateWidgetRef.Push(CheckBox);
+    SolutionTextMapping.Add(CheckBox, TextBlock);
     ensure(SlateWidgetRef.Num() == SolutionWidgetContainer->NumSlots());
 
     // Callback
     ensure(CB_Append);
-    CB_Append(SolutionIndex);
+    CB_Append(SlateWidgetRef.Num() - 1);
+}
+
+void SolutionSelector::RemoveSolution(int SolutionIndex)
+{
+    if (SolutionIndex >= 0) {
+        // remove target slot and array instance
+        auto Widget = SlateWidgetRef[SolutionIndex];
+        auto RemoveSlotIndex = SolutionWidgetContainer->RemoveSlot(Widget);
+        ensure(RemoveSlotIndex >= 0);
+        SlateWidgetRef.RemoveAt(SolutionIndex);
+        // callback
+        ensure(CB_Remove);
+        CB_Remove(SolutionIndex);
+        // update solution list UI
+        UpdateClickButtonState(SolutionIndex - 1);
+        UpdateToolTips();
+    }
 }
 
 void SolutionSelector::Initialize()
@@ -84,31 +108,23 @@ void SolutionSelector::Initialize()
     MainLayout->AddSlot().AutoHeight()[ToolBarContainer];
     MainLayout->AddSlot().AutoHeight()[SolutionWidgetContainer];
 
+    // Add
     TSharedRef<SWidget> BtnAdd = SNew(SButton)
         .Text(FText::FromString("ADD"))
         .OnClicked_Lambda([this]() -> FReply {
-            AddSolution("FUCK", "SHIT");
+            AddSolution();
             return FReply::Handled();
         });
 
+    // Remove
     TSharedRef<SWidget> BtnRemove = SNew(SButton)
         .Text(FText::FromString("REMOVE"))
         .OnClicked_Lambda([this]() -> FReply {
-            if (CurrentSelectedSolutionIndex >= 0) {
-                // remove target slot and array instance
-                auto ref = SlateWidgetRef[CurrentSelectedSolutionIndex];
-                auto idx = SolutionWidgetContainer->RemoveSlot(ref);
-                ensure(idx >= 0);
-                SlateWidgetRef.RemoveAt(CurrentSelectedSolutionIndex);
-                // callback
-                ensure(CB_Remove);
-                CB_Remove(CurrentSelectedSolutionIndex);
-                // update solution list UI
-                UpdateClickButtonState(CurrentSelectedSolutionIndex - 1);
-            }
+            RemoveSolution(CurrentSelectedSolutionIndex);
             return FReply::Handled();
         });
 
+    // Rename
     TSharedRef<SWidget> BtnRename = SNew(SButton)
         .Text(FText::FromString("RENAME"))
         .OnClicked_Lambda([&]() -> FReply {
@@ -135,8 +151,7 @@ void SolutionSelector::Initialize()
                         .OnClicked_Lambda([&]() -> FReply {
                             FText Text = EditableText->GetText();
                             ModalWindow->RequestDestroyWindow();
-                            ensure(CB_Rename);
-                            CB_Rename(CurrentSelectedSolutionIndex, Text);
+                            RenameSolution(CurrentSelectedSolutionIndex, Text.ToString(), "TODO");
                             return FReply::Handled();
                         })
                     ];
@@ -172,6 +187,31 @@ void SolutionSelector::UpdateClickButtonState(int CheckedIndex)
 
     // Set current selected
     CurrentSelectedSolutionIndex = CheckedIndex;
+}
+
+void SolutionSelector::UpdateToolTips()
+{
+    for (int i = 0; i < SlateWidgetRef.Num(); ++i) {
+        auto Widget = SlateWidgetRef[i];
+        ensure(SolutionTextMapping.Contains(Widget));
+        TSharedRef<STextBlock> TextBlock = SolutionTextMapping[Widget];
+        FString SolutionToolTip = FString::Printf(TEXT("The %d-th Solution"), i + 1);
+        TextBlock->SetToolTipText(FText::FromString(SolutionToolTip));
+    }
+}
+
+void SolutionSelector::RenameSolution(int SolutionIndex, FString SolutionName, FString SolutionToolTip, bool Callback)
+{
+    ensure(SolutionIndex >= 0 && SolutionIndex < SlateWidgetRef.Num());
+    TSharedRef<SCheckBox> Widget = SlateWidgetRef[SolutionIndex];
+    ensure(SolutionTextMapping.Contains(Widget));
+    TSharedRef<STextBlock> TextBlock = SolutionTextMapping[Widget];
+    TextBlock->SetText(FText::FromString(SolutionName));
+    TextBlock->SetToolTipText(FText::FromString(SolutionToolTip));
+    if (Callback) {
+        ensure(CB_Rename);
+        CB_Rename(SolutionIndex, SolutionName);
+    }
 }
 
 int SolutionSelector::InferClickedButtonIndex(ECheckBoxState CheckState)

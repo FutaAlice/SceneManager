@@ -43,8 +43,8 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
     leftside.CB_Active = [](int index) {
         GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Active Index %d"), index));
     };
-    leftside.CB_Rename = [](int index, FText text) {
-        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, text.ToString());
+    leftside.CB_Rename = [](int index, FString str) {
+        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, str);
     };
 
     ChildSlot
