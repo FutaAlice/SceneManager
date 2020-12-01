@@ -13,7 +13,6 @@
 
 #define LOCTEXT_NAMESPACE "SceneLightViewer"
 
-
 /**
  * Scene Lighting Viewer
  */
@@ -27,25 +26,29 @@ public:
 
     /** Constructs this widget with InArgs */
     void Construct(const FArguments& InArgs);
-    SolutionSelector leftside;
-};
 
+private:
+    FSolutionSelector SolutionSelector;
+
+};
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SSceneLightingViewer::Construct(const FArguments& InArgs)
 {
-    leftside.CB_Append = [](int index) {
+    SolutionSelector.CB_Append = [](int index) {
         GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Append Index %d"), index));
     };
-    leftside.CB_Remove = [](int index) {
+    SolutionSelector.CB_Remove = [](int index) {
         GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Remove Index %d"), index));
     };
-    leftside.CB_Active = [](int index) {
+    SolutionSelector.CB_Active = [](int index) {
         GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Active Index %d"), index));
     };
-    leftside.CB_Rename = [](int index, FString str) {
+    SolutionSelector.CB_Rename = [](int index, FString str) {
         GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, str);
     };
+
+    TSharedPtr<SVerticalBox> MainLayout;
 
     ChildSlot
     [
@@ -57,11 +60,23 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
             + SHorizontalBox::Slot()
             .AutoWidth()
             [
-                leftside.Self()
+                SolutionSelector.Self()
+            ]
+
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                SAssignNew(MainLayout, SVerticalBox)
             ]
         ]
-
     ];
+
+    MainLayout.Get()->AddSlot()
+        [
+            SNew(SButton)
+        ];
+
+    // MainLayout->SetContent
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 

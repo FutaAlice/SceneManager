@@ -8,10 +8,10 @@ class STextBlock;
 class SVerticalBox;
 class SHorizontalBox;
 
-class SolutionSelector
+class FSolutionSelector
 {
 public:
-    SolutionSelector();
+    FSolutionSelector();
 
     TSharedRef<SWidget> Self();
 

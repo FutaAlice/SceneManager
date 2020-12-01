@@ -15,7 +15,7 @@
 
 #include "Engine.h" // GEngine
 
-SolutionSelector::SolutionSelector()
+FSolutionSelector::FSolutionSelector()
     : MainLayout(SNew(SVerticalBox))
     , SolutionWidgetContainer(SNew(SVerticalBox))
     , ToolBarContainer(SNew(SHorizontalBox))
@@ -24,19 +24,19 @@ SolutionSelector::SolutionSelector()
     Initialize();
 }
 
-TSharedRef<SWidget> SolutionSelector::Self()
+TSharedRef<SWidget> FSolutionSelector::Self()
 {
     return MainLayout;
 }
 
-void SolutionSelector::AddSolution()
+void FSolutionSelector::AddSolution()
 {
     FString SolutionName = FString::Printf(TEXT("Solution %d"), Num() + 1);
     FString SolutionToolTip = FString::Printf(TEXT("The %d-th Solution"), Num() + 1);
     AddSolution(SolutionName, SolutionToolTip);
 }
 
-void SolutionSelector::AddSolution(FString SolutionName, FString SolutionToolTip)
+void FSolutionSelector::AddSolution(FString SolutionName, FString SolutionToolTip)
 {
     TSharedRef<SCheckBox> CheckBox = SNew(SCheckBox)
         .Style(FEditorStyle::Get(), "PlacementBrowser.Tab")
@@ -85,7 +85,7 @@ void SolutionSelector::AddSolution(FString SolutionName, FString SolutionToolTip
     CB_Append(Num() - 1);
 }
 
-void SolutionSelector::RemoveSolution(int SolutionIndex)
+void FSolutionSelector::RemoveSolution(int SolutionIndex)
 {
     if (SolutionIndex >= 0) {
         // remove target slot and array instance
@@ -103,41 +103,57 @@ void SolutionSelector::RemoveSolution(int SolutionIndex)
     }
 }
 
-int SolutionSelector::Num()
+int FSolutionSelector::Num()
 {
     ensure(SlateWidgetRef.Num() == SolutionTextMapping.Num());
     ensure(SlateWidgetRef.Num() == SolutionWidgetContainer->NumSlots());
     return SlateWidgetRef.Num();
 }
 
-void SolutionSelector::Clear()
+void FSolutionSelector::Clear()
 {
 }
 
-void SolutionSelector::Initialize()
+void FSolutionSelector::Initialize()
 {
     MainLayout->AddSlot().AutoHeight()[ToolBarContainer];
     MainLayout->AddSlot().AutoHeight()[SolutionWidgetContainer];
 
     // Add
     TSharedRef<SWidget> BtnAdd = SNew(SButton)
-        .Text(FText::FromString("ADD"))
         .OnClicked_Lambda([this]() -> FReply {
             AddSolution();
             return FReply::Handled();
-        });
+        })
+        [
+            SNew(SImage)
+            .Image(FEditorStyle::GetBrush("LevelEditor.NewLevel"))
+        ];
+
+    // Copy
+    TSharedRef<SWidget> BtnCopy = SNew(SButton)
+        .OnClicked_Lambda([this]() -> FReply {
+            // TODO: add impl
+            return FReply::Handled();
+        })
+        [
+            SNew(SImage)
+            .Image(FEditorStyle::GetBrush("LevelEditor.OpenLevel"))
+        ];
 
     // Remove
     TSharedRef<SWidget> BtnRemove = SNew(SButton)
-        .Text(FText::FromString("REMOVE"))
         .OnClicked_Lambda([this]() -> FReply {
             RemoveSolution(CurrentSelectedSolutionIndex);
             return FReply::Handled();
-        });
+        })
+        [
+            SNew(SImage)
+            .Image(FEditorStyle::GetBrush("Level.SaveDisabledIcon16x"))
+        ];
 
     // Rename
     TSharedRef<SWidget> BtnRename = SNew(SButton)
-        .Text(FText::FromString("RENAME"))
         .OnClicked_Lambda([&]() -> FReply {
             // TODO: hint message dialog
             if (CurrentSelectedSolutionIndex < 0) {
@@ -145,6 +161,7 @@ void SolutionSelector::Initialize()
             // create input dialog
             else {
                 TSharedRef<SWindow> ModalWindow = SNew(SWindow)
+                    .Title(FText::FromString("Rename Solution"))
                     .HasCloseButton(true)
                     .SizingRule(ESizingRule::FixedSize)
                     .ClientSize(FVector2D(200.0f, 60.0f));
@@ -171,14 +188,19 @@ void SolutionSelector::Initialize()
                 GEditor->EditorAddModalWindow(ModalWindow);
             }
             return FReply::Handled();
-        });
+        })
+        [
+            SNew(SImage)
+            .Image(FEditorStyle::GetBrush("Level.SaveModifiedIcon16x"))
+        ];
 
     ToolBarContainer->AddSlot().AutoWidth()[BtnAdd];
+    ToolBarContainer->AddSlot().AutoWidth()[BtnCopy];
     ToolBarContainer->AddSlot().AutoWidth()[BtnRemove];
     ToolBarContainer->AddSlot().AutoWidth()[BtnRename];
 }
 
-void SolutionSelector::UpdateClickButtonState(int CheckedIndex)
+void FSolutionSelector::UpdateClickButtonState(int CheckedIndex)
 {
     // clear all box check state
     for (auto Widget : SlateWidgetRef) {
@@ -200,7 +222,7 @@ void SolutionSelector::UpdateClickButtonState(int CheckedIndex)
     CurrentSelectedSolutionIndex = CheckedIndex;
 }
 
-void SolutionSelector::UpdateToolTips()
+void FSolutionSelector::UpdateToolTips()
 {
     for (int i = 0; i < Num(); ++i) {
         auto Widget = SlateWidgetRef[i];
@@ -211,7 +233,7 @@ void SolutionSelector::UpdateToolTips()
     }
 }
 
-void SolutionSelector::RenameSolution(int SolutionIndex, FString SolutionName, FString SolutionToolTip, bool Callback)
+void FSolutionSelector::RenameSolution(int SolutionIndex, FString SolutionName, FString SolutionToolTip, bool Callback)
 {
     ensure(SolutionIndex >= 0 && SolutionIndex < Num());
     TSharedRef<SCheckBox> Widget = SlateWidgetRef[SolutionIndex];
@@ -225,7 +247,7 @@ void SolutionSelector::RenameSolution(int SolutionIndex, FString SolutionName, F
     }
 }
 
-int SolutionSelector::InferClickedButtonIndex(ECheckBoxState CheckState)
+int FSolutionSelector::InferClickedButtonIndex(ECheckBoxState CheckState)
 {
     if (CheckState == ECheckBoxState::Unchecked) {
         return CurrentSelectedSolutionIndex;
