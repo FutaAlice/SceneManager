@@ -3,11 +3,15 @@
 #include "Misc/Guid.h"  // FGuid
 #include "EditorStyleSet.h" // FEditorStyle
 #include "Widgets/SBoxPanel.h"  // SVerticalBox
+#include "Widgets/SWindow.h"    // SWindow
 #include "Widgets/Input/SButton.h"  // SButton
 #include "Widgets/Input/SCheckBox.h"    // SCheckBox
+#include "Widgets/Input/SEditableText.h"    // SEditableText
 #include "Widgets/Images/SImage.h"  // SImage
 #include "Widgets/Text/STextBlock.h"    // STextBlock
 #include "Widgets/Layout/SSpacer.h" // SSpacer
+#include "Editor/EditorEngine.h"    // EditorAddModalWindow
+#include "Editor.h" // GEditor
 
 #include "Engine.h" // GEngine
 
@@ -90,21 +94,56 @@ void SolutionSelector::Initialize()
     TSharedRef<SWidget> BtnRemove = SNew(SButton)
         .Text(FText::FromString("REMOVE"))
         .OnClicked_Lambda([this]() -> FReply {
-            // AddSolution("FUCK", "SHIT");
             if (CurrentSelectedSolutionIndex >= 0) {
+                // remove target slot and array instance
                 auto ref = SlateWidgetRef[CurrentSelectedSolutionIndex];
                 auto idx = SolutionWidgetContainer->RemoveSlot(ref);
                 ensure(idx >= 0);
                 SlateWidgetRef.RemoveAt(CurrentSelectedSolutionIndex);
+                // callback
+                ensure(CB_Remove);
+                CB_Remove(CurrentSelectedSolutionIndex);
+                // update solution list UI
+                UpdateClickButtonState(CurrentSelectedSolutionIndex - 1);
             }
-            UpdateClickButtonState(CurrentSelectedSolutionIndex - 1);
             return FReply::Handled();
         });
 
     TSharedRef<SWidget> BtnRename = SNew(SButton)
         .Text(FText::FromString("RENAME"))
         .OnClicked_Lambda([&]() -> FReply {
-            AddSolution("FUCK", "SHIT");
+            // TODO: hint message dialog
+            if (CurrentSelectedSolutionIndex < 0) {
+            }
+            // create input dialog
+            else {
+                TSharedRef<SWindow> ModalWindow = SNew(SWindow)
+                    .HasCloseButton(true)
+                    .SizingRule(ESizingRule::FixedSize)
+                    .ClientSize(FVector2D(200.0f, 60.0f));
+                TSharedRef<SEditableText> EditableText = SNew(SEditableText)
+                    .HintText(FText::FromString("Input new solution name"));
+                TSharedRef<SWidget> ResultWidget = SNew(SVerticalBox)
+                    + SVerticalBox::Slot()
+                    [
+                        EditableText
+                    ]
+                    + SVerticalBox::Slot()
+                    [
+                        SNew(SButton)
+                        .Text(FText::FromString("OK"))
+                        .OnClicked_Lambda([&]() -> FReply {
+                            FText Text = EditableText->GetText();
+                            ModalWindow->RequestDestroyWindow();
+                            ensure(CB_Rename);
+                            CB_Rename(CurrentSelectedSolutionIndex, Text);
+                            return FReply::Handled();
+                        })
+                    ];
+
+                ModalWindow->SetContent(ResultWidget);
+                GEditor->EditorAddModalWindow(ModalWindow);
+            }
             return FReply::Handled();
         });
 

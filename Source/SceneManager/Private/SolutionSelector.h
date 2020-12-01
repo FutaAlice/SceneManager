@@ -45,6 +45,6 @@ private:
 public:
     std::function<void(int)> CB_Append;
     std::function<void(int)> CB_Remove;
-    std::function<void(int)> CB_Rename;
+    std::function<void(int, FText)> CB_Rename;
     std::function<void(int)> CB_Active;
 };

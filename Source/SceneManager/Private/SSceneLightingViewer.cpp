@@ -35,13 +35,16 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SSceneLightingViewer::Construct(const FArguments& InArgs)
 {
     leftside.CB_Append = [](int index) {
-        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("Append Index %d"), index));
+        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Append Index %d"), index));
     };
     leftside.CB_Remove = [](int index) {
         GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Remove Index %d"), index));
     };
     leftside.CB_Active = [](int index) {
         GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Active Index %d"), index));
+    };
+    leftside.CB_Rename = [](int index, FText text) {
+        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, text.ToString());
     };
 
     ChildSlot
