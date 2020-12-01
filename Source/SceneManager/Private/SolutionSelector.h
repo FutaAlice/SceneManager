@@ -20,6 +20,9 @@ public:
 
     void RemoveSolution(int SolutionIndex);
 
+    int Num();
+    void Clear();
+
 private:
     void Initialize();
 

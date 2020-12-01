@@ -31,8 +31,8 @@ TSharedRef<SWidget> SolutionSelector::Self()
 
 void SolutionSelector::AddSolution()
 {
-    FString SolutionName = FString::Printf(TEXT("Solution %d"), SlateWidgetRef.Num() + 1);
-    FString SolutionToolTip = FString::Printf(TEXT("The %d-th Solution"), SlateWidgetRef.Num() + 1);
+    FString SolutionName = FString::Printf(TEXT("Solution %d"), Num() + 1);
+    FString SolutionToolTip = FString::Printf(TEXT("The %d-th Solution"), Num() + 1);
     AddSolution(SolutionName, SolutionToolTip);
 }
 
@@ -79,11 +79,10 @@ void SolutionSelector::AddSolution(FString SolutionName, FString SolutionToolTip
     // add ref to container and mapping
     SlateWidgetRef.Push(CheckBox);
     SolutionTextMapping.Add(CheckBox, TextBlock);
-    ensure(SlateWidgetRef.Num() == SolutionWidgetContainer->NumSlots());
 
     // Callback
     ensure(CB_Append);
-    CB_Append(SlateWidgetRef.Num() - 1);
+    CB_Append(Num() - 1);
 }
 
 void SolutionSelector::RemoveSolution(int SolutionIndex)
@@ -94,6 +93,7 @@ void SolutionSelector::RemoveSolution(int SolutionIndex)
         auto RemoveSlotIndex = SolutionWidgetContainer->RemoveSlot(Widget);
         ensure(RemoveSlotIndex >= 0);
         SlateWidgetRef.RemoveAt(SolutionIndex);
+        SolutionTextMapping.Remove(Widget);
         // callback
         ensure(CB_Remove);
         CB_Remove(SolutionIndex);
@@ -101,6 +101,17 @@ void SolutionSelector::RemoveSolution(int SolutionIndex)
         UpdateClickButtonState(SolutionIndex - 1);
         UpdateToolTips();
     }
+}
+
+int SolutionSelector::Num()
+{
+    ensure(SlateWidgetRef.Num() == SolutionTextMapping.Num());
+    ensure(SlateWidgetRef.Num() == SolutionWidgetContainer->NumSlots());
+    return SlateWidgetRef.Num();
+}
+
+void SolutionSelector::Clear()
+{
 }
 
 void SolutionSelector::Initialize()
@@ -175,7 +186,7 @@ void SolutionSelector::UpdateClickButtonState(int CheckedIndex)
     }
     // toggle checked box
     if (CheckedIndex >= 0) {
-        ensure(CheckedIndex < SlateWidgetRef.Num());
+        ensure(CheckedIndex < Num());
         SlateWidgetRef[CheckedIndex]->SetIsChecked(ECheckBoxState::Checked);
     }
 
@@ -191,7 +202,7 @@ void SolutionSelector::UpdateClickButtonState(int CheckedIndex)
 
 void SolutionSelector::UpdateToolTips()
 {
-    for (int i = 0; i < SlateWidgetRef.Num(); ++i) {
+    for (int i = 0; i < Num(); ++i) {
         auto Widget = SlateWidgetRef[i];
         ensure(SolutionTextMapping.Contains(Widget));
         TSharedRef<STextBlock> TextBlock = SolutionTextMapping[Widget];
@@ -202,7 +213,7 @@ void SolutionSelector::UpdateToolTips()
 
 void SolutionSelector::RenameSolution(int SolutionIndex, FString SolutionName, FString SolutionToolTip, bool Callback)
 {
-    ensure(SolutionIndex >= 0 && SolutionIndex < SlateWidgetRef.Num());
+    ensure(SolutionIndex >= 0 && SolutionIndex < Num());
     TSharedRef<SCheckBox> Widget = SlateWidgetRef[SolutionIndex];
     ensure(SolutionTextMapping.Contains(Widget));
     TSharedRef<STextBlock> TextBlock = SolutionTextMapping[Widget];
@@ -221,7 +232,7 @@ int SolutionSelector::InferClickedButtonIndex(ECheckBoxState CheckState)
     }
     else if (CheckState == ECheckBoxState::Checked) {
         TArray<int> CheckedIndex;
-        for (int i = 0; i < SlateWidgetRef.Num(); ++i) {
+        for (int i = 0; i < Num(); ++i) {
             auto Widget = SlateWidgetRef[i];
             bool IsChecked = Widget->IsChecked();
             if (IsChecked) {
