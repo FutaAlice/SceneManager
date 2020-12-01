@@ -11,62 +11,31 @@
 
 #include "Engine.h" // GEngine
 
-#define LOCTEXT_NAMESPACE "SolutionSelectorCommands"
-
-/**
- * @brief A set of actions of Scene Manager main frame
- *
- */
-struct FSolutionSelectorCommands : public TCommands<FSolutionSelectorCommands>
-{
-    FSolutionSelectorCommands()
-        : TCommands<FSolutionSelectorCommands>(
-            TEXT("SolutionSelector"), // Context name for fast lookup
-            LOCTEXT("SolutionSelector FUCK", "SolutionSelector SHIT"), // Localized context name for displaying
-            NAME_None, // Parent
-            FCoreStyle::Get().GetStyleSetName() // Icon Style Set
-            )
-    {
-    }
-
-    // TCommand<> interface
-    virtual void RegisterCommands() override;
-    // End of TCommand<> interface
-
-    TSharedPtr<FUICommandInfo> Action_Rename;
-    TSharedPtr<FUICommandInfo> Action_Remove;
-};
-
-void FSolutionSelectorCommands::RegisterCommands()
-{
-    UI_COMMAND(Action_Rename, "Action_Rename", "TODO", EUserInterfaceActionType::Check, FInputChord());
-    UI_COMMAND(Action_Remove, "Action_Remove", "TODO", EUserInterfaceActionType::Check, FInputChord());
-}
-
 SolutionSelector::SolutionSelector()
-    : SolutionTabContainer(SNew(SVerticalBox))
-{    
-    AppendButtons();
+    : MainLayout(SNew(SVerticalBox))
+    , SolutionWidgetContainer(SNew(SVerticalBox))
+    , ToolBarContainer(SNew(SHorizontalBox))
+    , CurrentSelectedSolutionIndex(-1)
+{
+    Initialize();
 }
 
 TSharedRef<SWidget> SolutionSelector::Self()
 {
-    return SolutionTabContainer;
+    return MainLayout;
 }
 
 void SolutionSelector::AddSolution(FString SolutionName, FString SolutionToolTip)
 {
-    int SolutionIndex = SolutionTabContainer->NumSlots() - 1;
+    // The new solution index
+    const int SolutionIndex = SlateWidgetRef.Num();
 
     TSharedRef<SCheckBox> CheckBox = SNew(SCheckBox)
         .Style(FEditorStyle::Get(), "PlacementBrowser.Tab")
-        .OnCheckStateChanged_Lambda([&, SolutionIndex](ECheckBoxState CheckState) {
-            for (auto w : Widgets) {
-                w->SetIsChecked(ECheckBoxState::Unchecked);
-            }
-            Widgets[SolutionIndex]->SetIsChecked(ECheckBoxState::Checked);
-            ensure(CB_Active);
-            CB_Active(SolutionIndex);
+        .OnCheckStateChanged_Lambda([this](ECheckBoxState CheckState) {
+            // Set box check state
+            int Index = InferClickedButtonIndex(CheckState);
+            UpdateClickButtonState(Index);
         })
         [
             SNew(SOverlay)
@@ -94,65 +63,109 @@ void SolutionSelector::AddSolution(FString SolutionName, FString SolutionToolTip
             ]
         ];
 
-    // build command list for tab restoration menu:
-    TSharedPtr<FUICommandList> CommandList = MakeShareable(new FUICommandList());
-    TWeakPtr<SCheckBox> OwningWidgetWeak = CheckBox;
-
-
-    CheckBox->SetOnMouseButtonUp(
-        FPointerEventHandler::CreateStatic(
-            [](
-                const FGeometry&,   // The geometry of the widget
-                const FPointerEvent& PointerEvent,  // The Mouse Event that we are processing
-                TWeakPtr<SCheckBox> InOwnerWeak,
-                TSharedPtr<FUICommandList> InCommandList) -> FReply {
-
-                    GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("Append Index %d"), 1212));
-
-                    if (PointerEvent.GetEffectingButton() == EKeys::RightMouseButton) {
-                        // if the tab manager is still available then make a context window that allows users to
-                        // show and hide tabs:
-                        TSharedPtr<SCheckBox> InOwner = InOwnerWeak.Pin();
-                        if (InOwner.IsValid()) {
-                            FMenuBuilder MenuBuilder(true, InCommandList);
-
-                            MenuBuilder.PushCommandList(InCommandList.ToSharedRef());
-                            MenuBuilder.AddMenuEntry(FSolutionSelectorCommands::Get().Action_Rename);
-                            MenuBuilder.AddMenuEntry(FSolutionSelectorCommands::Get().Action_Remove);
-                            MenuBuilder.PopCommandList();
-
-                            FWidgetPath WidgetPath = PointerEvent.GetEventPath() != nullptr ? *PointerEvent.GetEventPath() : FWidgetPath();
-                            FSlateApplication::Get().PushMenu(InOwner.ToSharedRef(), WidgetPath, MenuBuilder.MakeWidget(), PointerEvent.GetScreenSpacePosition(), FPopupTransitionEffect(FPopupTransitionEffect::ContextMenu));
-
-                            return FReply::Handled();
-                        }
-                    }
-                    return FReply::Unhandled();
-            }
-            , OwningWidgetWeak , CommandList));
-
     // update slate UI
-    SolutionTabContainer->InsertSlot(SolutionIndex).AutoHeight()[CheckBox];
+    SolutionWidgetContainer->InsertSlot(SolutionIndex).AutoHeight()[CheckBox];
 
     // add ref to container
-    ensure(Widgets.Num() == SolutionIndex);
-    Widgets.Push(CheckBox);
+    SlateWidgetRef.Push(CheckBox);
+    ensure(SlateWidgetRef.Num() == SolutionWidgetContainer->NumSlots());
 
     // Callback
     ensure(CB_Append);
     CB_Append(SolutionIndex);
 }
 
-void SolutionSelector::AppendButtons()
+void SolutionSelector::Initialize()
 {
-    TSharedRef<SWidget> ShitButton = SNew(SButton)
+    MainLayout->AddSlot().AutoHeight()[ToolBarContainer];
+    MainLayout->AddSlot().AutoHeight()[SolutionWidgetContainer];
+
+    TSharedRef<SWidget> BtnAdd = SNew(SButton)
         .Text(FText::FromString("ADD"))
-        .OnClicked_Lambda([&]() -> FReply {
-            // SolutionTabContainer.ClearChildren();
+        .OnClicked_Lambda([this]() -> FReply {
             AddSolution("FUCK", "SHIT");
             return FReply::Handled();
         });
-    SolutionTabContainer->AddSlot().AutoHeight()[ShitButton];
+
+    TSharedRef<SWidget> BtnRemove = SNew(SButton)
+        .Text(FText::FromString("REMOVE"))
+        .OnClicked_Lambda([this]() -> FReply {
+            // AddSolution("FUCK", "SHIT");
+            if (CurrentSelectedSolutionIndex >= 0) {
+                auto ref = SlateWidgetRef[CurrentSelectedSolutionIndex];
+                auto idx = SolutionWidgetContainer->RemoveSlot(ref);
+                ensure(idx >= 0);
+                SlateWidgetRef.RemoveAt(CurrentSelectedSolutionIndex);
+            }
+            UpdateClickButtonState(CurrentSelectedSolutionIndex - 1);
+            return FReply::Handled();
+        });
+
+    TSharedRef<SWidget> BtnRename = SNew(SButton)
+        .Text(FText::FromString("RENAME"))
+        .OnClicked_Lambda([&]() -> FReply {
+            AddSolution("FUCK", "SHIT");
+            return FReply::Handled();
+        });
+
+    ToolBarContainer->AddSlot().AutoWidth()[BtnAdd];
+    ToolBarContainer->AddSlot().AutoWidth()[BtnRemove];
+    ToolBarContainer->AddSlot().AutoWidth()[BtnRename];
 }
 
-#undef LOCTEXT_NAMESPACE
+void SolutionSelector::UpdateClickButtonState(int CheckedIndex)
+{
+    // clear all box check state
+    for (auto Widget : SlateWidgetRef) {
+        Widget->SetIsChecked(ECheckBoxState::Unchecked);
+    }
+    // toggle checked box
+    if (CheckedIndex >= 0) {
+        ensure(CheckedIndex < SlateWidgetRef.Num());
+        SlateWidgetRef[CheckedIndex]->SetIsChecked(ECheckBoxState::Checked);
+    }
+
+    // callback
+    ensure(CB_Active);
+    if (CurrentSelectedSolutionIndex != CheckedIndex) {
+        CB_Active(CheckedIndex);
+    }
+
+    // Set current selected
+    CurrentSelectedSolutionIndex = CheckedIndex;
+}
+
+int SolutionSelector::InferClickedButtonIndex(ECheckBoxState CheckState)
+{
+    if (CheckState == ECheckBoxState::Unchecked) {
+        return CurrentSelectedSolutionIndex;
+    }
+    else if (CheckState == ECheckBoxState::Checked) {
+        TArray<int> CheckedIndex;
+        for (int i = 0; i < SlateWidgetRef.Num(); ++i) {
+            auto Widget = SlateWidgetRef[i];
+            bool IsChecked = Widget->IsChecked();
+            if (IsChecked) {
+                CheckedIndex.Push(i);
+            }
+            //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow,
+            //    FString::Printf(TEXT("Index %d check status %d"), i, int(IsChecked)));
+        }
+
+        if (CurrentSelectedSolutionIndex >= 0) {
+            ensure(CheckedIndex.Num() == 2);
+            return CheckedIndex[0] != CurrentSelectedSolutionIndex
+                ? CheckedIndex[0] : CheckedIndex[1];
+        }
+        else {
+            ensure(CheckedIndex.Num() == 1);
+            return CheckedIndex[0];
+        }
+    }
+    // ECheckBoxState::Undetermined
+    else {
+        // TODO: why
+        ensure(false);
+        return -1;
+    }
+}
