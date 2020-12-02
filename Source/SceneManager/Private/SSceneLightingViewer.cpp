@@ -10,6 +10,7 @@
 
 #include "Engine.h" // GEngine
 #include "SolutionSelector.h"
+#include "SLightActorComboBox.h"
 
 #define LOCTEXT_NAMESPACE "SceneLightViewer"
 
@@ -72,8 +73,9 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
     ];
 
     MainLayout.Get()->AddSlot()
+        .AutoHeight()
         [
-            SNew(SButton)
+            SNew(SLightActorComboBox)
         ];
 
     // MainLayout->SetContent

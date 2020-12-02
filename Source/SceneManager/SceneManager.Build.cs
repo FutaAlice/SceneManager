@@ -32,6 +32,7 @@ public class SceneManager : ModuleRules
             "InputCore",
             "WorkspaceMenuStructure",
             "UnrealEd",
+            "PropertyEditor",
         });
 
 
