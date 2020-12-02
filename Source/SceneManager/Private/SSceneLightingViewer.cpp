@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "EditorStyleSet.h" // FEditorStyle
 #include "Framework/Docking/TabManager.h"   // FTabManager, FSpawnTabArgs
-#include "Widgets/SCompoundWidget.h"
+#include "Widgets/SCompoundWidget.h"    // SCompoundWidget
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/Docking/SDockTab.h"   // SDockTab
 #include "SlateOptMacros.h"
@@ -11,6 +11,10 @@
 #include "Engine.h" // GEngine
 #include "SolutionSelector.h"
 #include "SLightActorComboBox.h"
+
+// DETAIL PANEL
+#include "IDetailsView.h"
+#include "PropertyEditorModule.h"
 
 #define LOCTEXT_NAMESPACE "SceneLightViewer"
 
@@ -31,6 +35,11 @@ public:
 private:
     FSolutionSelector SolutionSelector;
 
+    TSharedPtr<SVerticalBox> MainLayout;
+
+
+    UPlayerLightSettings* LightSetting;
+
 };
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -49,34 +58,61 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
         GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, str);
     };
 
-    TSharedPtr<SVerticalBox> MainLayout;
-
     ChildSlot
     [
-        SNew(SBorder)
-        .Padding(4)
-        .BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
+        SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
+        .AutoWidth()
         [
-            SNew(SHorizontalBox)
-            + SHorizontalBox::Slot()
-            .AutoWidth()
+            SNew(SBorder)
+            .Padding(4)
+            .BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
             [
                 SolutionSelector.Self()
             ]
-
-            + SHorizontalBox::Slot()
-            .AutoWidth()
+        ]
+        //+ SHorizontalBox::Slot()
+        //[
+        //    SNew(SSpacer)
+        //]
+        + SHorizontalBox::Slot()
+        .Padding(2, 0, 0, 0)
+        //.AutoWidth()
+        [
+            SNew(SBorder)
+            .Padding(4)
+            .BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
             [
                 SAssignNew(MainLayout, SVerticalBox)
             ]
         ]
     ];
 
-    MainLayout.Get()->AddSlot()
+    MainLayout->AddSlot()
         .AutoHeight()
         [
             SNew(SLightActorComboBox)
         ];
+
+
+    FDetailsViewArgs DetailsViewArgs(false, false, true, FDetailsViewArgs::HideNameArea, true);
+    DetailsViewArgs.bAllowSearch = false;
+    FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+
+
+    TSharedRef<IDetailsView> PlayerLightView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
+    // PlayerLightView->OnFinishedChangingProperties().AddRaw(this, &SPlayerLightManager::OnFinishedChangingMainLight);
+    LightSetting = NewObject<UPlayerLightSettings>();
+    LightSetting->AddToRoot();
+    PlayerLightView->SetObject(LightSetting);
+
+
+    MainLayout->AddSlot()
+        .AutoHeight()
+        [
+            PlayerLightView
+        ];
+
 
     // MainLayout->SetContent
 }

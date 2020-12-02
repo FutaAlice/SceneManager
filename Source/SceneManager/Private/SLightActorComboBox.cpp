@@ -30,6 +30,8 @@ void SLightActorComboBox::Construct(const FArguments& InArgs)
             .Text(this, &SLightActorComboBox::GetCurrentItemLabel)
         ]
     ];
+
+
  }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
