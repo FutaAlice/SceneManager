@@ -11,10 +11,10 @@
 #include "Engine.h" // GEngine
 #include "SolutionSelector.h"
 #include "SLightActorComboBox.h"
+#include "SLightActorDetailPanel.h"
 
 // DETAIL PANEL
-#include "IDetailsView.h"
-#include "PropertyEditorModule.h"
+#include "InternalDataStructure.h"
 
 #define LOCTEXT_NAMESPACE "SceneLightViewer"
 
@@ -36,10 +36,6 @@ private:
     FSolutionSelector SolutionSelector;
 
     TSharedPtr<SVerticalBox> MainLayout;
-
-
-    UPlayerLightSettings* LightSetting;
-
 };
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -62,6 +58,7 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
     [
         SNew(SHorizontalBox)
         + SHorizontalBox::Slot()
+        .Padding(1, 1, 1, 1)
         .AutoWidth()
         [
             SNew(SBorder)
@@ -71,13 +68,8 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
                 SolutionSelector.Self()
             ]
         ]
-        //+ SHorizontalBox::Slot()
-        //[
-        //    SNew(SSpacer)
-        //]
         + SHorizontalBox::Slot()
-        .Padding(2, 0, 0, 0)
-        //.AutoWidth()
+        .Padding(1, 1, 1, 1)
         [
             SNew(SBorder)
             .Padding(4)
@@ -94,23 +86,10 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
             SNew(SLightActorComboBox)
         ];
 
-
-    FDetailsViewArgs DetailsViewArgs(false, false, true, FDetailsViewArgs::HideNameArea, true);
-    DetailsViewArgs.bAllowSearch = false;
-    FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-
-
-    TSharedRef<IDetailsView> PlayerLightView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
-    // PlayerLightView->OnFinishedChangingProperties().AddRaw(this, &SPlayerLightManager::OnFinishedChangingMainLight);
-    LightSetting = NewObject<UPlayerLightSettings>();
-    LightSetting->AddToRoot();
-    PlayerLightView->SetObject(LightSetting);
-
-
     MainLayout->AddSlot()
         .AutoHeight()
         [
-            PlayerLightView
+            SNew(SLightActorDetailPanel)
         ];
 
 
