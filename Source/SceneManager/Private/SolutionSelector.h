@@ -24,8 +24,6 @@ public:
     void Clear();
 
 private:
-    void Initialize();
-
     /**
      * @brief Update solution tabs check state
      * 
@@ -57,14 +55,14 @@ private:
     int InferClickedButtonIndex(ECheckBoxState CheckState);
 
 private:
-    TSharedRef<SVerticalBox> MainLayout;
-    TSharedRef<SVerticalBox> SolutionWidgetContainer;
-    TSharedRef<SHorizontalBox> ToolBarContainer;
+    TSharedPtr<SVerticalBox> MainLayout;
+    TSharedPtr<SVerticalBox> SolutionWidgetContainer;
+    TSharedPtr<SHorizontalBox> ToolBarContainer;
 
     TArray<TSharedRef<SCheckBox>> SlateWidgetRef;
     TMap<TSharedRef<SCheckBox>, TSharedRef<STextBlock>> SolutionTextMapping;
 
-    int CurrentSelectedSolutionIndex;
+    int CurrentSelectedSolutionIndex = -1;
 
 public:
     std::function<void(int)> CB_Append;

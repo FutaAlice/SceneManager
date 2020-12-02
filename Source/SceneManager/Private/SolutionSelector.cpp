@@ -16,17 +16,95 @@
 #include "Engine.h" // GEngine
 
 FSolutionSelector::FSolutionSelector()
-    : MainLayout(SNew(SVerticalBox))
-    , SolutionWidgetContainer(SNew(SVerticalBox))
-    , ToolBarContainer(SNew(SHorizontalBox))
-    , CurrentSelectedSolutionIndex(-1)
 {
-    Initialize();
+    SAssignNew(MainLayout, SVerticalBox);
+    MainLayout->AddSlot().AutoHeight()[SAssignNew(ToolBarContainer, SHorizontalBox)];
+    MainLayout->AddSlot().AutoHeight()[SAssignNew(SolutionWidgetContainer, SVerticalBox)];
+
+    // Add
+    TSharedRef<SWidget> BtnAdd = SNew(SButton)
+        .OnClicked_Lambda([this]() -> FReply {
+            AddSolution();
+            return FReply::Handled();
+        })
+        [
+            SNew(SImage)
+            .Image(FEditorStyle::GetBrush("LevelEditor.NewLevel"))
+        ];
+
+    // Copy
+    TSharedRef<SWidget> BtnCopy = SNew(SButton)
+        .OnClicked_Lambda([this]() -> FReply {
+            // TODO: add impl
+            return FReply::Handled();
+        })
+        [
+            SNew(SImage)
+            .Image(FEditorStyle::GetBrush("LevelEditor.OpenLevel"))
+        ];
+
+    // Remove
+    TSharedRef<SWidget> BtnRemove = SNew(SButton)
+        .OnClicked_Lambda([this]() -> FReply {
+            RemoveSolution(CurrentSelectedSolutionIndex);
+            return FReply::Handled();
+        })
+        [
+            SNew(SImage)
+            .Image(FEditorStyle::GetBrush("Level.SaveDisabledIcon16x"))
+        ];
+
+    // Rename
+    TSharedRef<SWidget> BtnRename = SNew(SButton)
+        .OnClicked_Lambda([&]() -> FReply {
+            // TODO: hint message dialog
+            if (CurrentSelectedSolutionIndex < 0) {
+            }
+            // create input dialog
+            else {
+                TSharedRef<SWindow> ModalWindow = SNew(SWindow)
+                    .Title(FText::FromString("Rename Solution"))
+                    .HasCloseButton(true)
+                    .SizingRule(ESizingRule::FixedSize)
+                    .ClientSize(FVector2D(200.0f, 60.0f));
+                TSharedRef<SEditableText> EditableText = SNew(SEditableText)
+                    .HintText(FText::FromString("Input new solution name"));
+                TSharedRef<SWidget> ResultWidget = SNew(SVerticalBox)
+                    + SVerticalBox::Slot()
+                    [
+                        EditableText
+                    ]
+                    + SVerticalBox::Slot()
+                    [
+                        SNew(SButton)
+                        .Text(FText::FromString("OK"))
+                        .OnClicked_Lambda([&]() -> FReply {
+                            FText Text = EditableText->GetText();
+                            ModalWindow->RequestDestroyWindow();
+                            RenameSolution(CurrentSelectedSolutionIndex, Text.ToString(), "TODO");
+                            return FReply::Handled();
+                        })
+                    ];
+
+                ModalWindow->SetContent(ResultWidget);
+                GEditor->EditorAddModalWindow(ModalWindow);
+            }
+            return FReply::Handled();
+        })
+        [
+            SNew(SImage)
+            .Image(FEditorStyle::GetBrush("Level.SaveModifiedIcon16x"))
+        ];
+
+    ToolBarContainer->AddSlot().AutoWidth()[BtnAdd];
+    ToolBarContainer->AddSlot().AutoWidth()[BtnCopy];
+    ToolBarContainer->AddSlot().AutoWidth()[BtnRemove];
+    ToolBarContainer->AddSlot().AutoWidth()[BtnRename];
 }
 
 TSharedRef<SWidget> FSolutionSelector::Self()
 {
-    return MainLayout;
+    return MainLayout.ToSharedRef();
 }
 
 void FSolutionSelector::AddSolution()
@@ -112,92 +190,6 @@ int FSolutionSelector::Num()
 
 void FSolutionSelector::Clear()
 {
-}
-
-void FSolutionSelector::Initialize()
-{
-    MainLayout->AddSlot().AutoHeight()[ToolBarContainer];
-    MainLayout->AddSlot().AutoHeight()[SolutionWidgetContainer];
-
-    // Add
-    TSharedRef<SWidget> BtnAdd = SNew(SButton)
-        .OnClicked_Lambda([this]() -> FReply {
-            AddSolution();
-            return FReply::Handled();
-        })
-        [
-            SNew(SImage)
-            .Image(FEditorStyle::GetBrush("LevelEditor.NewLevel"))
-        ];
-
-    // Copy
-    TSharedRef<SWidget> BtnCopy = SNew(SButton)
-        .OnClicked_Lambda([this]() -> FReply {
-            // TODO: add impl
-            return FReply::Handled();
-        })
-        [
-            SNew(SImage)
-            .Image(FEditorStyle::GetBrush("LevelEditor.OpenLevel"))
-        ];
-
-    // Remove
-    TSharedRef<SWidget> BtnRemove = SNew(SButton)
-        .OnClicked_Lambda([this]() -> FReply {
-            RemoveSolution(CurrentSelectedSolutionIndex);
-            return FReply::Handled();
-        })
-        [
-            SNew(SImage)
-            .Image(FEditorStyle::GetBrush("Level.SaveDisabledIcon16x"))
-        ];
-
-    // Rename
-    TSharedRef<SWidget> BtnRename = SNew(SButton)
-        .OnClicked_Lambda([&]() -> FReply {
-            // TODO: hint message dialog
-            if (CurrentSelectedSolutionIndex < 0) {
-            }
-            // create input dialog
-            else {
-                TSharedRef<SWindow> ModalWindow = SNew(SWindow)
-                    .Title(FText::FromString("Rename Solution"))
-                    .HasCloseButton(true)
-                    .SizingRule(ESizingRule::FixedSize)
-                    .ClientSize(FVector2D(200.0f, 60.0f));
-                TSharedRef<SEditableText> EditableText = SNew(SEditableText)
-                    .HintText(FText::FromString("Input new solution name"));
-                TSharedRef<SWidget> ResultWidget = SNew(SVerticalBox)
-                    + SVerticalBox::Slot()
-                    [
-                        EditableText
-                    ]
-                    + SVerticalBox::Slot()
-                    [
-                        SNew(SButton)
-                        .Text(FText::FromString("OK"))
-                        .OnClicked_Lambda([&]() -> FReply {
-                            FText Text = EditableText->GetText();
-                            ModalWindow->RequestDestroyWindow();
-                            RenameSolution(CurrentSelectedSolutionIndex, Text.ToString(), "TODO");
-                            return FReply::Handled();
-                        })
-                    ];
-
-                ModalWindow->SetContent(ResultWidget);
-                GEditor->EditorAddModalWindow(ModalWindow);
-            }
-            return FReply::Handled();
-        })
-        [
-            SNew(SImage)
-            .Image(FEditorStyle::GetBrush("Level.SaveModifiedIcon16x"))
-        ];
-
-    ToolBarContainer->AddSlot().AutoWidth()[BtnAdd];
-    ToolBarContainer->AddSlot().AutoWidth()[BtnCopy];
-    ToolBarContainer->AddSlot().AutoWidth()[BtnRemove];
-    ToolBarContainer->AddSlot().AutoWidth()[BtnRename];
 }
 
 void FSolutionSelector::UpdateClickButtonState(int CheckedIndex)
