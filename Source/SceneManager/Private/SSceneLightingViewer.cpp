@@ -36,6 +36,10 @@ private:
     FSolutionSelector SolutionSelector;
 
     TSharedPtr<SVerticalBox> MainLayout;
+
+    TSharedPtr<SLightActorComboBox> LightActorComboBox;
+    TSharedPtr<SLightActorDetailPanel> LightActorDetailPanel;
+
 };
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -83,16 +87,18 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
     MainLayout->AddSlot()
         .AutoHeight()
         [
-            SNew(SLightActorComboBox)
+            SAssignNew(LightActorComboBox, SLightActorComboBox)
         ];
 
     MainLayout->AddSlot()
         .AutoHeight()
         [
-            SNew(SLightActorDetailPanel)
+            SAssignNew(LightActorDetailPanel, SLightActorDetailPanel)
         ];
 
-
+    LightActorComboBox->CB_SelectionChange = [this](FString Name, ALight *Light) {
+        LightActorDetailPanel->BindActor(Light);
+    };
     // MainLayout->SetContent
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

@@ -4,14 +4,14 @@
 #include "InternalDataStructure.generated.h"
 
 UCLASS()
-class ULightSettings : public UObject
+class ULightParams : public UObject
 {
     GENERATED_BODY()
 public:
     UPROPERTY(EditAnywhere, Category = "LightParams")
-        FRotator rotation;
+        FRotator Rotation;
     UPROPERTY(EditAnywhere, Category = "LightParams")
-        float intensity;
+        float Intensity;
     UPROPERTY(EditAnywhere, Category = "LightParams")
-        FLinearColor color;
+        FLinearColor LightColor;
 };

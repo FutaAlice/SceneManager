@@ -22,7 +22,7 @@ void SLightActorComboBox::Construct(const FArguments& InArgs)
         SAssignNew(ComboBox, SComboBox<ItemType>)
         .OptionsSource(&Options)
         .OnSelectionChanged(this, &SLightActorComboBox::OnSelectionChanged)
-        .OnGenerateWidget(this, &SLightActorComboBox::MakeWidgetForOption)
+        .OnGenerateWidget(this, &SLightActorComboBox::OnGenerateWidget)
         .OnComboBoxOpening(this, &SLightActorComboBox::OnComboBoxOpening)
         .InitiallySelectedItem(CurrentItem)
         [
@@ -44,7 +44,7 @@ FText SLightActorComboBox::GetCurrentItemLabel() const
     return LOCTEXT("InvalidComboEntryText", "<<Invalid option>>");
 }
 
-TSharedRef<SWidget> SLightActorComboBox::MakeWidgetForOption(ItemType InOption)
+TSharedRef<SWidget> SLightActorComboBox::OnGenerateWidget(ItemType InOption)
 {
     return SNew(STextBlock).Text(FText::FromString(*InOption));
 }
@@ -54,7 +54,24 @@ void SLightActorComboBox::OnSelectionChanged(ItemType NewValue, ESelectInfo::Typ
     if (Type == ESelectInfo::Type::Direct) {
         return;
     }
-    CurrentItem = NewValue;
+    if (*CurrentItem != *NewValue) {
+        CurrentItem = NewValue;
+
+        UWorld* World = GEditor->GetEditorWorldContext().World();
+        ULevel* Level = World->GetCurrentLevel();
+
+        TArray<AActor *> ActorList;
+        UGameplayStatics::GetAllActorsOfClass(World, ALight::StaticClass(), ActorList);
+        for (auto Actor : ActorList) {
+            if (Actor->GetName() == *NewValue) {
+                ALight *Light = Cast<ALight>(Actor);
+                CB_SelectionChange(*NewValue.Get(), Light);
+                return;
+            }
+        }
+
+        ensure(false);
+    }
 }
 
 void SLightActorComboBox::OnComboBoxOpening()

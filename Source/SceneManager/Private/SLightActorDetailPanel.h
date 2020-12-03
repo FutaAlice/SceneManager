@@ -1,12 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/SCompoundWidget.h"
 
-class ULightSettings;
+class ALight;
+class ULightParams;
 
 /**
  * 
@@ -21,6 +20,18 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
+    bool SetParam(ULightParams *InData);
+    TSharedPtr<ULightParams> GetParam() const;
+
+    bool BindActor(ALight *InActor);
+
 private:
-    TSharedPtr<ULightSettings> LightSettings;
+
+    void OnFinishedChangingProperties(const FPropertyChangedEvent& InEvent);
+    void OnLightDestroyed(AActor *);
+
+
+private:
+    ALight *Light;
+    TSharedPtr<ULightParams> LightParams;
 };
