@@ -30,8 +30,6 @@ void SLightActorComboBox::Construct(const FArguments& InArgs)
             .Text(this, &SLightActorComboBox::GetCurrentItemLabel)
         ]
     ];
-
-
  }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -85,10 +83,17 @@ void SLightActorComboBox::OnComboBoxOpening()
 
     TArray<AActor *> ActorList;
     UGameplayStatics::GetAllActorsOfClass(World, ALight::StaticClass(), ActorList);
+
     UE_LOG(LogTemp, Warning, TEXT("ALight actor count: %d"), ActorList.Num());
 
     for (auto Actor : ActorList) {
+        uint32 UniqueID = Actor->GetUniqueID();
+        FString ObjectName = UKismetSystemLibrary::GetObjectName(Actor);
+        FString ActorName = Actor->GetName();
+        FString LevelName = Actor->GetLevel()->GetOuter()->GetName();
+
         Options.Add(MakeShareable(new FString(Actor->GetName())));
+        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, ActorName + FString(" ") + ObjectName);
     }
 
     ComboBox->RefreshOptions();

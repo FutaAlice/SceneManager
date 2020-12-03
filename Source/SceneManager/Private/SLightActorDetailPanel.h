@@ -4,7 +4,7 @@
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/SCompoundWidget.h"
 
-class ALight;
+class AActor;
 class ULightParams;
 
 /**
@@ -20,18 +20,15 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
-    bool SetParam(ULightParams *InData);
+    // void SetParam(ULightParams *InData);
     ULightParams * GetParam();
 
-    bool BindActor(ALight *InActor);
+    void BindActor(AActor *InActor);
 
 private:
-
     void OnFinishedChangingProperties(const FPropertyChangedEvent& InEvent);
-    void OnLightDestroyed(AActor *);
-
 
 private:
-    ALight *Light;
+    AActor *Light;
     ULightParams *LightParams;
 };
