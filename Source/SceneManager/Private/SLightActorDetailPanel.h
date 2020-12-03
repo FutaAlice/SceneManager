@@ -21,7 +21,7 @@ public:
 	void Construct(const FArguments& InArgs);
 
     bool SetParam(ULightParams *InData);
-    TSharedPtr<ULightParams> GetParam() const;
+    ULightParams * GetParam();
 
     bool BindActor(ALight *InActor);
 
@@ -33,5 +33,5 @@ private:
 
 private:
     ALight *Light;
-    TSharedPtr<ULightParams> LightParams;
+    ULightParams *LightParams;
 };

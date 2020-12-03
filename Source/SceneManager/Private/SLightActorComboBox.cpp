@@ -65,7 +65,9 @@ void SLightActorComboBox::OnSelectionChanged(ItemType NewValue, ESelectInfo::Typ
         for (auto Actor : ActorList) {
             if (Actor->GetName() == *NewValue) {
                 ALight *Light = Cast<ALight>(Actor);
-                CB_SelectionChange(*NewValue.Get(), Light);
+                if (CB_SelectionChange) {
+                    CB_SelectionChange(*NewValue.Get(), Light);
+                }
                 return;
             }
         }

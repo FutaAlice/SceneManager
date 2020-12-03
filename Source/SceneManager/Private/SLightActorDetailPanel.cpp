@@ -14,13 +14,16 @@
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SLightActorDetailPanel::Construct(const FArguments& InArgs)
 {
+    LightParams = NewObject<ULightParams>();
+    LightParams->AddToRoot();
+
     BindActor(nullptr);
     SetParam(nullptr);
 
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FDetailsViewArgs DetailsViewArgs(false, false, false, FDetailsViewArgs::HideNameArea, true);
     TSharedRef<IDetailsView> PlayerLightView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
-    PlayerLightView->SetObject(LightParams.Get());
+    PlayerLightView->SetObject(LightParams);
     PlayerLightView->OnFinishedChangingProperties().AddRaw(this, &SLightActorDetailPanel::OnFinishedChangingProperties);
 
     ChildSlot
@@ -58,20 +61,14 @@ bool SLightActorDetailPanel::SetParam(ULightParams *InData)
         return true;
     }
     else {
-        if (LightParams.IsValid()) {
-            LightParams->Rotation = FRotator();
-            LightParams->Intensity = 0;
-            LightParams->LightColor = FLinearColor();
-            return false;
-        }
-        else {
-            LightParams = MakeShareable(NewObject<ULightParams>());
-            return true;
-        }
+        LightParams->Rotation = FRotator();
+        LightParams->Intensity = 0;
+        LightParams->LightColor = FLinearColor();
+        return true;
     }
 }
 
-TSharedPtr<ULightParams> SLightActorDetailPanel::GetParam() const
+ULightParams *SLightActorDetailPanel::GetParam()
 {
     return Light ? LightParams : nullptr;
 }
