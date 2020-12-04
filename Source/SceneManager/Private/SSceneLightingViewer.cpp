@@ -16,6 +16,12 @@
 // DETAIL PANEL
 #include "InternalDataStructure.h"
 
+// CONTENT BORWSER
+#include "ContentBrowserModule.h"   // FContentBrowserModule
+#include "IContentBrowserSingleton.h"   // IContentBrowserSingleton
+#include "AssetData.h"  // FAssetData
+#include "SceneManagementAsset.h"
+
 #define LOCTEXT_NAMESPACE "SceneLightViewer"
 
 /**
@@ -83,6 +89,28 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
             ]
         ]
     ];
+
+    MainLayout->AddSlot()
+        .AutoHeight()
+        [
+            SNew(SButton)
+            .OnClicked_Lambda([this]() -> FReply {
+                FContentBrowserModule& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+                IContentBrowserSingleton& ContentBrowserSingleton = ContentBrowserModule.Get();
+
+                TArray<FAssetData> AssetDatas;
+                ContentBrowserSingleton.GetSelectedAssets(AssetDatas);
+
+                for (auto AssetData : AssetDatas) {
+
+                    UE_LOG(LogTemp, Warning, TEXT("Asset %s"), *AssetData.ObjectPath.ToString());
+
+                    FName MyAssetClassName = USceneManagementAsset::StaticClass()->GetFName();
+                    UE_LOG(LogTemp, Warning, TEXT("Asset %s"), *MyAssetClassName.ToString());
+                }
+                return FReply::Handled();
+            })
+        ];
 
     MainLayout->AddSlot()
         .AutoHeight()
