@@ -8,6 +8,7 @@
 #include "PropertyEditorModule.h"   // FPropertyEditorModule
 
 #include "InternalDataStructure.h"
+#include "EventHub.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SLightActorDetailPanel::Construct(const FArguments& InArgs)
@@ -15,6 +16,9 @@ void SLightActorDetailPanel::Construct(const FArguments& InArgs)
     LightParams = NewObject<ULightParams>();
     LightParams->AddToRoot();
     Light = nullptr;
+
+    // Debug
+    EventHub::Get();
 
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FDetailsViewArgs DetailsViewArgs(false, false, false, FDetailsViewArgs::HideNameArea, true);
