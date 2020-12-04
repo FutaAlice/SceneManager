@@ -44,11 +44,15 @@ EventHub::EventHub()
         UE_LOG(LogTemp, Warning, TEXT("OnActorLabelChanged"));
     });
 
-    // MODIFY
+    // PropertyChanged
     FCoreUObjectDelegates::OnObjectPropertyChanged.AddLambda([](UObject*, struct FPropertyChangedEvent &) {
         UE_LOG(LogTemp, Warning, TEXT("OnObjectPropertyChanged"));
     });
 
+    // Modified (what's the different from 'OnObjectPropertyChanged'£¿)
+    FCoreUObjectDelegates::OnObjectModified.AddLambda([](UObject*) {
+        UE_LOG(LogTemp, Warning, TEXT("OnObjectModified"));
+    });
 
     //FEditorDelegates::MapChange.AddLambda([]() {
     //    UE_LOG(LogTemp, Warning, TEXT("MapChange"));
