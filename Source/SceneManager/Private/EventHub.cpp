@@ -44,6 +44,11 @@ EventHub::EventHub()
         UE_LOG(LogTemp, Warning, TEXT("OnActorLabelChanged"));
     });
 
+    //// Save 
+    //FCoreUObjectDelegates::OnObjectSaved.AddLambda([](UObject *) {
+    //    UE_LOG(LogTemp, Warning, TEXT("OnObjectSaved"));
+    //});
+
     // PropertyChanged
     FCoreUObjectDelegates::OnObjectPropertyChanged.AddLambda([](UObject*, struct FPropertyChangedEvent &) {
         UE_LOG(LogTemp, Warning, TEXT("OnObjectPropertyChanged"));
