@@ -1,6 +1,7 @@
 #include "SolutionSelector.h"
 
 #include "Misc/Guid.h"  // FGuid
+#include "Misc/MessageDialog.h" // FMessageDialog
 #include "EditorStyleSet.h" // FEditorStyle
 #include "Widgets/SBoxPanel.h"  // SVerticalBox
 #include "Widgets/SWindow.h"    // SWindow
@@ -109,7 +110,22 @@ TSharedRef<SWidget> FSolutionSelector::Self()
 
 void FSolutionSelector::AddSolution()
 {
-    FString SolutionName = FString::Printf(TEXT("Solution %d"), Num() + 1);
+    // collect exist solution names
+    TSet<FString> AllSolutionNames;
+    for (auto Widget : SlateWidgetRef) {
+        auto TextBlock = SolutionTextMapping[Widget];
+        FString SolutionName = TextBlock->GetText().ToString();
+        AllSolutionNames.Add(SolutionName);
+    }
+
+    // generate a valid solution name
+    FString SolutionName;
+    for (int i = Num();;) {
+        SolutionName = FString::Printf(TEXT("Solution %d"), ++i);
+        if (!AllSolutionNames.Contains(SolutionName)) {
+            break;
+        }
+    }
     FString SolutionToolTip = FString::Printf(TEXT("The %d-th Solution"), Num() + 1);
     AddSolution(SolutionName, SolutionToolTip);
 }
@@ -227,6 +243,27 @@ void FSolutionSelector::UpdateToolTips()
 
 void FSolutionSelector::RenameSolution(int SolutionIndex, FString SolutionName, FString SolutionToolTip, bool Callback)
 {
+    // collect exist solution names
+    TSet<FString> AllSolutionNames;
+    for (auto Widget : SlateWidgetRef) {
+        auto TextBlock = SolutionTextMapping[Widget];
+        FString SolutionName = TextBlock->GetText().ToString();
+        AllSolutionNames.Add(SolutionName);
+    }
+    // check whether solution name exist
+    if (AllSolutionNames.Contains(SolutionName)) {
+        FText Title = FText::FromString("Warning");
+        FText Content = FText::FromString(FString::Printf(TEXT("Solution '%s' already exist!"), *SolutionName));
+        FMessageDialog::Open(EAppMsgType::Ok, Content, &Title);
+        return;
+    }
+    // check whether solution name empty
+    if (SolutionName.IsEmpty()) {
+        FText Title = FText::FromString("Warning");
+        FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("Expected input to be a non-empty string!")), &Title);
+        return;
+    }
+
     ensure(SolutionIndex >= 0 && SolutionIndex < Num());
     TSharedRef<SCheckBox> Widget = SlateWidgetRef[SolutionIndex];
     ensure(SolutionTextMapping.Contains(Widget));

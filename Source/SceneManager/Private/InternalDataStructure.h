@@ -28,3 +28,12 @@ public:
     UPROPERTY(EditAnywhere, Category = "LightParams")
         FLinearColor LightColor;
 };
+
+UCLASS()
+class ULightParamsArray : public UObject
+{
+    GENERATED_BODY()
+public:
+    UPROPERTY(EditAnywhere, Category = "LightParams")
+        TArray<ULightParams *> Array;
+};
