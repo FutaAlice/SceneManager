@@ -28,6 +28,11 @@ void SLightActorDetailPanel::Construct(const FArguments& InArgs)
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
+SLightActorDetailPanel::~SLightActorDetailPanel()
+{
+    UE_LOG(LogTemp, Warning, TEXT("SLightActorDetailPanel Destory"));
+}
+
 void SLightActorDetailPanel::BindActor(AActor *InActor)
 {
     ensure(InActor);

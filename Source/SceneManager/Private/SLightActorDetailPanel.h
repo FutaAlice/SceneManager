@@ -20,6 +20,8 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
+    ~SLightActorDetailPanel();
+
     // void SetParam(ULightParams *InData);
     ULightParams * GetParam();
 
