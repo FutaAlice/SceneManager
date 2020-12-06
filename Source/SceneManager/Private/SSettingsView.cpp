@@ -57,7 +57,6 @@ void SSettingsView::Construct(const FArguments& InArgs)
                         FString BaseFilePath = FPaths::GetBaseFilename(AssetPath, false);   // /Game/NewSceneManagementAsset
                         UE_LOG(LogTemp, Warning, TEXT("FSoftObjectPath AssetPath: %s"), *AssetPath);
                         UE_LOG(LogTemp, Warning, TEXT("FSoftObjectPath BaseFilePath: %s"), *BaseFilePath);
-
                         UE_LOG(LogTemp, Warning, TEXT("ProjectContentDir: %s"), *FPaths::ProjectContentDir());  //  D:/Unreal Projects/SMRefactor/Content/
 
 
@@ -78,57 +77,26 @@ void SSettingsView::Construct(const FArguments& InArgs)
                     FString FileTypes = "uasset files (*.uasset;)|*.uasset;";
                     uint32 Flags = 0;
                     FDesktopPlatformModule::Get()->SaveFileDialog(nullptr, DialogTitle, DefaultPath, DefaultFile, FileTypes, Flags, OutFilenames);
-                    for (auto String : OutFilenames) {
-                        UE_LOG(LogTemp, Warning, TEXT("SaveFileDialog: %s"), *String);
-                    }
 
+                    FString ContentDir = FPaths::ProjectContentDir();
+                    FString RootDir = "/Game/";
+                    FString InGamePath = OutFilenames[0].Replace(*ContentDir, *RootDir);
 
-                    // Create Package
-                    FString FileName = "FUCK";
-                    FString pathPackage = FString("/Game/MyTextures/") + FileName;
-
+                    FString NewName = FPaths::GetBaseFilename(InGamePath);
+                    FString NewPath = FPaths::GetPath(InGamePath);
+                    UE_LOG(LogTemp, Warning, TEXT("NewName: %s"), *NewName);
+                    UE_LOG(LogTemp, Warning, TEXT("NewPath: %s"), *NewPath);
 
                     if (SelectedUXXX && SelectedUXXX->MyAsset) {
                         FAssetToolsModule &AssetToolModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
                         IAssetTools &AssetTools = AssetToolModule.Get();
                         UObject *Asset = SelectedUXXX->MyAsset;
 
-                        FAssetRegistryModule& AssetRegistryModule = FModuleManager::GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
-
-                        const FString PackagePath = FPackageName::GetLongPackagePath(Asset->GetOutermost()->GetName());
-                        UE_LOG(LogTemp, Warning, TEXT("Source asset package path: %s"), *PackagePath);
-
+                        // TODO: fix RENAME
                         TArray<FAssetRenameData> AssetsAndNames;
-                        new(AssetsAndNames) FAssetRenameData(Asset, PackagePath, FString("TESE_NAME_1"));
-
+                        new(AssetsAndNames) FAssetRenameData(Asset, NewPath, NewName);
                         AssetTools.RenameAssets(AssetsAndNames);
-
-                        FAssetRegistryModule::AssetRenamed(Asset, TEXT("/Game/TestImage1"));
-                        Asset->MarkPackageDirty();
-                        Asset->GetOuter()->MarkPackageDirty();
-                        //UPackage * Package = CreatePackage(nullptr, *pathPackage);
-                        //UObject* NewObj = NewObject<UTexture2D>(Package, SelectedUXXX->MyAsset->GetFName(), RF_Public | RF_Standalone);
-                        //USceneManagementAsset* NewAss = Cast<USceneManagementAsset>(NewObj);
-                        //Package->SetDirtyFlag(true);
-
-
-
-                        //FString PathName = "/Game/MyTextures";
-                        //FString ObjectName;
-                        //FString NewPackageName;
-                        //AssetTools.CreateUniqueAssetName(PathName + "/" + Asset->GetName() + "_", TEXT(""), NewPackageName, ObjectName);
-
-                        //AssetTools.DuplicateAsset(ObjectName, PathName, Asset);
-                        //AssetTools.DuplicateAssetWithDialog("FUCK.uasset", "/Game/", SelectedUXXX->MyAsset);
-
-                        //TArray<UObject*> SHIT;
-                        //SHIT.Add(NewAss);
-                        //AssetTools.ExportAssets(SHIT, "/Game/MyTextures/");
-                        
                     }
-
-
-                    // GEditor->SavePackage(SelectedUXXX, GEngine->GetWorld(), RF_Standalone, *OutFilenames[0]);
                     return FReply::Handled();
                 })
             ]
