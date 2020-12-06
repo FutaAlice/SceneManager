@@ -22,6 +22,7 @@
 #include "InternalDataStructure.h"
 #include "SceneManagementAsset.h"
 #include "SSceneLightingViewer.h"
+#include "SCharacterLightingViewer.h"
 #include "EventHub.h"
 
 SSettingsView *SSettingsView::Instance = nullptr;
@@ -163,5 +164,6 @@ void SSettingsView::OnSceneManagementAssetChanged(const FPropertyChangedEvent& I
 
         Asset->FindAllActors();
         SceneLightingViewer::OnAssetDataChanged();
+        CharacterLightingViewer::OnAssetDataChanged();
     }
 }
