@@ -3,7 +3,7 @@
 #include "Misc/Guid.h"  // FGuid
 #include "Misc/MessageDialog.h" // FMessageDialog
 #include "EditorStyleSet.h" // FEditorStyle
-#include "Widgets/SBoxPanel.h"  // SVerticalBox
+#include "Widgets/SBoxPanel.h"  // SVerticalBox, SHorizontalBox
 #include "Widgets/SWindow.h"    // SWindow
 #include "Widgets/Input/SButton.h"  // SButton
 #include "Widgets/Input/SCheckBox.h"    // SCheckBox
