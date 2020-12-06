@@ -5,6 +5,8 @@
 #include "Framework/Docking/TabManager.h"   // FTabManager, FSpawnTabArgs
 #include "EditorStyleSet.h" // FEditorStyle
 #include "Widgets/Docking/SDockTab.h"   // SDockTab
+#include "Widgets/Input/SButton.h"  // SButton
+#include "Widgets/Text/STextBlock.h"    // STextBlock
 
 #include "Engine.h" // GEngine
 
@@ -42,10 +44,10 @@ public:
 
 private:
     static SCharacterLightingViewer* CharacterLightingViewerInstance;
-
     FSolutionSelector SolutionSelector;
-
     TSharedPtr<SVerticalBox> MainLayout;
+    TSharedPtr<SVerticalBox> LightContainer;
+    TSharedPtr<SHorizontalBox> ToolBarContainer;
 };
 
 SCharacterLightingViewer* SCharacterLightingViewer::CharacterLightingViewerInstance = nullptr;
@@ -99,7 +101,31 @@ void SCharacterLightingViewer::Construct(const FArguments& InArgs)
             ]
         ]
     ];
-	
+
+    MainLayout->AddSlot().AutoHeight()[SAssignNew(ToolBarContainer, SHorizontalBox)];
+    MainLayout->AddSlot().AutoHeight()[SAssignNew(LightContainer, SVerticalBox)];
+
+    // Create Toolbar
+
+    TSharedRef<SWidget> TextBlock = SNew(STextBlock)
+        .Text(FText::FromString("Aux Light Params: "));
+
+    TSharedRef<SWidget> BtnAdd = SNew(SButton)
+        .Text(FText::FromString("Add"))
+        .OnClicked_Lambda([this]() -> FReply {
+            return FReply::Handled();
+        });
+    
+    TSharedRef<SWidget> BtnRemove = SNew(SButton)
+        .Text(FText::FromString("Remove"))
+        .OnClicked_Lambda([this]() -> FReply {
+            return FReply::Handled();
+        });
+
+    ToolBarContainer->AddSlot().VAlign(VAlign_Center).AutoWidth()[TextBlock];
+    ToolBarContainer->AddSlot().AutoWidth()[BtnAdd];
+    ToolBarContainer->AddSlot().AutoWidth()[BtnRemove];
+
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
