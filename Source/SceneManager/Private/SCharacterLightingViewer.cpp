@@ -151,6 +151,7 @@ void SCharacterLightingViewer::OnAssetDataChanged()
 
 void SCharacterLightingViewer::OnSolutionChanged(int SolutionIndex)
 {
+    AuxLightGroup;
 }
 
 namespace CharacterLightingViewer {

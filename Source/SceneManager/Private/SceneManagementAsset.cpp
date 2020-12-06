@@ -11,8 +11,12 @@ void USceneManagementAsset::AddLightingSolution()
     LightingSolutionNameList.Add("");
     KeyLightActorNames.Add("");
     KeyLightParams.Add(NewObject<ULightParams>());
-    SceneAuxLightArrayParams.Add(NewObject<ULightParamsArray>());
-    CharacterAuxLightArrayParams.Add(NewObject<ULightParamsArray>());
+
+    SceneAuxLightNames.Add(NewObject<UStringArray>());
+    SceneAuxLightParams.Add(NewObject<ULightParamsArray>());
+
+    CharacterAuxLightNames.Add(NewObject<UStringArray>());
+    CharacterAuxLightParams.Add(NewObject<ULightParamsArray>());
 
     KeyLightActors.Add(nullptr);
     FindAllActors();
@@ -23,8 +27,10 @@ void USceneManagementAsset::RemoveLightingSolution(int SolutionIndex)
     LightingSolutionNameList.RemoveAt(SolutionIndex);
     KeyLightActorNames.RemoveAt(SolutionIndex);
     KeyLightParams.RemoveAt(SolutionIndex);
-    SceneAuxLightArrayParams.RemoveAt(SolutionIndex);
-    CharacterAuxLightArrayParams.RemoveAt(SolutionIndex);
+    SceneAuxLightNames.RemoveAt(SolutionIndex);
+    SceneAuxLightParams.RemoveAt(SolutionIndex);
+    SceneAuxLightNames.RemoveAt(SolutionIndex);
+    SceneAuxLightParams.RemoveAt(SolutionIndex);
 
     KeyLightActors.RemoveAt(SolutionIndex);
 }
@@ -48,6 +54,17 @@ FString USceneManagementAsset::GetKeyLightActorName(int SolutionIndex)
 ULightParams* USceneManagementAsset::GetKeyLightParamsPtr(int SolutionIndex)
 {
     return KeyLightParams[SolutionIndex];
+}
+
+void USceneManagementAsset::AddCharacterAuxLight(int SolutionIndex)
+{
+    CharacterAuxLightNames[SolutionIndex]->Array.Add("");
+    CharacterAuxLightParams[SolutionIndex]->Array.Add(NewObject<ULightParams>());
+}
+
+void USceneManagementAsset::SetCharacterAuxLightName(int SolutionIndex, int ActorIndex, const FString& ActorName)
+{
+    CharacterAuxLightNames[SolutionIndex]->Array[ActorIndex] = ActorName;
 }
 
 void USceneManagementAsset::FindAllActors()

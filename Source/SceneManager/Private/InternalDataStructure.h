@@ -37,3 +37,12 @@ public:
     UPROPERTY(EditAnywhere, Category = "LightParams")
         TArray<ULightParams *> Array;
 };
+
+UCLASS()
+class UStringArray : public UObject
+{
+    GENERATED_BODY()
+public:
+    UPROPERTY(EditAnywhere, Category = "String")
+        TArray<FString> Array;
+};

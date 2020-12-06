@@ -29,7 +29,9 @@ public:
     FString GetKeyLightActorName(int SolutionIndex);
     ULightParams* GetKeyLightParamsPtr(int SolutionIndex);
     
-
+    void AddCharacterAuxLight(int SolutionIndex);
+    void SetCharacterAuxLightName(int SolutionIndex, int ActorIndex, const FString& ActorName);
+    void GetCharacterAuxLightName(int SolutionIndex, const FString& ActorName);
 
     void FindAllActors();
 
@@ -44,10 +46,16 @@ public:
         TArray<ULightParams*> KeyLightParams;
 
     UPROPERTY(EditAnywhere, Category = "Scene Lighting")
-        TArray<ULightParamsArray*> SceneAuxLightArrayParams;
+        TArray<UStringArray*> SceneAuxLightNames;
+
+    UPROPERTY(EditAnywhere, Category = "Scene Lighting")
+        TArray<ULightParamsArray*> SceneAuxLightParams;
 
     UPROPERTY(EditAnywhere, Category = "Character Lighting")
-        TArray<ULightParamsArray*> CharacterAuxLightArrayParams;
+        TArray<UStringArray*> CharacterAuxLightNames;
+
+    UPROPERTY(EditAnywhere, Category = "Character Lighting")
+        TArray<ULightParamsArray*> CharacterAuxLightParams;
 
 private:
     TArray<AActor *> KeyLightActors;
