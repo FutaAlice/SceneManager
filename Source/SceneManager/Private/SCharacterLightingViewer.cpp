@@ -10,6 +10,7 @@
 
 #include "Engine.h" // GEngine
 
+#include "SLightActorGroup.h"
 #include "SSettingsView.h"
 #include "SolutionSelector.h"
 #include "SceneManagementAsset.h"
@@ -35,7 +36,10 @@ public:
         CharacterLightingViewerInstance = nullptr;
     }
 
+    // TSharedPtr<SWidget> RefreshAuxLightGroup();
+
     void OnAssetDataChanged();
+    void OnSolutionChanged(int SolutionIndex);
 
     static SCharacterLightingViewer* GetInstance()
     {
@@ -46,7 +50,8 @@ private:
     static SCharacterLightingViewer* CharacterLightingViewerInstance;
     FSolutionSelector SolutionSelector;
     TSharedPtr<SVerticalBox> MainLayout;
-    TSharedPtr<SVerticalBox> LightContainer;
+    TSharedPtr<SLightActorGroup> KeyLightGroup;
+    TSharedPtr<SLightActorGroup> AuxLightGroup;
     TSharedPtr<SHorizontalBox> ToolBarContainer;
 };
 
@@ -67,8 +72,8 @@ void SCharacterLightingViewer::Construct(const FArguments& InArgs)
         USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
         SceneManagementAsset->RemoveLightingSolution(SolutionIndex);
     };
-    SolutionSelector.CB_Active = [](int SolutionIndex) {
-        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Active Index %d"), SolutionIndex));
+    SolutionSelector.CB_Active = [this](int SolutionIndex) {
+        OnSolutionChanged(SolutionIndex);
     };
     SolutionSelector.CB_Rename = [](int SolutionIndex, FString SolutionName) {
         GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, SolutionName);
@@ -103,12 +108,16 @@ void SCharacterLightingViewer::Construct(const FArguments& InArgs)
     ];
 
     MainLayout->AddSlot().AutoHeight()[SAssignNew(ToolBarContainer, SHorizontalBox)];
-    MainLayout->AddSlot().AutoHeight()[SAssignNew(LightContainer, SVerticalBox)];
+    MainLayout->AddSlot().AutoHeight()[SAssignNew(KeyLightGroup, SLightActorGroup)];
+    MainLayout->AddSlot().AutoHeight()[SAssignNew(AuxLightGroup, SLightActorGroup)];
+
+    KeyLightGroup->TitleBlock->SetText(FText::FromString("Key Light"));
+    AuxLightGroup->TitleBlock->SetText(FText::FromString("Aux Light"));
 
     // Create Toolbar
 
     TSharedRef<SWidget> TextBlock = SNew(STextBlock)
-        .Text(FText::FromString("Aux Light Params: "));
+        .Text(FText::FromString("xxx Light Params: "));
 
     TSharedRef<SWidget> BtnAdd = SNew(SButton)
         .Text(FText::FromString("Add"))
@@ -138,6 +147,10 @@ void SCharacterLightingViewer::OnAssetDataChanged()
         const FString& SolutionName = SceneManagementAsset->LightingSolutionNameList[i];
         SolutionSelector.AddSolution(SolutionName, "", false);
     }
+}
+
+void SCharacterLightingViewer::OnSolutionChanged(int SolutionIndex)
+{
 }
 
 namespace CharacterLightingViewer {

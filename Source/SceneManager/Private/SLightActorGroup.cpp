@@ -12,11 +12,36 @@
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SLightActorGroup::Construct(const FArguments& InArgs)
 {
-	/*
 	ChildSlot
 	[
-		// Populate the widget
+		SAssignNew(MainLayout, SVerticalBox)
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(0, 0, 0, 2)
+		[
+			SAssignNew(TitleBlock, STextBlock)
+		]
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SAssignNew(ToolBarContainer, SHorizontalBox)
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			[
+				SNew(SButton)
+				.Text(FText::FromString("TODO"))
+			]
+		]
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		[
+			SAssignNew(Groups, SVerticalBox)
+			+ SVerticalBox::Slot()
+			[
+				SNew(SButton)
+				.Text(FText::FromString("Padding"))
+			]
+		]
 	];
-	*/
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

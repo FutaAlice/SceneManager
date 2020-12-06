@@ -6,6 +6,7 @@
 
 class SVerticalBox;
 class SHorizontalBox;
+class STextBlock;
 
 /**
  * 
@@ -22,6 +23,7 @@ public:
 
 public:
 	TSharedPtr<SVerticalBox> MainLayout;
-	TSharedPtr<SVerticalBox> LightWidgetContainer;
+	TSharedPtr<STextBlock> TitleBlock;
 	TSharedPtr<SHorizontalBox> ToolBarContainer;
+	TSharedPtr<SVerticalBox> Groups;
 };
