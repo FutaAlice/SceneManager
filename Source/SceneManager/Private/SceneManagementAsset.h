@@ -1,6 +1,8 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "InternalDataStructure.h"
+#include "GameFramework/SaveGame.h" // USaveGame
+#include "Engine/DataAsset.h"   // UDataAsset
 #include "SceneManagementAsset.generated.h"
 
 UCLASS()
@@ -15,7 +17,7 @@ public:
  * Scene Manager Asset Type
  */
 UCLASS()
-class USceneManagementAsset : public UObject
+class USceneManagementAsset : public USaveGame
 {
     GENERATED_BODY()
 public:

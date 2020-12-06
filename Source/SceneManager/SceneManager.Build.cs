@@ -33,6 +33,7 @@ public class SceneManager : ModuleRules
             "WorkspaceMenuStructure",
             "UnrealEd",
             "PropertyEditor",
+            "DesktopPlatform",
         });
 
 
