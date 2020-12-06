@@ -6,14 +6,14 @@
 
 #include "SSettingsView.generated.h"
 
+class USceneManagementAsset;
+
 UCLASS()
-class UXXX : public UObject {
+class UAssetWrap : public UObject {
     GENERATED_BODY()
 public:
-    UPROPERTY(EditAnywhere, Category = "Asset")
-        int fuck;
-    UPROPERTY(EditAnywhere, Category = "Asset")
-        class USceneManagementAsset *MyAsset;
+    UPROPERTY(EditAnywhere, Category = "Select Scene Management Asset:")
+    USceneManagementAsset *SceneManagementAsset;
 };
 
 /**
@@ -30,7 +30,11 @@ public:
     /** Constructs this widget with InArgs */
     void Construct(const FArguments& InArgs);
 
-    UXXX *SelectedUXXX;
+    static USceneManagementAsset *GetSceneManagementAsset();
 
-    void OnFinishedChangingProperties(const FPropertyChangedEvent& InEvent);
+    void OnSceneManagementAssetChanged(const FPropertyChangedEvent& InEvent);
+
+private:
+    static SSettingsView *Instance;
+    UAssetWrap *AssetWrap;
 };

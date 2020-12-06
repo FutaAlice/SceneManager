@@ -19,17 +19,22 @@
 #include "InternalDataStructure.h"
 #include "SceneManagementAsset.h"
 
+SSettingsView *SSettingsView::Instance = nullptr;
+
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SSettingsView::Construct(const FArguments& InArgs)
 {
-    SelectedUXXX = NewObject<UXXX>();
-    SelectedUXXX->AddToRoot();
+    // Init AssetWrap
+    AssetWrap = NewObject<UAssetWrap>();
+    AssetWrap->SceneManagementAsset = nullptr;
+    AssetWrap->AddToRoot();
 
+    // Create AssetWrap DetailView widget
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FDetailsViewArgs DetailsViewArgs(false, false, false, FDetailsViewArgs::HideNameArea, true);
     TSharedRef<IDetailsView> PlayerLightView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
-    PlayerLightView->SetObject(SelectedUXXX);
-    PlayerLightView->OnFinishedChangingProperties().AddRaw(this, &SSettingsView::OnFinishedChangingProperties);
+    PlayerLightView->SetObject(AssetWrap);
+    PlayerLightView->OnFinishedChangingProperties().AddRaw(this, &SSettingsView::OnSceneManagementAssetChanged);
 
     ChildSlot
     [
@@ -40,6 +45,7 @@ void SSettingsView::Construct(const FArguments& InArgs)
         [
             PlayerLightView
         ]
+
         + SVerticalBox::Slot()
         .AutoHeight()
         [
@@ -50,16 +56,14 @@ void SSettingsView::Construct(const FArguments& InArgs)
                 SNew(SButton)
                 .Text(FText::FromString("Save"))
                 .OnClicked_Lambda([this]() -> FReply {
-                    if (SelectedUXXX && SelectedUXXX->MyAsset) {
+                    if (USceneManagementAsset *Asset = GetSceneManagementAsset()) {
                         // FSoftObjectPath
-                        FStringAssetReference StringAssetReference(SelectedUXXX->MyAsset);  
+                        FStringAssetReference StringAssetReference(Asset);
                         FString AssetPath = StringAssetReference.GetAssetPathString();  // /Game/NewSceneManagementAsset.NewSceneManagementAsset
                         FString BaseFilePath = FPaths::GetBaseFilename(AssetPath, false);   // /Game/NewSceneManagementAsset
                         UE_LOG(LogTemp, Warning, TEXT("FSoftObjectPath AssetPath: %s"), *AssetPath);
                         UE_LOG(LogTemp, Warning, TEXT("FSoftObjectPath BaseFilePath: %s"), *BaseFilePath);
                         UE_LOG(LogTemp, Warning, TEXT("ProjectContentDir: %s"), *FPaths::ProjectContentDir());  //  D:/Unreal Projects/SMRefactor/Content/
-
-
                     }
                     return FReply::Handled();
                 })
@@ -76,7 +80,9 @@ void SSettingsView::Construct(const FArguments& InArgs)
                     FString DefaultFile = "";
                     FString FileTypes = "uasset files (*.uasset;)|*.uasset;";
                     uint32 Flags = 0;
-                    FDesktopPlatformModule::Get()->SaveFileDialog(nullptr, DialogTitle, DefaultPath, DefaultFile, FileTypes, Flags, OutFilenames);
+
+                    IDesktopPlatform *DesktopPlatform = FDesktopPlatformModule::Get();
+                    DesktopPlatform->SaveFileDialog(nullptr, DialogTitle, DefaultPath, DefaultFile, FileTypes, Flags, OutFilenames);
 
                     FString ContentDir = FPaths::ProjectContentDir();
                     FString RootDir = "/Game/";
@@ -87,10 +93,9 @@ void SSettingsView::Construct(const FArguments& InArgs)
                     UE_LOG(LogTemp, Warning, TEXT("NewName: %s"), *NewName);
                     UE_LOG(LogTemp, Warning, TEXT("NewPath: %s"), *NewPath);
 
-                    if (SelectedUXXX && SelectedUXXX->MyAsset) {
+                    if (USceneManagementAsset* Asset = GetSceneManagementAsset()) {
                         FAssetToolsModule &AssetToolModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
                         IAssetTools &AssetTools = AssetToolModule.Get();
-                        UObject *Asset = SelectedUXXX->MyAsset;
 
                         // TODO: fix RENAME
                         TArray<FAssetRenameData> AssetsAndNames;
@@ -106,14 +111,17 @@ void SSettingsView::Construct(const FArguments& InArgs)
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-void SSettingsView::OnFinishedChangingProperties(const FPropertyChangedEvent& InEvent)
+USceneManagementAsset *SSettingsView::GetSceneManagementAsset()
 {
-    USceneManagementAsset *MyAsset = SelectedUXXX->MyAsset;
-    if (!MyAsset) {
-        return;
+    return Instance->AssetWrap->SceneManagementAsset;
+}
+
+void SSettingsView::OnSceneManagementAssetChanged(const FPropertyChangedEvent& InEvent)
+{
+    if (USceneManagementAsset* Asset = GetSceneManagementAsset()) {
+        for (auto Name : Asset->LightingSolutionNameList) {
+            UE_LOG(LogTemp, Warning, TEXT("MyAsset: %s"), *Name);
+        }
+        UE_LOG(LogTemp, Warning, TEXT("MyAsset: DONE"));
     }
-    for (auto Name : MyAsset->LightingSolutionNameList) {
-        UE_LOG(LogTemp, Warning, TEXT("MyAsset: %s"), *Name);
-    }
-    UE_LOG(LogTemp, Warning, TEXT("MyAsset: DONE"));
 }
