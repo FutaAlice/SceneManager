@@ -7,6 +7,10 @@
 #include "DesktopPlatformModule.h"  // FDesktopPlatformModule
 #include "Misc/Paths.h" // FPahts
 #include "HAL/FileManager.h"    // IFileManager
+#include "UObject/SoftObjectPath.h" // FSoftObjectPath
+#include "Editor.h" // GEditor
+#include "AssetToolsModule.h"   // FAssetToolsModule
+#include "IAssetTools.h"    // IAssetTools
 
 #include "Widgets/SBoxPanel.h"  // SVerticalBox, SHorizontalBox
 #include "Widgets/Input/SButton.h"  // SButton
@@ -45,16 +49,16 @@ void SSettingsView::Construct(const FArguments& InArgs)
                 .Text(FText::FromString("Save"))
                 .OnClicked_Lambda([this]() -> FReply {
                     if (SelectedUXXX && SelectedUXXX->MyAsset) {
-                        FString OuterName = SelectedUXXX->MyAsset->GetOuter()->GetName();
-                        FString OuterPath = FPaths::GetPath(OuterName);
-                        UE_LOG(LogTemp, Warning, TEXT("OuterName: %s"), *OuterName);
-                        UE_LOG(LogTemp, Warning, TEXT("OuterPath: %s"), *OuterPath);
+                        // FSoftObjectPath
+                        FStringAssetReference StringAssetReference(SelectedUXXX->MyAsset);  
+                        FString AssetPath = StringAssetReference.GetAssetPathString();  // /Game/NewSceneManagementAsset.NewSceneManagementAsset
+                        FString BaseFilePath = FPaths::GetBaseFilename(AssetPath, false);   // /Game/NewSceneManagementAsset
+                        UE_LOG(LogTemp, Warning, TEXT("FSoftObjectPath AssetPath: %s"), *AssetPath);
+                        UE_LOG(LogTemp, Warning, TEXT("FSoftObjectPath BaseFilePath: %s"), *BaseFilePath);
 
-                        // "/Game/NewSceneManagementAsset"
-                        const FString& RelPath = FPaths::ProjectDir();
-                        const FString& FullPath = IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*OuterPath);
-                        UE_LOG(LogTemp, Warning, TEXT("RelPath: %s"), *RelPath);
-                        UE_LOG(LogTemp, Warning, TEXT("FullPath: %s"), *FullPath);
+                        UE_LOG(LogTemp, Warning, TEXT("ProjectContentDir: %s"), *FPaths::ProjectContentDir());  //  D:/Unreal Projects/SMRefactor/Content/
+
+
                     }
                     return FReply::Handled();
                 })
@@ -67,17 +71,40 @@ void SSettingsView::Construct(const FArguments& InArgs)
                 .OnClicked_Lambda([this]() -> FReply {
                     TArray<FString> OutFilenames;
                     FString DialogTitle = "Save as ...";
-                    FString DefaultPath = "";
+                    FString DefaultPath = FPaths::ProjectContentDir();
                     FString DefaultFile = "";
-                    FString FileTypes = "uasset";
-                    uint32 Flags = 0; 
-                    if (SelectedUXXX) {
-                        DefaultPath = SelectedUXXX->GetPathName();
-                    }
+                    FString FileTypes = "uasset files (*.uasset;)|*.uasset;";
+                    uint32 Flags = 0;
                     FDesktopPlatformModule::Get()->SaveFileDialog(nullptr, DialogTitle, DefaultPath, DefaultFile, FileTypes, Flags, OutFilenames);
                     for (auto String : OutFilenames) {
                         UE_LOG(LogTemp, Warning, TEXT("SaveFileDialog: %s"), *String);
                     }
+
+
+                    // Create Package
+                    FString FileName = "FUCK";
+                    FString pathPackage = FString("/Game/MyTextures/") + FileName;
+
+
+                    if (SelectedUXXX && SelectedUXXX->MyAsset) {
+
+                        UPackage * Package = CreatePackage(nullptr, *pathPackage);
+                        UObject* NewObj = NewObject<UTexture2D>(Package, SelectedUXXX->MyAsset->GetFName(), RF_Public | RF_Standalone);
+                        USceneManagementAsset* NewAss = Cast<USceneManagementAsset>(NewObj);
+                        Package->SetDirtyFlag(true);
+
+                        FAssetToolsModule &AssetToolModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
+                        IAssetTools &AssetTools = AssetToolModule.Get();
+                        // AssetTools.DuplicateAsset("FUCK.uasset", "./Game/MyTextures/", SelectedUXXX->MyAsset);
+
+                        TArray<UObject*> SHIT;
+                        SHIT.Add(NewAss);
+                        AssetTools.ExportAssets(SHIT, "/Game/MyTextures/");
+                        
+                    }
+
+
+                    // GEditor->SavePackage(SelectedUXXX, GEngine->GetWorld(), RF_Standalone, *OutFilenames[0]);
                     return FReply::Handled();
                 })
             ]

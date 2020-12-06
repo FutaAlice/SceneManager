@@ -34,6 +34,7 @@ public class SceneManager : ModuleRules
             "UnrealEd",
             "PropertyEditor",
             "DesktopPlatform",
+            "AssetTools",
         });
 
 
