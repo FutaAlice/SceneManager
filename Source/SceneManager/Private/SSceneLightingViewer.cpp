@@ -177,12 +177,11 @@ FName GetTabName()
 {
     const FName TabName = TEXT("SceneLightingViewer");
     return TabName;
-
 }
 
 void RegisterTabSpawner(FTabManager& TabManager)
 {
-    const auto SpawnScenLightingViewTab = [](const FSpawnTabArgs& Args) {
+    const auto SpawnSceneLightingViewTab = [](const FSpawnTabArgs& Args) {
         return SNew(SDockTab)
             .TabRole(ETabRole::PanelTab)
             .Label(LOCTEXT("TabTitle", "Scene Lighting"))
@@ -195,7 +194,7 @@ void RegisterTabSpawner(FTabManager& TabManager)
             ];
     };
 
-    TabManager.RegisterTabSpawner(SceneLightingViewer::GetTabName(), FOnSpawnTab::CreateStatic(SpawnScenLightingViewTab))
+    TabManager.RegisterTabSpawner(SceneLightingViewer::GetTabName(), FOnSpawnTab::CreateStatic(SpawnSceneLightingViewTab))
         .SetDisplayName(LOCTEXT("TabTitle", "Scene Lighting"))
         .SetTooltipText(LOCTEXT("TooltipText", "Open the Scene Lighting tab"));
 }
