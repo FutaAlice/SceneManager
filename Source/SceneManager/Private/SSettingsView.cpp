@@ -12,8 +12,9 @@
 #include "AssetToolsModule.h"   // FAssetToolsModule
 #include "IAssetTools.h"    // IAssetTools
 #include "AssetRegistryModule.h"
+#include "FileHelpers.h"    // UEditorLoadingAndSavingUtils
 #include "IAssetRegistry.h" // IAssetRegistry
-
+#include "EditorAssetLibrary.h" // UEditorAssetLibrary
 #include "Widgets/SBoxPanel.h"  // SVerticalBox, SHorizontalBox
 #include "Widgets/Input/SButton.h"  // SButton
 #include "InternalDataStructure.h"
@@ -24,6 +25,8 @@ SSettingsView *SSettingsView::Instance = nullptr;
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SSettingsView::Construct(const FArguments& InArgs)
 {
+    Instance = this;
+
     // Init AssetWrap
     AssetWrap = NewObject<UAssetWrap>();
     AssetWrap->SceneManagementAsset = nullptr;
@@ -64,6 +67,20 @@ void SSettingsView::Construct(const FArguments& InArgs)
                         UE_LOG(LogTemp, Warning, TEXT("FSoftObjectPath AssetPath: %s"), *AssetPath);
                         UE_LOG(LogTemp, Warning, TEXT("FSoftObjectPath BaseFilePath: %s"), *BaseFilePath);
                         UE_LOG(LogTemp, Warning, TEXT("ProjectContentDir: %s"), *FPaths::ProjectContentDir());  //  D:/Unreal Projects/SMRefactor/Content/
+
+                        // Try add something
+                        Asset->LightingSolutionNameList.Add("FUCK");
+                        Asset->Modify(true);
+                        
+                        TArray<UPackage*> Packages;
+                        Packages.Add(Asset->GetOutermost()); // Fully load and check out is done in UEditorLoadingAndSavingUtils::SavePackages
+
+                        UEditorLoadingAndSavingUtils::SavePackages(Packages, true);
+
+                        //TArray<UObject *> AssetsToSave;
+                        //AssetsToSave.Add(Asset);
+                        // UEditorAssetLibrary::SaveLoadedAsset(Asset, true);
+
                     }
                     return FReply::Handled();
                 })
@@ -122,6 +139,6 @@ void SSettingsView::OnSceneManagementAssetChanged(const FPropertyChangedEvent& I
         for (auto Name : Asset->LightingSolutionNameList) {
             UE_LOG(LogTemp, Warning, TEXT("MyAsset: %s"), *Name);
         }
-        UE_LOG(LogTemp, Warning, TEXT("MyAsset: DONE"));
+        UE_LOG(LogTemp, Warning, TEXT("DEBUG_PRINT_DONE"));
     }
 }

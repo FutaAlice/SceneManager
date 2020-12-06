@@ -27,14 +27,15 @@ public class SceneManager : ModuleRules
             "Engine",
             "Slate",
             "SlateCore",
-			// ... add private dependencies that you statically link with here ...	
-            "EditorStyle",
-            "InputCore",
-            "WorkspaceMenuStructure",
-            "UnrealEd",
-            "PropertyEditor",
-            "DesktopPlatform",
+			// ... add private dependencies that you statically link with here ...
             "AssetTools",
+            "DesktopPlatform",
+            "EditorStyle",
+            "EditorScriptingUtilities",
+            "InputCore",
+            "PropertyEditor",
+            "UnrealEd",
+            "WorkspaceMenuStructure",
         });
 
 
