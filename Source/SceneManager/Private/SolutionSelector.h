@@ -19,7 +19,7 @@ public:
      * @brief Add a new solution with default name
      * 
      */
-    void AddSolution();
+    void AddSolution(bool bCallback = true);
 
     /**
      * @brief Add a new solution with specified name and tooltip
@@ -27,7 +27,7 @@ public:
      * @param SolutionName 
      * @param SolutionToolTip 
      */
-    void AddSolution(FString SolutionName, FString SolutionToolTip);
+    void AddSolution(FString SolutionName, FString SolutionToolTip, bool bCallback = true);
 
     /**
     * @brief Reset solution name and tooltip

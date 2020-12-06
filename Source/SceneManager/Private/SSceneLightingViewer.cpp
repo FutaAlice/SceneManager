@@ -158,14 +158,18 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
     };
     // MainLayout->SetContent
 }
+END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SSceneLightingViewer::OnAssetDataChanged()
 {
     USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
     SolutionSelector.Clear();
-}
 
-END_SLATE_FUNCTION_BUILD_OPTIMIZATION
+    for (int i = 0; i < SceneManagementAsset->LightingSolutionNameList.Num(); ++i) {
+        const FString& SolutionName = SceneManagementAsset->LightingSolutionNameList[i];
+        SolutionSelector.AddSolution(SolutionName, "", false);
+    }
+}
 
 namespace SceneLightingViewer {
 

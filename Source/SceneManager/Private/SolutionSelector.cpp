@@ -72,7 +72,7 @@ TSharedRef<SWidget> FSolutionSelector::Self()
     return MainLayout.ToSharedRef();
 }
 
-void FSolutionSelector::AddSolution()
+void FSolutionSelector::AddSolution(bool bCallback)
 {
     // collect exist solution names
     TSet<FString> AllSolutionNames;
@@ -91,10 +91,10 @@ void FSolutionSelector::AddSolution()
         }
     }
     FString SolutionToolTip = FString::Printf(TEXT("The %d-th Solution"), Num() + 1);
-    AddSolution(SolutionName, SolutionToolTip);
+    AddSolution(SolutionName, SolutionToolTip, bCallback);
 }
 
-void FSolutionSelector::AddSolution(FString SolutionName, FString SolutionToolTip)
+void FSolutionSelector::AddSolution(FString SolutionName, FString SolutionToolTip, bool bCallback)
 {
     TSharedRef<SCheckBox> CheckBox = SNew(SCheckBox)
         .Style(FEditorStyle::Get(), "PlacementBrowser.Tab")
@@ -139,10 +139,12 @@ void FSolutionSelector::AddSolution(FString SolutionName, FString SolutionToolTi
     SolutionTextMapping.Add(CheckBox, TextBlock);
 
     // Callback
-    ensure(CB_Append);
-    ensure(CB_Rename);
-    CB_Append(Num() - 1);
-    CB_Rename(Num() - 1, SolutionName);
+    if (bCallback) {
+        ensure(CB_Append);
+        ensure(CB_Rename);
+        CB_Append(Num() - 1);
+        CB_Rename(Num() - 1, SolutionName);
+    }
 }
 
 void FSolutionSelector::RenameSolution(int SolutionIndex, FString SolutionName, FString SolutionToolTip, bool Callback) {
