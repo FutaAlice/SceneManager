@@ -63,14 +63,17 @@ void USceneManagementAsset::FindAllActors()
         }
     }
 
+    if (KeyLightActors.Num() != LightingSolutionNameList.Num()) {
+        KeyLightActors.Init(nullptr, LightingSolutionNameList.Num());
+    }
     for (int Index = 0; Index < LightingSolutionNameList.Num(); ++Index) {
         for (auto ActorName : KeyLightActorNames) {
             FString RecordName = KeyLightActorNames[Index];
             int FoundIndex = ActorNameList.Find(RecordName);
             AActor* FoundActor = nullptr;
-            if (FoundIndex != INDEX_NONE) {
+            if (FoundIndex >= 0) {
                 FoundActor = ActorList[FoundIndex];
-            } 
+            }
             KeyLightActors[Index] = FoundActor;
         }
     }

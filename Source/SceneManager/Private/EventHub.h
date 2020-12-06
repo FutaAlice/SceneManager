@@ -4,6 +4,8 @@
 
 #include <memory>
 #include <mutex>
+#include <functional>
+#include <vector>
 
 #include "CoreMinimal.h"
 
@@ -24,4 +26,6 @@ private:
 private:
     static std::shared_ptr<EventHub> _instance;
     static std::mutex _mutex;
+
+    // std::vector<std::function<void()>> OnAssetDataChanged;
 };

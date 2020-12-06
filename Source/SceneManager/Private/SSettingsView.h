@@ -30,7 +30,7 @@ public:
     /** Constructs this widget with InArgs */
     void Construct(const FArguments& InArgs);
 
-    static USceneManagementAsset *GetSceneManagementAsset();
+    static USceneManagementAsset* GetSceneManagementAsset(bool bShowMsgDialog = true);
 
     void OnSceneManagementAssetChanged(const FPropertyChangedEvent& InEvent);
 

@@ -21,6 +21,8 @@
 
 #include "InternalDataStructure.h"
 #include "SceneManagementAsset.h"
+#include "SSceneLightingViewer.h"
+#include "EventHub.h"
 
 SSettingsView *SSettingsView::Instance = nullptr;
 
@@ -70,9 +72,9 @@ void SSettingsView::Construct(const FArguments& InArgs)
                         UE_LOG(LogTemp, Warning, TEXT("FSoftObjectPath BaseFilePath: %s"), *BaseFilePath);
                         UE_LOG(LogTemp, Warning, TEXT("ProjectContentDir: %s"), *FPaths::ProjectContentDir());  //  D:/Unreal Projects/SMRefactor/Content/
 
-                        // Try add something
-                        Asset->LightingSolutionNameList.Add("FUCK");
-                        Asset->Modify(true);
+                        //// Try add something
+                        //Asset->LightingSolutionNameList.Add("FUCK");
+                        //Asset->Modify(true);
                         
                         TArray<UPackage*> Packages;
                         Packages.Add(Asset->GetOutermost()); // Fully load and check out is done in UEditorLoadingAndSavingUtils::SavePackages
@@ -130,7 +132,7 @@ void SSettingsView::Construct(const FArguments& InArgs)
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-USceneManagementAsset *SSettingsView::GetSceneManagementAsset()
+USceneManagementAsset *SSettingsView::GetSceneManagementAsset(bool bShowMsgDialog)
 {
     ensure(Instance);
     static USceneManagementAsset *NullAsset = NewObject<USceneManagementAsset>();
@@ -142,19 +144,24 @@ USceneManagementAsset *SSettingsView::GetSceneManagementAsset()
         return SceneManagementAsset;
     }
     else {
-        FText Title = FText::FromString("Warning");
-        FText Content = FText::FromString(TEXT("Please select a USceneManagementAsset before edit!"));
-        FMessageDialog::Open(EAppMsgType::Ok, Content, &Title);
+        if (bShowMsgDialog) {
+            FText Title = FText::FromString("Warning");
+            FText Content = FText::FromString(TEXT("Please select a USceneManagementAsset before edit!"));
+            FMessageDialog::Open(EAppMsgType::Ok, Content, &Title);
+        }
         return NullAsset;
     }
 }
 
 void SSettingsView::OnSceneManagementAssetChanged(const FPropertyChangedEvent& InEvent)
 {
-    if (USceneManagementAsset* Asset = GetSceneManagementAsset()) {
+    if (USceneManagementAsset* Asset = GetSceneManagementAsset(false)) {
         for (auto Name : Asset->LightingSolutionNameList) {
             UE_LOG(LogTemp, Warning, TEXT("MyAsset: %s"), *Name);
         }
         UE_LOG(LogTemp, Warning, TEXT("DEBUG_PRINT_DONE"));
+
+        Asset->FindAllActors();
+        SceneLightingViewer::OnAssetDataChanged();
     }
 }

@@ -23,6 +23,7 @@
 #include "SceneManagementAsset.h"
 
 #include "SSettingsView.h"
+#include "EventHub.h"
 
 #define LOCTEXT_NAMESPACE "SceneLightViewer"
 
@@ -40,6 +41,21 @@ public:
     /** Constructs this widget with InArgs */
     void Construct(const FArguments& InArgs);
 
+    ~SSceneLightingViewer()
+    {
+        SceneLightingViewerInstance = nullptr;
+    }
+
+    void OnAssetDataChanged();
+
+    static SSceneLightingViewer* GetInstance()
+    {
+        return SceneLightingViewerInstance;
+    }
+
+private:
+    static SSceneLightingViewer* SceneLightingViewerInstance;
+
 private:
     FSolutionSelector SolutionSelector;
 
@@ -50,9 +66,13 @@ private:
 
 };
 
+SSceneLightingViewer* SSceneLightingViewer::SceneLightingViewerInstance = nullptr;
+
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SSceneLightingViewer::Construct(const FArguments& InArgs)
 {
+    SceneLightingViewerInstance = this;
+
     SolutionSelector.CB_Append = [](int SolutionIndex) {
         GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Append Index %d"), SolutionIndex));
         USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
@@ -138,6 +158,13 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
     };
     // MainLayout->SetContent
 }
+
+void SSceneLightingViewer::OnAssetDataChanged()
+{
+    USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
+    SolutionSelector.Clear();
+}
+
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 namespace SceneLightingViewer {
@@ -167,6 +194,12 @@ void RegisterTabSpawner(FTabManager& TabManager)
     TabManager.RegisterTabSpawner(SceneLightingViewer::GetTabName(), FOnSpawnTab::CreateStatic(SpawnScenLightingViewTab))
         .SetDisplayName(LOCTEXT("TabTitle", "Scene Lighting"))
         .SetTooltipText(LOCTEXT("TooltipText", "Open the Scene Lighting tab"));
+}
+
+void OnAssetDataChanged()
+{
+    SSceneLightingViewer* SceneLightingViewer = SSceneLightingViewer::GetInstance();
+    SceneLightingViewer->OnAssetDataChanged();
 }
 
 } // namespace SceneLightingViewer

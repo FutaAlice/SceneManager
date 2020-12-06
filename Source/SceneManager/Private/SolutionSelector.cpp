@@ -205,6 +205,13 @@ int FSolutionSelector::Num()
 
 void FSolutionSelector::Clear()
 {
+    for (auto Widget : SlateWidgetRef) {
+        auto RemoveSlotIndex = SolutionWidgetContainer->RemoveSlot(Widget);
+        ensure(RemoveSlotIndex >= 0);
+    }
+    SlateWidgetRef.Reset();
+    SolutionTextMapping.Reset();
+    UpdateClickButtonState(-1);
 }
 
 void FSolutionSelector::UpdateClickButtonState(int CheckedIndex)
