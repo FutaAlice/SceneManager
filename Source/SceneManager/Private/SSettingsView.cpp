@@ -17,6 +17,8 @@
 #include "EditorAssetLibrary.h" // UEditorAssetLibrary
 #include "Widgets/SBoxPanel.h"  // SVerticalBox, SHorizontalBox
 #include "Widgets/Input/SButton.h"  // SButton
+#include "Misc/MessageDialog.h" // FMessageDialog
+
 #include "InternalDataStructure.h"
 #include "SceneManagementAsset.h"
 
@@ -130,7 +132,21 @@ END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 USceneManagementAsset *SSettingsView::GetSceneManagementAsset()
 {
-    return Instance->AssetWrap->SceneManagementAsset;
+    ensure(Instance);
+    static USceneManagementAsset *NullAsset = NewObject<USceneManagementAsset>();
+    if (!NullAsset->IsRooted()) {
+        NullAsset->AddToRoot();
+    }
+
+    if (USceneManagementAsset* SceneManagementAsset = Instance->AssetWrap->SceneManagementAsset) {
+        return SceneManagementAsset;
+    }
+    else {
+        FText Title = FText::FromString("Warning");
+        FText Content = FText::FromString(TEXT("Please select a USceneManagementAsset before edit!"));
+        FMessageDialog::Open(EAppMsgType::Ok, Content, &Title);
+        return NullAsset;
+    }
 }
 
 void SSettingsView::OnSceneManagementAssetChanged(const FPropertyChangedEvent& InEvent)

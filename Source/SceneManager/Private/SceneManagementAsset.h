@@ -21,12 +21,27 @@ class USceneManagementAsset : public USaveGame
 {
     GENERATED_BODY()
 public:
+    void AddLightingSolution();
+    void RemoveLightingSolution(int SolutionIndex);
+    void RenameLightingSolution(int SolutionIndex, const FString& SolutionName);
+    void SetKeyLightActorName(int SolutionIndex, const FString& ActorName);
+
+public:
     UPROPERTY(EditAnywhere, Category = "Lighting")
         TArray<FString> LightingSolutionNameList;
 
     UPROPERTY(EditAnywhere, Category = "Lighting")
-        TArray<ULightParams *> KeyLighList;
+        TArray<FString> KeyLightActorNames;
+
+    UPROPERTY(EditAnywhere, Category = "Lighting")
+        TArray<ULightParams*> KeyLightParams;
 
     UPROPERTY(EditAnywhere, Category = "Scene Lighting")
-        TArray<ULightParamsArray *> AuxLighList;
+        TArray<ULightParamsArray*> SceneAuxLightArrayParams;
+
+    UPROPERTY(EditAnywhere, Category = "Character Lighting")
+        TArray<ULightParamsArray*> CharacterAuxLightArrayParams;
+
+private:
+    TArray<AActor *> KeyLightActors;
 };

@@ -22,6 +22,8 @@
 #include "AssetData.h"  // FAssetData
 #include "SceneManagementAsset.h"
 
+#include "SSettingsView.h"
+
 #define LOCTEXT_NAMESPACE "SceneLightViewer"
 
 /**
@@ -51,17 +53,23 @@ private:
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SSceneLightingViewer::Construct(const FArguments& InArgs)
 {
-    SolutionSelector.CB_Append = [](int index) {
-        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Append Index %d"), index));
+    SolutionSelector.CB_Append = [](int SolutionIndex) {
+        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Append Index %d"), SolutionIndex));
+        USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
+        SceneManagementAsset->AddLightingSolution();
     };
-    SolutionSelector.CB_Remove = [](int index) {
-        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Remove Index %d"), index));
+    SolutionSelector.CB_Remove = [](int SolutionIndex) {
+        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Remove Index %d"), SolutionIndex));
+        USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
+        SceneManagementAsset->RemoveLightingSolution(SolutionIndex);
     };
-    SolutionSelector.CB_Active = [](int index) {
-        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Active Index %d"), index));
+    SolutionSelector.CB_Active = [](int SolutionIndex) {
+        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Active Index %d"), SolutionIndex));
     };
-    SolutionSelector.CB_Rename = [](int index, FString str) {
-        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, str);
+    SolutionSelector.CB_Rename = [](int SolutionIndex, FString SolutionName) {
+        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, SolutionName);
+        USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
+        SceneManagementAsset->RenameLightingSolution(SolutionIndex, SolutionName);
     };
 
     ChildSlot

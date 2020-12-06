@@ -140,7 +140,9 @@ void FSolutionSelector::AddSolution(FString SolutionName, FString SolutionToolTi
 
     // Callback
     ensure(CB_Append);
+    ensure(CB_Rename);
     CB_Append(Num() - 1);
+    CB_Rename(Num() - 1, SolutionName);
 }
 
 void FSolutionSelector::RenameSolution(int SolutionIndex, FString SolutionName, FString SolutionToolTip, bool Callback) {
