@@ -11,6 +11,8 @@
 #include "Editor.h" // GEditor
 #include "AssetToolsModule.h"   // FAssetToolsModule
 #include "IAssetTools.h"    // IAssetTools
+#include "AssetRegistryModule.h"
+#include "IAssetRegistry.h" // IAssetRegistry
 
 #include "Widgets/SBoxPanel.h"  // SVerticalBox, SHorizontalBox
 #include "Widgets/Input/SButton.h"  // SButton
@@ -87,19 +89,41 @@ void SSettingsView::Construct(const FArguments& InArgs)
 
 
                     if (SelectedUXXX && SelectedUXXX->MyAsset) {
-
-                        UPackage * Package = CreatePackage(nullptr, *pathPackage);
-                        UObject* NewObj = NewObject<UTexture2D>(Package, SelectedUXXX->MyAsset->GetFName(), RF_Public | RF_Standalone);
-                        USceneManagementAsset* NewAss = Cast<USceneManagementAsset>(NewObj);
-                        Package->SetDirtyFlag(true);
-
                         FAssetToolsModule &AssetToolModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
                         IAssetTools &AssetTools = AssetToolModule.Get();
-                        // AssetTools.DuplicateAsset("FUCK.uasset", "./Game/MyTextures/", SelectedUXXX->MyAsset);
+                        UObject *Asset = SelectedUXXX->MyAsset;
 
-                        TArray<UObject*> SHIT;
-                        SHIT.Add(NewAss);
-                        AssetTools.ExportAssets(SHIT, "/Game/MyTextures/");
+                        FAssetRegistryModule& AssetRegistryModule = FModuleManager::GetModuleChecked<FAssetRegistryModule>("AssetRegistry");
+
+                        const FString PackagePath = FPackageName::GetLongPackagePath(Asset->GetOutermost()->GetName());
+                        UE_LOG(LogTemp, Warning, TEXT("Source asset package path: %s"), *PackagePath);
+
+                        TArray<FAssetRenameData> AssetsAndNames;
+                        new(AssetsAndNames) FAssetRenameData(Asset, PackagePath, FString("TESE_NAME_1"));
+
+                        AssetTools.RenameAssets(AssetsAndNames);
+
+                        FAssetRegistryModule::AssetRenamed(Asset, TEXT("/Game/TestImage1"));
+                        Asset->MarkPackageDirty();
+                        Asset->GetOuter()->MarkPackageDirty();
+                        //UPackage * Package = CreatePackage(nullptr, *pathPackage);
+                        //UObject* NewObj = NewObject<UTexture2D>(Package, SelectedUXXX->MyAsset->GetFName(), RF_Public | RF_Standalone);
+                        //USceneManagementAsset* NewAss = Cast<USceneManagementAsset>(NewObj);
+                        //Package->SetDirtyFlag(true);
+
+
+
+                        //FString PathName = "/Game/MyTextures";
+                        //FString ObjectName;
+                        //FString NewPackageName;
+                        //AssetTools.CreateUniqueAssetName(PathName + "/" + Asset->GetName() + "_", TEXT(""), NewPackageName, ObjectName);
+
+                        //AssetTools.DuplicateAsset(ObjectName, PathName, Asset);
+                        //AssetTools.DuplicateAssetWithDialog("FUCK.uasset", "/Game/", SelectedUXXX->MyAsset);
+
+                        //TArray<UObject*> SHIT;
+                        //SHIT.Add(NewAss);
+                        //AssetTools.ExportAssets(SHIT, "/Game/MyTextures/");
                         
                     }
 
