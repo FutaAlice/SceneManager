@@ -133,6 +133,7 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
         ];
 
     LightActorComboBox->CB_SelectionChange = [this](FString Name, ALight *Light) {
+        LightActorDetailPanel->SetObject(SSettingsView::GetSceneManagementAsset()->GetKeyLightParamsPtr(0));
         LightActorDetailPanel->BindActor(Light);
     };
     // MainLayout->SetContent

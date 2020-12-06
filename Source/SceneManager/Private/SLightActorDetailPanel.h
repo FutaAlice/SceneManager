@@ -6,6 +6,7 @@
 
 class AActor;
 class ULightParams;
+class IDetailsView;
 
 /**
  * 
@@ -20,17 +21,18 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
-    ~SLightActorDetailPanel();
-
     // void SetParam(ULightParams *InData);
     ULightParams * GetParam();
 
     void BindActor(AActor *InActor);
+    void SetObject(UObject* InObject);
 
 private:
     void OnFinishedChangingProperties(const FPropertyChangedEvent& InEvent);
 
 private:
+    IDetailsView* PlayerLightView;
+
     AActor *Light;
     ULightParams *LightParams;
 };

@@ -24,7 +24,14 @@ public:
     void AddLightingSolution();
     void RemoveLightingSolution(int SolutionIndex);
     void RenameLightingSolution(int SolutionIndex, const FString& SolutionName);
+
     void SetKeyLightActorName(int SolutionIndex, const FString& ActorName);
+    FString GetKeyLightActorName(int SolutionIndex);
+    ULightParams* GetKeyLightParamsPtr(int SolutionIndex);
+    
+
+
+    void FindAllActors();
 
 public:
     UPROPERTY(EditAnywhere, Category = "Lighting")

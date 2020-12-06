@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "SLightActorDetailPanel.h"
 #include "SlateOptMacros.h"
 #include "Modules/ModuleManager.h"  // FModuleManager
@@ -13,29 +10,27 @@
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SLightActorDetailPanel::Construct(const FArguments& InArgs)
 {
-    LightParams = NewObject<ULightParams>();
-    LightParams->AddToRoot();
-    Light = nullptr;
+    //LightParams = NewObject<ULightParams>();
+    //LightParams->AddToRoot();
+    //Light = nullptr;
 
-    // Debug
-    EventHub::Get();
+    //// Debug
+    //EventHub::Get();
 
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FDetailsViewArgs DetailsViewArgs(false, false, false, FDetailsViewArgs::HideNameArea, true);
-    TSharedRef<IDetailsView> PlayerLightView = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
-    PlayerLightView->SetObject(LightParams);
-    PlayerLightView->OnFinishedChangingProperties().AddRaw(this, &SLightActorDetailPanel::OnFinishedChangingProperties);
+    TSharedRef<IDetailsView> PlayerLightViewRef = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
+    PlayerLightViewRef->OnFinishedChangingProperties().AddRaw(this, &SLightActorDetailPanel::OnFinishedChangingProperties);
+
+    // PlayerLightViewRef->SetObject(nullptr);
     ChildSlot
     [
-        PlayerLightView
+        PlayerLightViewRef
     ];
+
+    PlayerLightView = PlayerLightViewRef.operator->();
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
-
-SLightActorDetailPanel::~SLightActorDetailPanel()
-{
-    UE_LOG(LogTemp, Warning, TEXT("SLightActorDetailPanel Destory"));
-}
 
 void SLightActorDetailPanel::BindActor(AActor *InActor)
 {
@@ -46,7 +41,18 @@ void SLightActorDetailPanel::BindActor(AActor *InActor)
     }
 
     Light = InActor;
-    LightParams->FromActor(InActor);
+
+    if (LightParams) {
+        LightParams->FromActor(InActor);
+    }
+}
+
+
+void SLightActorDetailPanel::SetObject(UObject* InObject)
+{
+    PlayerLightView->SetObject(InObject);
+    LightParams = Cast<ULightParams>(InObject);
+    LightParams->FromActor(Light);
 }
 
 ULightParams *SLightActorDetailPanel::GetParam()
