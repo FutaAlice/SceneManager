@@ -15,12 +15,48 @@ public:
 
     TSharedRef<SWidget> Self();
 
+    /**
+     * @brief Add a new solution with default name
+     * 
+     */
     void AddSolution();
+
+    /**
+     * @brief Add a new solution with specified name and tooltip
+     * 
+     * @param SolutionName 
+     * @param SolutionToolTip 
+     */
     void AddSolution(FString SolutionName, FString SolutionToolTip);
 
+    /**
+    * @brief Reset solution name and tooltip
+    *
+    * @param SolutionIndex Target solution widget index
+    * @param SolutionName Name
+    * @param SolutionToolTip ToolTip
+    * @param Callback Should call user callback function or not
+    */
+    void RenameSolution(int SolutionIndex, FString SolutionName, FString SolutionToolTip, bool Callback = true);
+
+    /**
+     * @brief Removes an solution at given location
+     * 
+     * @param SolutionIndex Location in array of the solution to remove.
+     */
     void RemoveSolution(int SolutionIndex);
 
+    /**
+     * @brief Returns number of solutions in current selector
+     * 
+     * @return int 
+     */
     int Num();
+
+    /**
+     * @brief 
+     * 
+     */
     void Clear();
 
 private:
@@ -37,22 +73,14 @@ private:
     void UpdateToolTips();
 
     /**
-     * @brief Reset solution name and tooltip
-     * 
-     * @param SolutionIndex Target solution widget index
-     * @param SolutionName Name
-     * @param SolutionToolTip ToolTip
-     * @param Callback Should call user callback function or not
-     */
-    void RenameSolution(int SolutionIndex, FString SolutionName, FString SolutionToolTip, bool Callback = true);
-
-    /**
      * @brief Infer the SCheckBox index user clicked from previous click index and current check state
      * 
      * @param CheckState the new SCheckBox state after user click
      * @return int 
      */
     int InferClickedButtonIndex(ECheckBoxState CheckState);
+
+    void CreateRenameDialog(int Index);
 
 private:
     TSharedPtr<SVerticalBox> MainLayout;

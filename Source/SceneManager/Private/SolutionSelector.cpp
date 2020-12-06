@@ -16,6 +16,11 @@
 
 #include "Engine.h" // GEngine
 
+#define SetImageBrush(Name) Me() [          \
+    SNew(SImage)                            \
+    .Image(FEditorStyle::GetBrush(Name))    \
+]
+
 FSolutionSelector::FSolutionSelector()
 {
     SAssignNew(MainLayout, SVerticalBox);
@@ -28,10 +33,7 @@ FSolutionSelector::FSolutionSelector()
             AddSolution();
             return FReply::Handled();
         })
-        [
-            SNew(SImage)
-            .Image(FEditorStyle::GetBrush("LevelEditor.NewLevel"))
-        ];
+        .SetImageBrush("LevelEditor.NewLevel");
 
     // Copy
     TSharedRef<SWidget> BtnCopy = SNew(SButton)
@@ -39,10 +41,7 @@ FSolutionSelector::FSolutionSelector()
             // TODO: add impl
             return FReply::Handled();
         })
-        [
-            SNew(SImage)
-            .Image(FEditorStyle::GetBrush("LevelEditor.OpenLevel"))
-        ];
+        .SetImageBrush("LevelEditor.OpenLevel");
 
     // Remove
     TSharedRef<SWidget> BtnRemove = SNew(SButton)
@@ -50,58 +49,23 @@ FSolutionSelector::FSolutionSelector()
             RemoveSolution(CurrentSelectedSolutionIndex);
             return FReply::Handled();
         })
-        [
-            SNew(SImage)
-            .Image(FEditorStyle::GetBrush("Level.SaveDisabledIcon16x"))
-        ];
+        .SetImageBrush("Level.SaveDisabledIcon16x");
 
     // Rename
     TSharedRef<SWidget> BtnRename = SNew(SButton)
-        .OnClicked_Lambda([&]() -> FReply {
-            // TODO: hint message dialog
-            if (CurrentSelectedSolutionIndex < 0) {
-            }
-            // create input dialog
-            else {
-                TSharedRef<SWindow> ModalWindow = SNew(SWindow)
-                    .Title(FText::FromString("Rename Solution"))
-                    .HasCloseButton(true)
-                    .SizingRule(ESizingRule::FixedSize)
-                    .ClientSize(FVector2D(200.0f, 60.0f));
-                TSharedRef<SEditableText> EditableText = SNew(SEditableText)
-                    .HintText(FText::FromString("Input new solution name"));
-                TSharedRef<SWidget> ResultWidget = SNew(SVerticalBox)
-                    + SVerticalBox::Slot()
-                    [
-                        EditableText
-                    ]
-                    + SVerticalBox::Slot()
-                    [
-                        SNew(SButton)
-                        .Text(FText::FromString("OK"))
-                        .OnClicked_Lambda([&]() -> FReply {
-                            FText Text = EditableText->GetText();
-                            ModalWindow->RequestDestroyWindow();
-                            RenameSolution(CurrentSelectedSolutionIndex, Text.ToString(), "TODO");
-                            return FReply::Handled();
-                        })
-                    ];
-
-                ModalWindow->SetContent(ResultWidget);
-                GEditor->EditorAddModalWindow(ModalWindow);
-            }
+        .OnClicked_Lambda([this]() -> FReply {
+            CreateRenameDialog(CurrentSelectedSolutionIndex);
             return FReply::Handled();
         })
-        [
-            SNew(SImage)
-            .Image(FEditorStyle::GetBrush("Level.SaveModifiedIcon16x"))
-        ];
+        .SetImageBrush("Level.SaveModifiedIcon16x");
 
     ToolBarContainer->AddSlot().AutoWidth()[BtnAdd];
     ToolBarContainer->AddSlot().AutoWidth()[BtnCopy];
     ToolBarContainer->AddSlot().AutoWidth()[BtnRemove];
     ToolBarContainer->AddSlot().AutoWidth()[BtnRename];
 }
+
+#undef SetImageBrush
 
 TSharedRef<SWidget> FSolutionSelector::Self()
 {
@@ -179,6 +143,39 @@ void FSolutionSelector::AddSolution(FString SolutionName, FString SolutionToolTi
     CB_Append(Num() - 1);
 }
 
+void FSolutionSelector::RenameSolution(int SolutionIndex, FString SolutionName, FString SolutionToolTip, bool Callback) {
+    // collect exist solution names
+    TSet<FString> AllSolutionNames;
+    for (auto Widget : SlateWidgetRef) {
+        auto TextBlock = SolutionTextMapping[Widget];
+        AllSolutionNames.Add(TextBlock->GetText().ToString());
+    }
+    // check whether solution name exist
+    if (AllSolutionNames.Contains(SolutionName)) {
+        FText Title = FText::FromString("Warning");
+        FText Content = FText::FromString(FString::Printf(TEXT("Solution '%s' already exist!"), *SolutionName));
+        FMessageDialog::Open(EAppMsgType::Ok, Content, &Title);
+        return;
+    }
+    // check whether solution name empty
+    if (SolutionName.IsEmpty()) {
+        FText Title = FText::FromString("Warning");
+        FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("Expected input to be a non-empty string!")), &Title);
+        return;
+    }
+
+    ensure(SolutionIndex >= 0 && SolutionIndex < Num());
+    TSharedRef<SCheckBox> Widget = SlateWidgetRef[SolutionIndex];
+    ensure(SolutionTextMapping.Contains(Widget));
+    TSharedRef<STextBlock> TextBlock = SolutionTextMapping[Widget];
+    TextBlock->SetText(FText::FromString(SolutionName));
+    TextBlock->SetToolTipText(FText::FromString(SolutionToolTip));
+    if (Callback) {
+        ensure(CB_Rename);
+        CB_Rename(SolutionIndex, SolutionName);
+    }
+}
+
 void FSolutionSelector::RemoveSolution(int SolutionIndex)
 {
     if (SolutionIndex >= 0) {
@@ -241,41 +238,6 @@ void FSolutionSelector::UpdateToolTips()
     }
 }
 
-void FSolutionSelector::RenameSolution(int SolutionIndex, FString SolutionName, FString SolutionToolTip, bool Callback)
-{
-    // collect exist solution names
-    TSet<FString> AllSolutionNames;
-    for (auto Widget : SlateWidgetRef) {
-        auto TextBlock = SolutionTextMapping[Widget];
-        FString SolutionName = TextBlock->GetText().ToString();
-        AllSolutionNames.Add(SolutionName);
-    }
-    // check whether solution name exist
-    if (AllSolutionNames.Contains(SolutionName)) {
-        FText Title = FText::FromString("Warning");
-        FText Content = FText::FromString(FString::Printf(TEXT("Solution '%s' already exist!"), *SolutionName));
-        FMessageDialog::Open(EAppMsgType::Ok, Content, &Title);
-        return;
-    }
-    // check whether solution name empty
-    if (SolutionName.IsEmpty()) {
-        FText Title = FText::FromString("Warning");
-        FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(TEXT("Expected input to be a non-empty string!")), &Title);
-        return;
-    }
-
-    ensure(SolutionIndex >= 0 && SolutionIndex < Num());
-    TSharedRef<SCheckBox> Widget = SlateWidgetRef[SolutionIndex];
-    ensure(SolutionTextMapping.Contains(Widget));
-    TSharedRef<STextBlock> TextBlock = SolutionTextMapping[Widget];
-    TextBlock->SetText(FText::FromString(SolutionName));
-    TextBlock->SetToolTipText(FText::FromString(SolutionToolTip));
-    if (Callback) {
-        ensure(CB_Rename);
-        CB_Rename(SolutionIndex, SolutionName);
-    }
-}
-
 int FSolutionSelector::InferClickedButtonIndex(ECheckBoxState CheckState)
 {
     if (CheckState == ECheckBoxState::Unchecked) {
@@ -309,4 +271,40 @@ int FSolutionSelector::InferClickedButtonIndex(ECheckBoxState CheckState)
         ensure(false);
         return -1;
     }
+}
+
+void FSolutionSelector::CreateRenameDialog(int Index) {
+    if (Index < 0) {
+        FText Title = FText::FromString("Warning");
+        FText Content = FText::FromString(TEXT("Please select a target solution to rename!"));
+        FMessageDialog::Open(EAppMsgType::Ok, Content, &Title);
+        return;
+    }
+
+    TSharedRef<SWindow> ModalWindow = SNew(SWindow)
+        .Title(FText::FromString("Rename Solution"))
+        .HasCloseButton(true)
+        .SizingRule(ESizingRule::FixedSize)
+        .ClientSize(FVector2D(200.0f, 60.0f));
+    TSharedRef<SEditableText> EditableText = SNew(SEditableText)
+        .HintText(FText::FromString("Input new solution name"));
+    TSharedRef<SWidget> ResultWidget = SNew(SVerticalBox)
+        + SVerticalBox::Slot()
+        [
+            EditableText
+        ]
+        + SVerticalBox::Slot()
+        [
+            SNew(SButton)
+            .Text(FText::FromString("OK"))
+            .OnClicked_Lambda([&]() -> FReply {
+                FText Text = EditableText->GetText();
+                ModalWindow->RequestDestroyWindow();
+                RenameSolution(CurrentSelectedSolutionIndex, Text.ToString(), "TODO");
+                return FReply::Handled();
+            })
+        ];
+
+    ModalWindow->SetContent(ResultWidget);
+    GEditor->EditorAddModalWindow(ModalWindow);
 }
