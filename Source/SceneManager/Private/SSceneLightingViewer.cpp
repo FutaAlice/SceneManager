@@ -149,7 +149,6 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
             LightActorDetailPanel->BindDataField(nullptr);
             return;
         }
-
         ULightParams* LightParams = SceneManagementAsset->GetKeyLightParamsPtr(SolutionIndex);
         // update combo box
         LightActorComboBox->SetByActorName(LightParams->ActorName);

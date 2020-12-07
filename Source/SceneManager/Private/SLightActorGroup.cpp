@@ -188,6 +188,7 @@ void SLightActorGroup::OnSolutionChanged(int SolutionIndex)
 		for (auto LightParams : DataField->Array) {
 			auto Widget = AddLightItemWidget();
 			Widget->BindDataField(LightParams);
+			LightParams->ToActor();
 		}
 	}
 }
