@@ -83,7 +83,6 @@ void SLightActorGroup::Construct(const FArguments& InArgs)
 		[
 			SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot()
-			// .HAlign(HAlign_Left)
 			[
 				SAssignNew(TitleBlock, STextBlock)
 				.Text(FText::FromString("Other Light"))
@@ -96,7 +95,6 @@ void SLightActorGroup::Construct(const FArguments& InArgs)
 			]
 			+ SHorizontalBox::Slot()
 			.AutoWidth()
-			// .HAlign(HAlign_Right)
 			[
 				SNew(SButton)
 				.Text(FText::FromString("CLEAR"))
@@ -107,7 +105,6 @@ void SLightActorGroup::Construct(const FArguments& InArgs)
 			]
 			+ SHorizontalBox::Slot()
 			.AutoWidth()
-			// .HAlign(HAlign_Right)
 			[
 				SNew(SButton)
 				.Text(FText::FromString("APPEND"))
@@ -134,29 +131,41 @@ void SLightActorGroup::Clear()
 		ensure(RemoveSlotIndex >= 0);
 	}
 	LightItemWidgets.Reset();
+	DataField = nullptr;
 }
 
 void SLightActorGroup::OnAddLightItem()
 {
-	USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
-	if (!SceneManagementAsset) {
-		return;
+	if (DataField) {
+		AddLightItemWidget();
+		AddLightItemDatafield();
 	}
-
-	TSharedRef<SLightItem> Widget = SNew(SLightItem);
-	Group->AddSlot().AutoHeight()[Widget];
-	LightItemWidgets.Add(Widget);
-
-	// SceneManagementAsset->CharacterAuxLightNames->Array.Add("");
 }
 
 void SLightActorGroup::OnSolutionChanged(int SolutionIndex)
 {
-	USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
-	if (!SceneManagementAsset) {
-		return;
-	}
 	Clear();
+	if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
+		if (SolutionIndex < 0) {
+			return;
+		}
+		DataField = SceneManagementAsset->GetAuxLightGroupsPtr(SolutionIndex, (ELightCategory)LightCategory);
+		for (auto LightParams : DataField->Array) {
+			AddLightItemWidget();
+		}
+	}
+}
 
+void SLightActorGroup::AddLightItemWidget()
+{
+	TSharedRef<SLightItem> Widget = SNew(SLightItem);
+	Group->AddSlot().AutoHeight()[Widget];
+	LightItemWidgets.Add(Widget);
+}
 
+void SLightActorGroup::AddLightItemDatafield()
+{
+	if (DataField) {
+		DataField->AddLightParam();
+	}
 }

@@ -46,6 +46,9 @@ public:
      */
     void RemoveSolution(int SolutionIndex);
 
+
+    int GetCurrentSelectedSolutionIndex();
+
     /**
      * @brief Returns number of solutions in current selector
      * 

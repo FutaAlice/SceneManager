@@ -159,6 +159,8 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
 
     // MainLayout->SetContent
     LightActorGroup->SolutionSelector = &SolutionSelector;
+    LightActorGroup->LightCategory = LightCategory_AuxLight | LightCategory_SceneLight;
+
 
     // On data asset changed
     LightActorComboBox->CB_SelectionChange = [this](FString Name, ALight* Light) {

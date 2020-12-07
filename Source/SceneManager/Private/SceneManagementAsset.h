@@ -7,12 +7,22 @@
 
 enum ELightCategory
 {
-    KeyLight = 1,
-    AuxLight = 2, 
-    SceneLight = 4,
-    CharacterLight = 8,
+    LightCategory_KeyLight = 1,
+    LightCategory_AuxLight = 2,
+    LightCategory_SceneLight = 4,
+    LightCategory_CharacterLight = 8,
 };
 
+UCLASS()
+class UGroupLightParams : public UObject
+{
+    GENERATED_BODY()
+public:
+    UPROPERTY(VisibleAnywhere, Instanced, EditFixedSize, Category = "LightParams")
+        TArray<ULightParams*> Array;
+
+    void AddLightParam();
+};
 
 /**
  * Scene Manager Asset Type
@@ -27,7 +37,7 @@ public:
     void RenameLightingSolution(int SolutionIndex, const FString& SolutionName);
 
     ULightParams* GetKeyLightParamsPtr(int SolutionIndex);
-    ULightParams* GetAuxLightParamsPtr(int SolutionIndex, int LightIndex, ELightCategory LightCategory);
+    UGroupLightParams* GetAuxLightGroupsPtr(int SolutionIndex, ELightCategory LightCategory);
     
     void SyncActorByName();
 
@@ -39,8 +49,8 @@ public:
         TArray<ULightParams*> KeyLightParams;
 
     UPROPERTY(VisibleAnywhere, Instanced, EditFixedSize, Category = "Scene Lighting")
-        TArray<UGroupLightParamsArray*> SceneAuxGroups;
+        TArray<UGroupLightParams*> SceneAuxGroups;
 
     UPROPERTY(VisibleAnywhere, Instanced, EditFixedSize, Category = "Character Lighting")
-        TArray<UGroupLightParamsArray*> CharacterAuxGroups;
+        TArray<UGroupLightParams*> CharacterAuxGroups;
 };

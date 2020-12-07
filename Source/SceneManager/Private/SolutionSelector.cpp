@@ -198,6 +198,12 @@ void FSolutionSelector::RemoveSolution(int SolutionIndex)
     }
 }
 
+int FSolutionSelector::GetCurrentSelectedSolutionIndex()
+{
+    // TODO: why?
+    return CurrentSelectedSolutionIndex;
+}
+
 int FSolutionSelector::Num()
 {
     ensure(SlateWidgetRef.Num() == SolutionTextMapping.Num());
@@ -227,15 +233,14 @@ void FSolutionSelector::UpdateClickButtonState(int CheckedIndex)
         ensure(CheckedIndex < Num());
         SlateWidgetRef[CheckedIndex]->SetIsChecked(ECheckBoxState::Checked);
     }
-
-    // callback
-    ensure(CB_Active);
+    // update
     if (CurrentSelectedSolutionIndex != CheckedIndex) {
-        CB_Active(CheckedIndex);
+        // Set current selected
+        CurrentSelectedSolutionIndex = CheckedIndex;
+        // callback
+        ensure(CB_Active);
+        CB_Active(CurrentSelectedSolutionIndex);
     }
-
-    // Set current selected
-    CurrentSelectedSolutionIndex = CheckedIndex;
 }
 
 void FSolutionSelector::UpdateToolTips()

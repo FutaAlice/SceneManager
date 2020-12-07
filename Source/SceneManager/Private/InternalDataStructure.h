@@ -34,12 +34,3 @@ public:
     UPROPERTY(EditAnywhere, Category = "LightParams")
         FLinearColor LightColor;
 };
-
-UCLASS()
-class UGroupLightParamsArray : public UObject
-{
-    GENERATED_BODY()
-public:
-    UPROPERTY(VisibleAnywhere, Instanced, EditFixedSize, Category = "LightParams")
-        TArray<ULightParams *> Array;
-};

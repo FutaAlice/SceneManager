@@ -9,6 +9,7 @@ class SHorizontalBox;
 class STextBlock;
 class SLightItem;
 class FSolutionSelector;
+class UGroupLightParams;
 
 /**
  * 
@@ -28,8 +29,14 @@ public:
 	void OnAddLightItem();
 	void OnSolutionChanged(int SolutionIndex);
 
+private:
+	void AddLightItemWidget();
+	void AddLightItemDatafield();
+
 public:
+	UGroupLightParams *DataField;
 	FSolutionSelector *SolutionSelector;
+	int LightCategory;
 
 public:
 	TSharedPtr<SVerticalBox> MainLayout;

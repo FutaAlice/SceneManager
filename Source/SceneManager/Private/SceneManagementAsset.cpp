@@ -6,14 +6,19 @@
 #include "Engine/World.h"   // UWorld
 #include "Kismet/GameplayStatics.h" // UGameplayStatics
 
+void UGroupLightParams::AddLightParam()
+{
+    Array.Add(NewObject<ULightParams>(this));
+}
+
 void USceneManagementAsset::AddLightingSolution()
 {
     LightingSolutionNameList.Add("");
 
     // Attach to root object
     KeyLightParams.Add(NewObject<ULightParams>(this));
-    SceneAuxGroups.Add(NewObject<UGroupLightParamsArray>(this));
-    CharacterAuxGroups.Add(NewObject<UGroupLightParamsArray>(this));
+    SceneAuxGroups.Add(NewObject<UGroupLightParams>(this));
+    CharacterAuxGroups.Add(NewObject<UGroupLightParams>(this));
 
     SyncActorByName();
 }
@@ -37,23 +42,19 @@ ULightParams* USceneManagementAsset::GetKeyLightParamsPtr(int SolutionIndex)
     return KeyLightParams[SolutionIndex];
 }
 
-ULightParams* USceneManagementAsset::GetAuxLightParamsPtr(int SolutionIndex, int LightIndex, ELightCategory LightCategory)
+UGroupLightParams* USceneManagementAsset::GetAuxLightGroupsPtr(int SolutionIndex, ELightCategory LightCategory)
 {
-    if (LightCategory == (AuxLight | SceneLight)) {
-        ensure(SceneAuxGroups.Num() > SolutionIndex);
-        const auto& Group = SceneAuxGroups[SolutionIndex];
-        ensure(Group->Array.Num() > LightIndex);
-        return Group->Array[LightIndex];
+    TArray<UGroupLightParams*>* GroupArray = nullptr;
+    if (LightCategory & LightCategory_SceneLight) {
+        GroupArray = &SceneAuxGroups;
     }
-    else if (LightCategory == (AuxLight | CharacterLight)) {
-        ensure(CharacterAuxGroups.Num() > SolutionIndex);
-        const auto& Group = CharacterAuxGroups[SolutionIndex];
-        ensure(Group->Array.Num() > LightIndex);
-        return Group->Array[LightIndex];
+    else if (LightCategory & LightCategory_CharacterLight) {
+        GroupArray = &CharacterAuxGroups;
     }
-    else {
-        return nullptr;
-    }
+
+    ensure(GroupArray);
+    ensure(GroupArray->Num() > SolutionIndex);
+    return (*GroupArray)[SolutionIndex];
 }
 
 void USceneManagementAsset::SyncActorByName()
@@ -75,11 +76,6 @@ void USceneManagementAsset::SyncActorByName()
     ensure(LightingSolutionNameList.Num() == CharacterAuxGroups.Num());
 
     auto SyncActor = [ActorList, NameList](ULightParams* LightParams) {
-        // TODO: why??
-        if (!LightParams) {
-            LightParams = NewObject<ULightParams>();
-        }
-
         FString ActorName = LightParams->ActorName;
         AActor* LightActor = nullptr;
         do {
@@ -100,16 +96,15 @@ void USceneManagementAsset::SyncActorByName()
         SyncActor(LightParams);
     }
 
-    // TODO
     // Aux Light
-    //for (auto LightGroup : SceneAuxGroups) {
-    //    for (ULightParams* LightParams : LightGroup->Array) {
-    //        SyncActor(LightParams);
-    //    }
-    //}
-    //for (auto LightGroup : CharacterAuxGroups) {
-    //    for (ULightParams* LightParams : LightGroup->Array) {
-    //        SyncActor(LightParams);
-    //    }
-    //}
+    for (auto LightGroup : SceneAuxGroups) {
+        for (ULightParams* LightParams : LightGroup->Array) {
+            SyncActor(LightParams);
+        }
+    }
+    for (auto LightGroup : CharacterAuxGroups) {
+        for (ULightParams* LightParams : LightGroup->Array) {
+            SyncActor(LightParams);
+        }
+    }
 }
