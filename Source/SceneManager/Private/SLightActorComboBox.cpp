@@ -114,7 +114,7 @@ void SLightActorComboBox::OnComboBoxOpening()
         FString LevelName = Actor->GetLevel()->GetOuter()->GetName();
 
         Options.Add(MakeShareable(new FString(Actor->GetName())));
-        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, ActorName + FString(" ") + ObjectName);
+        // GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, ActorName + FString(" ") + ObjectName);
     }
 
     ComboBox->RefreshOptions();

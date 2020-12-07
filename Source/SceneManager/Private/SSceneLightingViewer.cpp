@@ -1,12 +1,13 @@
 #include "SSceneLightingViewer.h"
 
 #include "CoreMinimal.h"
+#include "Widgets/DeclarativeSyntaxSupport.h"
+#include "SlateOptMacros.h"
 #include "EditorStyleSet.h" // FEditorStyle
 #include "Framework/Docking/TabManager.h"   // FTabManager, FSpawnTabArgs
 #include "Widgets/SCompoundWidget.h"    // SCompoundWidget
-#include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/Docking/SDockTab.h"   // SDockTab
-#include "SlateOptMacros.h"
+#include "Widgets/Layout/SSplitter.h"   // SSplitter
 
 #include "Engine.h" // GEngine
 #include "SolutionSelector.h"
@@ -73,38 +74,6 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
 {
     SceneLightingViewerInstance = this;
 
-    SolutionSelector.CB_Append = [](int SolutionIndex) {
-        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Append Index %d"), SolutionIndex));
-        USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
-        SceneManagementAsset->AddLightingSolution();
-    };
-    SolutionSelector.CB_Remove = [](int SolutionIndex) {
-        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Remove Index %d"), SolutionIndex));
-        USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
-        SceneManagementAsset->RemoveLightingSolution(SolutionIndex);
-    };
-    SolutionSelector.CB_Rename = [](int SolutionIndex, FString SolutionName) {
-        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, SolutionName);
-        USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
-        SceneManagementAsset->RenameLightingSolution(SolutionIndex, SolutionName);
-    };
-
-
-    SolutionSelector.CB_Active = [this](int SolutionIndex) {
-        if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
-            ULightParams* LightParams = SceneManagementAsset->GetKeyLightParamsPtr(SolutionIndex);
-            // update combo box
-            LightActorComboBox->SetByActorName(LightParams->ActorName);
-            // update details panel
-            LightActorDetailPanel->BindDataField(LightParams);
-            LightActorDetailPanel->ForceRefresh();
-        }
-        else {
-            LightActorDetailPanel->BindDataField(nullptr);
-        }
-    };
-
-
     ChildSlot
     [
         SNew(SHorizontalBox)
@@ -148,19 +117,73 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
     MainLayout->AddSlot()
         .AutoHeight()
         [
-            SAssignNew(LightActorComboBox, SLightActorComboBox)
+            SNew(SBorder)
+            .BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
+            .Padding(2)
+            [
+                SNew(SVerticalBox)
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                [
+                    SNew(STextBlock)
+                    .Text(FText::FromString("Key Light:"))
+                    .TextStyle(FEditorStyle::Get(), "LargeText")
+                ]
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                [
+                    SAssignNew(LightActorComboBox, SLightActorComboBox)
+                ]
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                [
+                    SAssignNew(LightActorDetailPanel, SLightActorDetailPanel)
+                ]
+            ]
         ];
 
-    MainLayout->AddSlot()
-        .AutoHeight()
-        [
-            SAssignNew(LightActorDetailPanel, SLightActorDetailPanel)
-        ];
+    // MainLayout->SetContent
 
-    LightActorComboBox->CB_SelectionChange = [this](FString Name, ALight *Light) {
+    // On data asset changed
+    LightActorComboBox->CB_SelectionChange = [this](FString Name, ALight* Light) {
         LightActorDetailPanel->SetActor(Light);
     };
-    // MainLayout->SetContent
+
+    // On solution changed
+    SolutionSelector.CB_Active = [this](int SolutionIndex) {
+        if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
+            ULightParams* LightParams = SceneManagementAsset->GetKeyLightParamsPtr(SolutionIndex);
+            // update combo box
+            LightActorComboBox->SetByActorName(LightParams->ActorName);
+            // update details panel
+            LightActorDetailPanel->BindDataField(LightParams);
+            LightActorDetailPanel->ForceRefresh();
+        }
+        else {
+            LightActorDetailPanel->BindDataField(nullptr);
+        }
+    };
+
+    // On solution rename
+    SolutionSelector.CB_Rename = [](int SolutionIndex, FString SolutionName) {
+        if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
+            SceneManagementAsset->RenameLightingSolution(SolutionIndex, SolutionName);
+        }
+    };
+
+    // On solution append
+    SolutionSelector.CB_Append = [](int SolutionIndex) {
+        if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
+            SceneManagementAsset->AddLightingSolution();
+        }
+    };
+
+    // On solution remove
+    SolutionSelector.CB_Remove = [](int SolutionIndex) {
+        if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
+            SceneManagementAsset->RemoveLightingSolution(SolutionIndex);
+        }
+    };
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
