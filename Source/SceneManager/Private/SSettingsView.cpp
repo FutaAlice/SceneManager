@@ -167,11 +167,6 @@ USceneManagementAsset* SSettingsView::GetSceneManagementNullAsset()
 void SSettingsView::OnSceneManagementAssetChanged(const FPropertyChangedEvent& InEvent)
 {
     if (USceneManagementAsset* Asset = GetSceneManagementAsset(false)) {
-        for (auto Name : Asset->LightingSolutionNameList) {
-            UE_LOG(LogTemp, Warning, TEXT("MyAsset: %s"), *Name);
-        }
-        UE_LOG(LogTemp, Warning, TEXT("DEBUG_PRINT_DONE"));
-
         Asset->SyncActorByName();
         SceneLightingViewer::OnAssetDataChanged();
         CharacterLightingViewer::OnAssetDataChanged();

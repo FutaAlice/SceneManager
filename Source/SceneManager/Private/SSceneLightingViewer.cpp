@@ -1,8 +1,7 @@
 #include "SSceneLightingViewer.h"
 
-#include "CoreMinimal.h"
-#include "Widgets/DeclarativeSyntaxSupport.h"
 #include "SlateOptMacros.h"
+#include "Widgets/DeclarativeSyntaxSupport.h"
 #include "EditorStyleSet.h" // FEditorStyle
 #include "Framework/Docking/TabManager.h"   // FTabManager, FSpawnTabArgs
 #include "Widgets/SCompoundWidget.h"    // SCompoundWidget
@@ -13,10 +12,10 @@
 #include "SolutionSelector.h"
 #include "SLightActorComboBox.h"
 #include "SLightActorDetailPanel.h"
+#include "SLightActorGroup.h"
 #include "InternalDataStructure.h"
 #include "SceneManagementAsset.h"
 #include "SSettingsView.h"
-#include "SLightActorGroup.h"
 #include "EventHub.h"
 
 #define LOCTEXT_NAMESPACE "SceneLightViewer"
@@ -54,7 +53,6 @@ private:
     FSolutionSelector SolutionSelector;
 
     TSharedPtr<SVerticalBox> MainLayout;
-
     TSharedPtr<SLightActorComboBox> LightActorComboBox;
     TSharedPtr<SLightActorDetailPanel> LightActorDetailPanel;
     TSharedPtr<SLightActorGroup> LightActorGroup;
@@ -134,7 +132,7 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
             ]
         ];
 
-    // MainLayout->SetContent
+    // Set group init variables
     LightActorGroup->SolutionSelector = &SolutionSelector;
     LightActorGroup->LightCategory = LightCategory_AuxLight | LightCategory_SceneLight;
 

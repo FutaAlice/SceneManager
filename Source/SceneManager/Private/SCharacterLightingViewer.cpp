@@ -1,24 +1,27 @@
 #include "SCharacterLightingViewer.h"
+
 #include "SlateOptMacros.h"
-#include "Widgets/SCompoundWidget.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
-#include "Framework/Docking/TabManager.h"   // FTabManager, FSpawnTabArgs
 #include "EditorStyleSet.h" // FEditorStyle
+#include "Framework/Docking/TabManager.h"   // FTabManager, FSpawnTabArgs
+#include "Widgets/SCompoundWidget.h"    // SCompoundWidget
 #include "Widgets/Docking/SDockTab.h"   // SDockTab
-#include "Widgets/Input/SButton.h"  // SButton
 #include "Widgets/Text/STextBlock.h"    // STextBlock
 
 #include "Engine.h" // GEngine
-
-#include "SLightActorGroup.h"
-#include "SSettingsView.h"
 #include "SolutionSelector.h"
+#include "SLightActorComboBox.h"
+#include "SLightActorDetailPanel.h"
+#include "SLightActorGroup.h"
+#include "InternalDataStructure.h"
 #include "SceneManagementAsset.h"
+#include "SSettingsView.h"
+#include "EventHub.h"
 
 #define LOCTEXT_NAMESPACE "CharacterLightViewer"
 
 /**
- *
+ * Character Light Viewer
  */
 class SCharacterLightingViewer : public SCompoundWidget
 {
@@ -36,10 +39,7 @@ public:
         CharacterLightingViewerInstance = nullptr;
     }
 
-    // TSharedPtr<SWidget> RefreshAuxLightGroup();
-
     void OnAssetDataChanged();
-    void OnSolutionChanged(int SolutionIndex);
 
     static SCharacterLightingViewer* GetInstance()
     {
@@ -48,11 +48,14 @@ public:
 
 private:
     static SCharacterLightingViewer* CharacterLightingViewerInstance;
+
+private:
     FSolutionSelector SolutionSelector;
+
     TSharedPtr<SVerticalBox> MainLayout;
-    TSharedPtr<SLightActorGroup> KeyLightGroup;
-    TSharedPtr<SLightActorGroup> AuxLightGroup;
-    TSharedPtr<SHorizontalBox> ToolBarContainer;
+    TSharedPtr<SLightActorComboBox> LightActorComboBox;
+    TSharedPtr<SLightActorDetailPanel> LightActorDetailPanel;
+    TSharedPtr<SLightActorGroup> LightActorGroup;
 };
 
 SCharacterLightingViewer* SCharacterLightingViewer::CharacterLightingViewerInstance = nullptr;
@@ -62,25 +65,6 @@ void SCharacterLightingViewer::Construct(const FArguments& InArgs)
 {
     CharacterLightingViewerInstance = this;
 
-    SolutionSelector.CB_Append = [](int SolutionIndex) {
-        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Append Index %d"), SolutionIndex));
-        USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
-        SceneManagementAsset->AddLightingSolution();
-    };
-    SolutionSelector.CB_Remove = [](int SolutionIndex) {
-        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Remove Index %d"), SolutionIndex));
-        USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
-        SceneManagementAsset->RemoveLightingSolution(SolutionIndex);
-    };
-    SolutionSelector.CB_Active = [this](int SolutionIndex) {
-        OnSolutionChanged(SolutionIndex);
-    };
-    SolutionSelector.CB_Rename = [](int SolutionIndex, FString SolutionName) {
-        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, SolutionName);
-        USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
-        SceneManagementAsset->RenameLightingSolution(SolutionIndex, SolutionName);
-    };
-	
     ChildSlot
     [
         SNew(SHorizontalBox)
@@ -107,51 +91,106 @@ void SCharacterLightingViewer::Construct(const FArguments& InArgs)
         ]
     ];
 
-    MainLayout->AddSlot().AutoHeight()[SAssignNew(ToolBarContainer, SHorizontalBox)];
-    MainLayout->AddSlot().AutoHeight()[SAssignNew(KeyLightGroup, SLightActorGroup)];
-    MainLayout->AddSlot().AutoHeight()[SAssignNew(AuxLightGroup, SLightActorGroup)];
+    // Key Light
+    MainLayout->AddSlot()
+        .AutoHeight()
+        [
+            SNew(SBorder)
+            .BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
+            .Padding(2)
+            [
+                SNew(SVerticalBox)
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                [
+                    SNew(STextBlock)
+                    .Text(FText::FromString("Key Light"))
+                    .TextStyle(FEditorStyle::Get(), "LargeText")
+                ]
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                [
+                    SAssignNew(LightActorComboBox, SLightActorComboBox)
+                ]
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                [
+                    SAssignNew(LightActorDetailPanel, SLightActorDetailPanel)
+                ]
+            ]
+        ];
 
-    KeyLightGroup->TitleBlock->SetText(FText::FromString("Key Light"));
-    AuxLightGroup->TitleBlock->SetText(FText::FromString("Aux Light"));
+    // Aud Light
+    MainLayout->AddSlot()
+        .AutoHeight()
+        [
+            SNew(SBorder)
+            .BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
+            .Padding(2)
+            [
+                SAssignNew(LightActorGroup, SLightActorGroup)
+            ]
+        ];
 
-    // Create Toolbar
+    // Set group init variables
+    LightActorGroup->SolutionSelector = &SolutionSelector;
+    LightActorGroup->LightCategory = LightCategory_AuxLight | LightCategory_CharacterLight;
 
-    TSharedRef<SWidget> TextBlock = SNew(STextBlock)
-        .Text(FText::FromString("xxx Light Params: "));
 
-    TSharedRef<SWidget> BtnAdd = SNew(SButton)
-        .Text(FText::FromString("Add"))
-        .OnClicked_Lambda([this]() -> FReply {
-            return FReply::Handled();
-        });
-    
-    TSharedRef<SWidget> BtnRemove = SNew(SButton)
-        .Text(FText::FromString("Remove"))
-        .OnClicked_Lambda([this]() -> FReply {
-            return FReply::Handled();
-        });
+    // On data asset changed
+    LightActorComboBox->CB_SelectionChange = [this](FString Name, ALight* Light) {
+        LightActorDetailPanel->SetActor(Light);
+    };
 
-    ToolBarContainer->AddSlot().VAlign(VAlign_Center).AutoWidth()[TextBlock];
-    ToolBarContainer->AddSlot().AutoWidth()[BtnAdd];
-    ToolBarContainer->AddSlot().AutoWidth()[BtnRemove];
+    // On solution changed
+    SolutionSelector.CB_Active = [this](int SolutionIndex) {
+        if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
+            ULightParams* LightParams = SceneManagementAsset->GetKeyLightParamsPtr(SolutionIndex);
+            // update combo box
+            LightActorComboBox->SetByActorName(LightParams->ActorName);
+            // update details panel
+            LightActorDetailPanel->BindDataField(LightParams);
+            LightActorDetailPanel->ForceRefresh();
+            // update groups
+            LightActorGroup->OnSolutionChanged(SolutionIndex);
+        }
+        else {
+            LightActorDetailPanel->BindDataField(nullptr);
+        }
+    };
 
+    // On solution rename
+    SolutionSelector.CB_Rename = [](int SolutionIndex, FString SolutionName) {
+        if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
+            SceneManagementAsset->RenameLightingSolution(SolutionIndex, SolutionName);
+        }
+    };
+
+    // On solution append
+    SolutionSelector.CB_Append = [](int SolutionIndex) {
+        if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
+            SceneManagementAsset->AddLightingSolution();
+        }
+    };
+
+    // On solution remove
+    SolutionSelector.CB_Remove = [](int SolutionIndex) {
+        if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
+            SceneManagementAsset->RemoveLightingSolution(SolutionIndex);
+        }
+    };
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SCharacterLightingViewer::OnAssetDataChanged()
 {
-    USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
     SolutionSelector.Clear();
-
-    for (int i = 0; i < SceneManagementAsset->LightingSolutionNameList.Num(); ++i) {
-        const FString& SolutionName = SceneManagementAsset->LightingSolutionNameList[i];
-        SolutionSelector.AddSolution(SolutionName, "", false);
+    if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
+        for (int i = 0; i < SceneManagementAsset->LightingSolutionNameList.Num(); ++i) {
+            const FString& SolutionName = SceneManagementAsset->LightingSolutionNameList[i];
+            SolutionSelector.AddSolution(SolutionName, "", false);
+        }
     }
-}
-
-void SCharacterLightingViewer::OnSolutionChanged(int SolutionIndex)
-{
-    AuxLightGroup;
 }
 
 namespace CharacterLightingViewer {
