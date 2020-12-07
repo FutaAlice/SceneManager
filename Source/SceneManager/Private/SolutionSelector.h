@@ -46,6 +46,7 @@ public:
      */
     void RemoveSolution(int SolutionIndex);
 
+    void DuplicateSolution(int SolutionIndex);
 
     int GetCurrentSelectedSolutionIndex();
 
@@ -96,8 +97,9 @@ private:
     int CurrentSelectedSolutionIndex = -1;
 
 public:
+    std::function<void(int)> CB_Active;
     std::function<void(int)> CB_Append;
+    std::function<void(int)> CB_Duplicate;
     std::function<void(int)> CB_Remove;
     std::function<void(int, FString)> CB_Rename;
-    std::function<void(int)> CB_Active;
 };

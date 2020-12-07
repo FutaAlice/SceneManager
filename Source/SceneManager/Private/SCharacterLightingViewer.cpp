@@ -173,6 +173,13 @@ void SCharacterLightingViewer::Construct(const FArguments& InArgs)
         }
     };
 
+    // On solution duplicate
+    SolutionSelector.CB_Duplicate = [](int SolutionIndex) {
+        if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
+            SceneManagementAsset->DuplicateLightingSolution(SolutionIndex);
+        }
+    };
+
     // On solution remove
     SolutionSelector.CB_Remove = [](int SolutionIndex) {
         if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {

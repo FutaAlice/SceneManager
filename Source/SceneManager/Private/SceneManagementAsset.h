@@ -34,6 +34,7 @@ class USceneManagementAsset : public UObject
     GENERATED_BODY()
 public:
     void AddLightingSolution();
+    void DuplicateLightingSolution(int SolutionIndex);
     void RemoveLightingSolution(int SolutionIndex);
     void RenameLightingSolution(int SolutionIndex, const FString& SolutionName);
 

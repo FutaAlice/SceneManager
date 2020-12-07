@@ -24,10 +24,24 @@ void USceneManagementAsset::AddLightingSolution()
 {
     LightingSolutionNameList.Add("");
 
-    // Attach to root object
     KeyLightParams.Add(NewObject<ULightParams>(this));
     SceneAuxGroups.Add(NewObject<UGroupLightParams>(this));
     CharacterAuxGroups.Add(NewObject<UGroupLightParams>(this));
+
+    SyncActorByName();
+}
+
+void USceneManagementAsset::DuplicateLightingSolution(int SolutionIndex)
+{
+    int TargetIndex = LightingSolutionNameList.Num() - 1;
+    KeyLightParams[TargetIndex] = DuplicateObject<ULightParams>(KeyLightParams[SolutionIndex], this);
+
+    for (ULightParams* LightParams : SceneAuxGroups[SolutionIndex]->Array) {
+        SceneAuxGroups[TargetIndex]->Array.Add(DuplicateObject<ULightParams>(LightParams, this));
+    }
+    for (ULightParams* LightParams : CharacterAuxGroups[SolutionIndex]->Array) {
+        CharacterAuxGroups[TargetIndex]->Array.Add(DuplicateObject<ULightParams>(LightParams, this));
+    }
 
     SyncActorByName();
 }

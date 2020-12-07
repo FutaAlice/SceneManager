@@ -35,10 +35,10 @@ FSolutionSelector::FSolutionSelector()
         })
         .SetImageBrush("LevelEditor.NewLevel");
 
-    // Copy
-    TSharedRef<SWidget> BtnCopy = SNew(SButton)
+    // Duplicate
+    TSharedRef<SWidget> BtnDuplicate = SNew(SButton)
         .OnClicked_Lambda([this]() -> FReply {
-            // TODO: add impl
+            DuplicateSolution(CurrentSelectedSolutionIndex);
             return FReply::Handled();
         })
         .SetImageBrush("LevelEditor.OpenLevel");
@@ -60,7 +60,7 @@ FSolutionSelector::FSolutionSelector()
         .SetImageBrush("Level.SaveModifiedIcon16x");
 
     ToolBarContainer->AddSlot().AutoWidth()[BtnAdd];
-    ToolBarContainer->AddSlot().AutoWidth()[BtnCopy];
+    ToolBarContainer->AddSlot().AutoWidth()[BtnDuplicate];
     ToolBarContainer->AddSlot().AutoWidth()[BtnRemove];
     ToolBarContainer->AddSlot().AutoWidth()[BtnRename];
 }
@@ -196,6 +196,18 @@ void FSolutionSelector::RemoveSolution(int SolutionIndex)
         UpdateClickButtonState(SolutionIndex - 1);
         UpdateToolTips();
     }
+}
+
+void FSolutionSelector::DuplicateSolution(int SolutionIndex)
+{
+    if (SolutionIndex < 0) {
+        return;
+    }
+    AddSolution(true);
+    if (CB_Duplicate) {
+        CB_Duplicate(SolutionIndex);
+    }
+    UpdateClickButtonState(Num() - 1);
 }
 
 int FSolutionSelector::GetCurrentSelectedSolutionIndex()
