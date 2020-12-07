@@ -18,6 +18,7 @@
 #include "SMaterialViewer.h"
 #include "SSceneLightingViewer.h"
 #include "SCharacterLightingViewer.h"
+#include "EventHub.h"
 
 
 #define LOCTEXT_NAMESPACE "FSceneManagerModule"
@@ -25,6 +26,7 @@
 FSceneManagerModule::FSceneManagerModule()
     : Impl(MakeUnique<FSceneManagerImpl>())
 {
+    EventHub::Get();
 }
 
 void FSceneManagerModule::StartupModule()

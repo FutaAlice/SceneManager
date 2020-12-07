@@ -42,6 +42,7 @@ public:
     UGroupLightParams* GetAuxLightGroupsPtr(int SolutionIndex, ELightCategory LightCategory);
     
     void SyncActorByName();
+    void SyncDataByActor();
 
 public:
     UPROPERTY(EditAnywhere, EditFixedSize, Category = "Lighting")

@@ -9,6 +9,9 @@
 #include "Misc/CoreDelegates.h" // FCoreDelegates
 #include "UObject/UObjectGlobals.h" // FCoreUObjectDelegates
 
+#include "SSettingsView.h"
+#include "SceneManagementAsset.h"
+
 std::shared_ptr<EventHub> EventHub::_instance;
 std::mutex EventHub::_mutex;
 
@@ -50,14 +53,18 @@ EventHub::EventHub()
         UE_LOG(LogTemp, Warning, TEXT("OnObjectSaved: %s"), *ObjectName);
     });
 
-    // PropertyChanged
-    FCoreUObjectDelegates::OnObjectPropertyChanged.AddLambda([](UObject*, struct FPropertyChangedEvent &) {
-        UE_LOG(LogTemp, Warning, TEXT("OnObjectPropertyChanged"));
-    });
+    //// PropertyChanged
+    //FCoreUObjectDelegates::OnObjectPropertyChanged.AddLambda([](UObject*, struct FPropertyChangedEvent &) {
+    //    UE_LOG(LogTemp, Warning, TEXT("OnObjectPropertyChanged"));
+    //});
 
     // Modified (what's the different from 'OnObjectPropertyChanged'£¿)
-    FCoreUObjectDelegates::OnObjectModified.AddLambda([](UObject*) {
-        UE_LOG(LogTemp, Warning, TEXT("OnObjectModified"));
+    FCoreUObjectDelegates::OnObjectModified.AddLambda([](UObject* InObject) {
+        if (InObject->IsA(ALight::StaticClass()) || InObject->IsA(ULightComponent::StaticClass())) {
+            if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
+                SceneManagementAsset->SyncDataByActor();
+            }
+        }
     });
 
     //FEditorDelegates::MapChange.AddLambda([]() {

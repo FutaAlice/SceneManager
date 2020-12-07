@@ -131,3 +131,22 @@ void USceneManagementAsset::SyncActorByName()
         }
     }
 }
+
+void USceneManagementAsset::SyncDataByActor()
+{
+    for (ULightParams* LightParams : KeyLightParams) {
+        LightParams->FromActor();
+    }
+
+    for (auto Group : SceneAuxGroups) {
+        for (ULightParams* LightParams : Group->Array) {
+            LightParams->FromActor();
+        }
+    }
+
+    for (auto Group : CharacterAuxGroups) {
+        for (ULightParams* LightParams : Group->Array) {
+            LightParams->FromActor();
+        }
+    }
+}

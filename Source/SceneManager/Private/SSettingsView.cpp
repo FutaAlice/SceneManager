@@ -140,7 +140,9 @@ END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 USceneManagementAsset *SSettingsView::GetSceneManagementAsset(bool bShowMsgDialog)
 {
-    ensure(Instance);
+    if (!Instance) {
+        return nullptr;
+    }
 
     if (USceneManagementAsset* SceneManagementAsset = Instance->AssetWrap->SceneManagementAsset) {
         return SceneManagementAsset;
