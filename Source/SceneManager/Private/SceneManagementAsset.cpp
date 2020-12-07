@@ -9,30 +9,20 @@
 void USceneManagementAsset::AddLightingSolution()
 {
     LightingSolutionNameList.Add("");
-    KeyLightActorNames.Add("");
     KeyLightParams.Add(NewObject<ULightParams>());
 
-    SceneAuxLightNames.Add(NewObject<UStringArray>());
-    SceneAuxLightParams.Add(NewObject<ULightParamsArray>());
+    SceneAuxGroups.Add(NewObject<UGroupLightParamsArray>());
+    CharacterAuxGroups.Add(NewObject<UGroupLightParamsArray>());
 
-    CharacterAuxLightNames.Add(NewObject<UStringArray>());
-    CharacterAuxLightParams.Add(NewObject<ULightParamsArray>());
-
-    KeyLightActors.Add(nullptr);
-    FindAllActors();
+    SyncActorByName();
 }
 
 void USceneManagementAsset::RemoveLightingSolution(int SolutionIndex)
 {
     LightingSolutionNameList.RemoveAt(SolutionIndex);
-    KeyLightActorNames.RemoveAt(SolutionIndex);
     KeyLightParams.RemoveAt(SolutionIndex);
-    SceneAuxLightNames.RemoveAt(SolutionIndex);
-    SceneAuxLightParams.RemoveAt(SolutionIndex);
-    SceneAuxLightNames.RemoveAt(SolutionIndex);
-    SceneAuxLightParams.RemoveAt(SolutionIndex);
-
-    KeyLightActors.RemoveAt(SolutionIndex);
+    SceneAuxGroups.RemoveAt(SolutionIndex);
+    CharacterAuxGroups.RemoveAt(SolutionIndex);
 }
 
 void USceneManagementAsset::RenameLightingSolution(int SolutionIndex, const FString& SolutionName)
@@ -40,58 +30,79 @@ void USceneManagementAsset::RenameLightingSolution(int SolutionIndex, const FStr
     LightingSolutionNameList[SolutionIndex] = SolutionName;
 }
 
-void USceneManagementAsset::SetKeyLightActorName(int SolutionIndex, const FString& ActorName)
-{
-    KeyLightActorNames[SolutionIndex] = ActorName;
-    FindAllActors();
-}
-
-FString USceneManagementAsset::GetKeyLightActorName(int SolutionIndex)
-{
-    return KeyLightActorNames[SolutionIndex];
-}
-
 ULightParams* USceneManagementAsset::GetKeyLightParamsPtr(int SolutionIndex)
 {
+    ensure(KeyLightParams.Num() > SolutionIndex);
     return KeyLightParams[SolutionIndex];
 }
 
-void USceneManagementAsset::AddCharacterAuxLight(int SolutionIndex)
+ULightParams* USceneManagementAsset::GetAuxLightParamsPtr(int SolutionIndex, int LightIndex, ELightCategory LightCategory)
 {
-    CharacterAuxLightNames[SolutionIndex]->Array.Add("");
-    CharacterAuxLightParams[SolutionIndex]->Array.Add(NewObject<ULightParams>());
+    if (LightCategory == (AuxLight | SceneLight)) {
+        ensure(SceneAuxGroups.Num() > SolutionIndex);
+        const auto& Group = SceneAuxGroups[SolutionIndex];
+        ensure(Group->Array.Num() > LightIndex);
+        return Group->Array[LightIndex];
+    }
+    else if (LightCategory == (AuxLight | CharacterLight)) {
+        ensure(CharacterAuxGroups.Num() > SolutionIndex);
+        const auto& Group = CharacterAuxGroups[SolutionIndex];
+        ensure(Group->Array.Num() > LightIndex);
+        return Group->Array[LightIndex];
+    }
+    else {
+        return nullptr;
+    }
 }
 
-void USceneManagementAsset::SetCharacterAuxLightName(int SolutionIndex, int ActorIndex, const FString& ActorName)
+void USceneManagementAsset::SyncActorByName()
 {
-    CharacterAuxLightNames[SolutionIndex]->Array[ActorIndex] = ActorName;
-}
-
-void USceneManagementAsset::FindAllActors()
-{
+    // gather all ALight actor in level
     TArray<AActor*> ActorList;
-    TArray<FString> ActorNameList;
+    TArray<FString> NameList;
     {
         UWorld* World = GEditor->GetEditorWorldContext().World();
         ULevel* Level = World->GetCurrentLevel();
         UGameplayStatics::GetAllActorsOfClass(World, ALight::StaticClass(), ActorList);
         for (auto Actor : ActorList) {
-            ActorNameList.Add(Actor->GetName());
+            NameList.Add(Actor->GetName());
         }
     }
 
-    if (KeyLightActors.Num() != LightingSolutionNameList.Num()) {
-        KeyLightActors.Init(nullptr, LightingSolutionNameList.Num());
-    }
-    for (int Index = 0; Index < LightingSolutionNameList.Num(); ++Index) {
-        for (auto ActorName : KeyLightActorNames) {
-            FString RecordName = KeyLightActorNames[Index];
-            int FoundIndex = ActorNameList.Find(RecordName);
-            AActor* FoundActor = nullptr;
-            if (FoundIndex >= 0) {
-                FoundActor = ActorList[FoundIndex];
+    ensure(LightingSolutionNameList.Num() == KeyLightParams.Num());
+    ensure(LightingSolutionNameList.Num() == SceneAuxGroups.Num());
+    ensure(LightingSolutionNameList.Num() == CharacterAuxGroups.Num());
+
+    auto SyncActor = [ActorList, NameList](ULightParams* LightParams) {
+        FString ActorName = LightParams->ActorName;
+        AActor* LightActor = nullptr;
+        do {
+            if (ActorName.IsEmpty()) {
+                break;
             }
-            KeyLightActors[Index] = FoundActor;
+            int FoundIndex = NameList.Find(ActorName);
+            if (FoundIndex < 0) {
+                break;
+            }
+            LightActor = ActorList[FoundIndex];
+        } while (0);
+        LightParams->LightActor = Cast<ALight>(LightActor);
+    };
+
+    // key light
+    for (ULightParams *LightParams : KeyLightParams) {
+        SyncActor(LightParams);
+    }
+
+    // Aux Light
+    for (auto LightGroup : SceneAuxGroups) {
+        for (ULightParams* LightParams : LightGroup->Array) {
+            SyncActor(LightParams);
+        }
+    }
+    for (auto LightGroup : CharacterAuxGroups) {
+        for (ULightParams* LightParams : LightGroup->Array) {
+            SyncActor(LightParams);
         }
     }
 }

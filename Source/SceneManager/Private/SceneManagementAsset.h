@@ -12,6 +12,14 @@ class ULightSolutionData : public UObject
 public:
 };
 
+enum ELightCategory
+{
+    KeyLight = 1,
+    AuxLight = 2, 
+    SceneLight = 4,
+    CharacterLight = 8,
+};
+
 
 /**
  * Scene Manager Asset Type
@@ -25,38 +33,21 @@ public:
     void RemoveLightingSolution(int SolutionIndex);
     void RenameLightingSolution(int SolutionIndex, const FString& SolutionName);
 
-    void SetKeyLightActorName(int SolutionIndex, const FString& ActorName);
-    FString GetKeyLightActorName(int SolutionIndex);
     ULightParams* GetKeyLightParamsPtr(int SolutionIndex);
+    ULightParams* GetAuxLightParamsPtr(int SolutionIndex, int LightIndex, ELightCategory LightCategory);
     
-    void AddCharacterAuxLight(int SolutionIndex);
-    void SetCharacterAuxLightName(int SolutionIndex, int ActorIndex, const FString& ActorName);
-    void GetCharacterAuxLightName(int SolutionIndex, const FString& ActorName);
-
-    void FindAllActors();
+    void SyncActorByName();
 
 public:
     UPROPERTY(EditAnywhere, Category = "Lighting")
         TArray<FString> LightingSolutionNameList;
 
     UPROPERTY(EditAnywhere, Category = "Lighting")
-        TArray<FString> KeyLightActorNames;
-
-    UPROPERTY(EditAnywhere, Category = "Lighting")
         TArray<ULightParams*> KeyLightParams;
 
     UPROPERTY(EditAnywhere, Category = "Scene Lighting")
-        TArray<UStringArray*> SceneAuxLightNames;
-
-    UPROPERTY(EditAnywhere, Category = "Scene Lighting")
-        TArray<ULightParamsArray*> SceneAuxLightParams;
+        TArray<UGroupLightParamsArray*> SceneAuxGroups;
 
     UPROPERTY(EditAnywhere, Category = "Character Lighting")
-        TArray<UStringArray*> CharacterAuxLightNames;
-
-    UPROPERTY(EditAnywhere, Category = "Character Lighting")
-        TArray<ULightParamsArray*> CharacterAuxLightParams;
-
-private:
-    TArray<AActor *> KeyLightActors;
+        TArray<UGroupLightParamsArray*> CharacterAuxGroups;
 };

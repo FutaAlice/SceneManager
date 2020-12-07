@@ -162,7 +162,7 @@ void SSettingsView::OnSceneManagementAssetChanged(const FPropertyChangedEvent& I
         }
         UE_LOG(LogTemp, Warning, TEXT("DEBUG_PRINT_DONE"));
 
-        Asset->FindAllActors();
+        Asset->SyncActorByName();
         SceneLightingViewer::OnAssetDataChanged();
         CharacterLightingViewer::OnAssetDataChanged();
     }

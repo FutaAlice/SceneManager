@@ -10,9 +10,8 @@
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SLightActorDetailPanel::Construct(const FArguments& InArgs)
 {
-    //LightParams = NewObject<ULightParams>();
-    //LightParams->AddToRoot();
-    //Light = nullptr;
+    ULightParams *fawef = NewObject<ULightParams>();
+    fawef->AddToRoot();
 
     //// Debug
     //EventHub::Get();
@@ -22,7 +21,7 @@ void SLightActorDetailPanel::Construct(const FArguments& InArgs)
     TSharedRef<IDetailsView> PlayerLightViewRef = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
     PlayerLightViewRef->OnFinishedChangingProperties().AddRaw(this, &SLightActorDetailPanel::OnFinishedChangingProperties);
 
-    // PlayerLightViewRef->SetObject(nullptr);
+     PlayerLightViewRef->SetObject(fawef);
     ChildSlot
     [
         PlayerLightViewRef
