@@ -44,7 +44,10 @@ public:
 
     void DebugSyncLightingSolutionRename(int SolutionIndex, FString SolutionName)
     {
-        SolutionSelector.RenameSolution(SolutionIndex, SolutionName, "", false);
+        SolutionSelector.Clear();
+        LightActorGroup->Clear();
+        LightActorDetailPanel->BindDataField(nullptr);
+        OnAssetDataChanged();
     }
 
     static SSceneLightingViewer* GetInstance()
@@ -195,6 +198,7 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
     SolutionSelector.CB_Remove = [](int SolutionIndex) {
         if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
             SceneManagementAsset->RemoveLightingSolution(SolutionIndex);
+            CharacterLightingViewer::DebugSyncLightingSolutionRename(0, "");
         }
     };
 }
