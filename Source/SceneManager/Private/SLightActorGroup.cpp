@@ -8,6 +8,8 @@
 #include "Widgets/Input/SEditableText.h"    // SEditableText
 #include "Widgets/Images/SImage.h"  // SImage
 #include "Widgets/Text/STextBlock.h"    // STextBlock
+#include "Widgets/Input/SComboBox.h"	// FArguments
+#include "Widgets/Layout/SSpacer.h"	// SSpacer
 
 #include "InternalDataStructure.h"
 #include "SceneManagementAsset.h"
@@ -81,6 +83,7 @@ void SLightActorGroup::Construct(const FArguments& InArgs)
 		[
 			SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot()
+			// .HAlign(HAlign_Left)
 			[
 				SAssignNew(TitleBlock, STextBlock)
 				.Text(FText::FromString("Other Light"))
@@ -88,6 +91,23 @@ void SLightActorGroup::Construct(const FArguments& InArgs)
 			]
 			+ SHorizontalBox::Slot()
 			.HAlign(HAlign_Right)
+			[
+				SNew(SSpacer)
+			]
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			// .HAlign(HAlign_Right)
+			[
+				SNew(SButton)
+				.Text(FText::FromString("CLEAR"))
+				.OnClicked_Lambda([this]() -> FReply {
+					Clear();
+					return FReply::Handled();
+				})
+			]
+			+ SHorizontalBox::Slot()
+			.AutoWidth()
+			// .HAlign(HAlign_Right)
 			[
 				SNew(SButton)
 				.Text(FText::FromString("APPEND"))
@@ -102,15 +122,6 @@ void SLightActorGroup::Construct(const FArguments& InArgs)
 		.AutoHeight()
 		[
 			SAssignNew(Group, SVerticalBox)
-			//+ SVerticalBox::Slot()
-			//[
-			//	SNew(SButton)
-			//	.Text(FText::FromString("Padding"))
-			//]
-			//+ SVerticalBox::Slot()
-			//[
-			//	SNew(SLightItem)
-			//]
 		]
 	];
 }
@@ -146,4 +157,6 @@ void SLightActorGroup::OnSolutionChanged(int SolutionIndex)
 		return;
 	}
 	Clear();
+
+
 }

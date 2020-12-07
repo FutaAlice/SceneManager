@@ -174,6 +174,8 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
             // update details panel
             LightActorDetailPanel->BindDataField(LightParams);
             LightActorDetailPanel->ForceRefresh();
+            // update groups
+            LightActorGroup->OnSolutionChanged(SolutionIndex);
         }
         else {
             LightActorDetailPanel->BindDataField(nullptr);
