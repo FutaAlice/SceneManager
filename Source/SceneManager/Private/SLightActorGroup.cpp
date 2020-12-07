@@ -11,6 +11,7 @@
 
 #include "InternalDataStructure.h"
 #include "SceneManagementAsset.h"
+#include "SolutionSelector.h"
 #include "SLightActorComboBox.h"
 #include "SLightActorDetailPanel.h"
 #include "SSettingsView.h"
@@ -78,27 +79,29 @@ void SLightActorGroup::Construct(const FArguments& InArgs)
 		.AutoHeight()
 		.Padding(0, 0, 0, 2)
 		[
-			SAssignNew(TitleBlock, STextBlock)
-		]
-		+ SVerticalBox::Slot()
-		.AutoHeight()
-		[
-			SAssignNew(ToolBarContainer, SHorizontalBox)
+			SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot()
-			.AutoWidth()
+			[
+				SAssignNew(TitleBlock, STextBlock)
+				.Text(FText::FromString("Other Light"))
+				.TextStyle(FEditorStyle::Get(), "LargeText")
+			]
+			+ SHorizontalBox::Slot()
+			.HAlign(HAlign_Right)
 			[
 				SNew(SButton)
-				.Text(FText::FromString("ADD"))
+				.Text(FText::FromString("APPEND"))
 				.OnClicked_Lambda([this]() -> FReply {
 					OnAddLightItem();
 					return FReply::Handled();
 				})
 			]
 		]
+
 		+ SVerticalBox::Slot()
 		.AutoHeight()
 		[
-			SAssignNew(Groups, SVerticalBox)
+			SAssignNew(Group, SVerticalBox)
 			//+ SVerticalBox::Slot()
 			//[
 			//	SNew(SButton)
@@ -116,7 +119,7 @@ END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SLightActorGroup::Clear()
 {
 	for (auto Widget : LightItemWidgets) {
-		auto RemoveSlotIndex = Groups->RemoveSlot(Widget);
+		auto RemoveSlotIndex = Group->RemoveSlot(Widget);
 		ensure(RemoveSlotIndex >= 0);
 	}
 	LightItemWidgets.Reset();
@@ -130,7 +133,7 @@ void SLightActorGroup::OnAddLightItem()
 	}
 
 	TSharedRef<SLightItem> Widget = SNew(SLightItem);
-	Groups->AddSlot().AutoHeight()[Widget];
+	Group->AddSlot().AutoHeight()[Widget];
 	LightItemWidgets.Add(Widget);
 
 	// SceneManagementAsset->CharacterAuxLightNames->Array.Add("");
@@ -143,5 +146,4 @@ void SLightActorGroup::OnSolutionChanged(int SolutionIndex)
 		return;
 	}
 	Clear();
-
 }

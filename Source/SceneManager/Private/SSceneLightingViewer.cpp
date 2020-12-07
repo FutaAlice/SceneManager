@@ -24,6 +24,7 @@
 #include "SceneManagementAsset.h"
 
 #include "SSettingsView.h"
+#include "SLightActorGroup.h"
 #include "EventHub.h"
 
 #define LOCTEXT_NAMESPACE "SceneLightViewer"
@@ -64,6 +65,7 @@ private:
 
     TSharedPtr<SLightActorComboBox> LightActorComboBox;
     TSharedPtr<SLightActorDetailPanel> LightActorDetailPanel;
+    TSharedPtr<SLightActorGroup> LightActorGroup;
 
 };
 
@@ -114,6 +116,7 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
     //    return FReply::Handled();
     //})
 
+    // Key Light
     MainLayout->AddSlot()
         .AutoHeight()
         [
@@ -126,7 +129,7 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
                 .AutoHeight()
                 [
                     SNew(STextBlock)
-                    .Text(FText::FromString("Key Light:"))
+                    .Text(FText::FromString("Key Light"))
                     .TextStyle(FEditorStyle::Get(), "LargeText")
                 ]
                 + SVerticalBox::Slot()
@@ -142,7 +145,20 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
             ]
         ];
 
+    // Aud Light
+    MainLayout->AddSlot()
+        .AutoHeight()
+        [
+            SNew(SBorder)
+            .BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
+            .Padding(2)
+            [
+                SAssignNew(LightActorGroup, SLightActorGroup)
+            ]
+        ];
+
     // MainLayout->SetContent
+    LightActorGroup->SolutionSelector = &SolutionSelector;
 
     // On data asset changed
     LightActorComboBox->CB_SelectionChange = [this](FString Name, ALight* Light) {
