@@ -5,23 +5,19 @@
 #include "PropertyEditorModule.h"   // FPropertyEditorModule
 
 #include "InternalDataStructure.h"
-#include "EventHub.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SLightActorDetailPanel::Construct(const FArguments& InArgs)
 {
-    //ULightParams *fawef = NewObject<ULightParams>();
-    //fawef->AddToRoot();
-
-    //// Debug
-    //EventHub::Get();
-
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FDetailsViewArgs DetailsViewArgs(false, false, false, FDetailsViewArgs::HideNameArea, true);
     TSharedRef<IDetailsView> PlayerLightViewRef = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
     PlayerLightViewRef->OnFinishedChangingProperties().AddRaw(this, &SLightActorDetailPanel::OnFinishedChangingProperties);
 
-    // PlayerLightViewRef->SetObject(fawef);
+    // FOR DEBUG
+    //ULightParams *fawef = NewObject<ULightParams>();
+    //fawef->AddToRoot();
+    //PlayerLightViewRef->SetObject(fawef);
     ChildSlot
     [
         PlayerLightViewRef

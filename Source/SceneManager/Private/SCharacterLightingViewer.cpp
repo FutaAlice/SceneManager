@@ -13,6 +13,7 @@
 #include "SLightActorComboBox.h"
 #include "SLightActorDetailPanel.h"
 #include "SLightActorGroup.h"
+#include "SMPCDetialsPanel.h"
 #include "InternalDataStructure.h"
 #include "SceneManagementAsset.h"
 #include "SSettingsView.h"
@@ -41,6 +42,7 @@ public:
     }
 
     void OnAssetDataChanged();
+    void OnMPCChanged();
 
     void DebugSyncLightingSolutionRename(int SolutionIndex, FString SolutionName)
     {
@@ -65,6 +67,7 @@ private:
     TSharedPtr<SLightActorComboBox> LightActorComboBox;
     TSharedPtr<SLightActorDetailPanel> LightActorDetailPanel;
     TSharedPtr<SLightActorGroup> LightActorGroup;
+    TSharedPtr<SMPCDetialsPanel> MPCDetailsPanel;
 };
 
 SCharacterLightingViewer* SCharacterLightingViewer::CharacterLightingViewerInstance = nullptr;
@@ -138,6 +141,18 @@ void SCharacterLightingViewer::Construct(const FArguments& InArgs)
             .Padding(2)
             [
                 SAssignNew(LightActorGroup, SLightActorGroup)
+            ]
+        ];
+
+    // Aud MPC
+    MainLayout->AddSlot()
+        .AutoHeight()
+        [
+            SNew(SBorder)
+            .BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
+            .Padding(2)
+            [
+                SAssignNew(MPCDetailsPanel, SMPCDetialsPanel)
             ]
         ];
 
@@ -216,6 +231,13 @@ void SCharacterLightingViewer::OnAssetDataChanged()
     }
 }
 
+void SCharacterLightingViewer::OnMPCChanged()
+{
+    if (UMaterialParameterCollection* MPC = SSettingsView::GetCharacterLightingMPC()) {
+        MPCDetailsPanel->SetObject(MPC);
+    }
+}
+
 namespace CharacterLightingViewer {
 
 FName GetTabName()
@@ -248,6 +270,12 @@ void OnAssetDataChanged()
 {
     SCharacterLightingViewer* CharacterLightingViewer = SCharacterLightingViewer::GetInstance();
     CharacterLightingViewer->OnAssetDataChanged();
+}
+
+void OnMPCChanged()
+{
+    SCharacterLightingViewer* CharacterLightingViewer = SCharacterLightingViewer::GetInstance();
+    CharacterLightingViewer->OnMPCChanged();
 }
 
 void DebugSyncLightingSolutionRename(int SolutionIndex, FString SolutionName)

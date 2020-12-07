@@ -9,6 +9,7 @@ namespace CharacterLightingViewer {
 FName GetTabName();
 void RegisterTabSpawner(FTabManager& TabManager);
 void OnAssetDataChanged();
+void OnMPCChanged();
 
 void DebugSyncLightingSolutionRename(int SolutionIndex, FString SolutionName);
 

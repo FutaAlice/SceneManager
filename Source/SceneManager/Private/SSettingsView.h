@@ -50,7 +50,8 @@ public:
     static USceneManagementAsset* GetSceneManagementNullAsset();
 
     static UMaterialParameterCollection* GetSceneLightingMPC();
-
+    static UMaterialParameterCollection* GetCharacterLightingMPC();
+    
     void OnSceneManagementAssetChanged(const FPropertyChangedEvent& InEvent);
 
 private:

@@ -175,6 +175,14 @@ UMaterialParameterCollection* SSettingsView::GetSceneLightingMPC()
     return Instance->AssetWrap->SceneLightingMPC;
 }
 
+UMaterialParameterCollection* SSettingsView::GetCharacterLightingMPC()
+{
+    if (!Instance) {
+        return nullptr;
+    }
+    return Instance->AssetWrap->CharacterLightingMPC;
+}
+
 void SSettingsView::OnSceneManagementAssetChanged(const FPropertyChangedEvent& InEvent)
 {
     auto N1 = InEvent.GetPropertyName().ToString();
@@ -194,7 +202,7 @@ void SSettingsView::OnSceneManagementAssetChanged(const FPropertyChangedEvent& I
     if (InEvent.GetPropertyName().ToString() == FString(TEXT("SceneLightingMPC"))) {
         SceneLightingViewer::OnMPCChanged();
     }
-    //if (InEvent.GetPropertyName().ToString() == FString(TEXT("SceneLightingMPC"))) {
-    //    SceneLightingViewer::OnMPCChanged();
-    //}
+    if (InEvent.GetPropertyName().ToString() == FString(TEXT("CharacterLightingMPC"))) {
+        CharacterLightingViewer::OnMPCChanged();
+    }
 }

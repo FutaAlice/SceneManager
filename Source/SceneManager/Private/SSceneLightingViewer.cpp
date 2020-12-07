@@ -13,6 +13,7 @@
 #include "SLightActorComboBox.h"
 #include "SLightActorDetailPanel.h"
 #include "SLightActorGroup.h"
+#include "SMPCDetialsPanel.h"
 #include "InternalDataStructure.h"
 #include "SceneManagementAsset.h"
 #include "SSettingsView.h"
@@ -66,6 +67,7 @@ private:
     TSharedPtr<SLightActorComboBox> LightActorComboBox;
     TSharedPtr<SLightActorDetailPanel> LightActorDetailPanel;
     TSharedPtr<SLightActorGroup> LightActorGroup;
+    TSharedPtr<SMPCDetialsPanel> MPCDetailsPanel;
 };
 
 SSceneLightingViewer* SSceneLightingViewer::SceneLightingViewerInstance = nullptr;
@@ -139,6 +141,18 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
             .Padding(2)
             [
                 SAssignNew(LightActorGroup, SLightActorGroup)
+            ]
+        ];
+
+    // Aud MPC
+    MainLayout->AddSlot()
+        .AutoHeight()
+        [
+            SNew(SBorder)
+            .BorderImage(FEditorStyle::GetBrush("ToolPanel.DarkGroupBorder"))
+            .Padding(2)
+            [
+                SAssignNew(MPCDetailsPanel, SMPCDetialsPanel)
             ]
         ];
 
@@ -220,7 +234,7 @@ void SSceneLightingViewer::OnAssetDataChanged()
 void SSceneLightingViewer::OnMPCChanged()
 {
     if (UMaterialParameterCollection* MPC = SSettingsView::GetSceneLightingMPC()) {
-
+        MPCDetailsPanel->SetObject(MPC);
     }
 }
 
