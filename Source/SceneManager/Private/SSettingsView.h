@@ -16,6 +16,15 @@ public:
     USceneManagementAsset *SceneManagementAsset;
 };
 
+//UCLASS()
+//class UAssetWrap : public UObject
+//{
+//    GENERATED_BODY()
+//public:
+//    UPROPERTY(EditAnywhere, Category = "Select Scene Management Asset:")
+//        USceneManagementAsset* SceneManagementAsset;
+//};
+
 /**
  *
  */

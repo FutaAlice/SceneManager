@@ -168,8 +168,14 @@ USceneManagementAsset* SSettingsView::GetSceneManagementNullAsset()
 
 void SSettingsView::OnSceneManagementAssetChanged(const FPropertyChangedEvent& InEvent)
 {
-    if (USceneManagementAsset* Asset = GetSceneManagementAsset(false)) {
-        Asset->SyncActorByName();
+    auto N1 = InEvent.GetPropertyName().ToString();
+    auto N2 = USceneManagementAsset::StaticClass()->GetName();
+
+    // AssetData changed
+    if (InEvent.GetPropertyName() == USceneManagementAsset::StaticClass()->GetFName()) {
+        if (USceneManagementAsset* Asset = GetSceneManagementAsset(false)) {
+            Asset->SyncActorByName();
+        }
         SceneLightingViewer::OnAssetDataChanged();
         CharacterLightingViewer::OnAssetDataChanged();
     }

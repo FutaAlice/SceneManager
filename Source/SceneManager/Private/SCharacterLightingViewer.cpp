@@ -150,8 +150,12 @@ void SCharacterLightingViewer::Construct(const FArguments& InArgs)
 
     // On solution changed
     SolutionSelector.CB_Active = [this](int SolutionIndex) {
+        if (SolutionIndex < 0) {
+            LightActorDetailPanel->BindDataField(nullptr);
+            return;
+        }
         USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
-        if (!SceneManagementAsset || SolutionIndex < 0) {
+        if (!SceneManagementAsset) {
             LightActorDetailPanel->BindDataField(nullptr);
             return;
         }
@@ -199,7 +203,8 @@ END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SCharacterLightingViewer::OnAssetDataChanged()
 {
     SolutionSelector.Clear();
-    if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
+    LightActorGroup->OnSolutionChanged(-1);
+    if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset(false)) {
         for (int i = 0; i < SceneManagementAsset->LightingSolutionNameList.Num(); ++i) {
             const FString& SolutionName = SceneManagementAsset->LightingSolutionNameList[i];
             SolutionSelector.AddSolution(SolutionName, "", false);

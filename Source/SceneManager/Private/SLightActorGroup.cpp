@@ -180,10 +180,10 @@ void SLightActorGroup::OnAddLightItem()
 void SLightActorGroup::OnSolutionChanged(int SolutionIndex)
 {
 	Clear();
+	if (SolutionIndex < 0) {
+		return;
+	}
 	if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
-		if (SolutionIndex < 0) {
-			return;
-		}
 		DataField = SceneManagementAsset->GetAuxLightGroupsPtr(SolutionIndex, (ELightCategory)LightCategory);
 		for (auto LightParams : DataField->Array) {
 			auto Widget = AddLightItemWidget();
