@@ -31,6 +31,7 @@ public:
     void Construct(const FArguments& InArgs);
 
     static USceneManagementAsset* GetSceneManagementAsset(bool bShowMsgDialog = true);
+    static USceneManagementAsset* GetSceneManagementNullAsset();
 
     void OnSceneManagementAssetChanged(const FPropertyChangedEvent& InEvent);
 

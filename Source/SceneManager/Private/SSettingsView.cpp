@@ -141,10 +141,6 @@ END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 USceneManagementAsset *SSettingsView::GetSceneManagementAsset(bool bShowMsgDialog)
 {
     ensure(Instance);
-    static USceneManagementAsset *NullAsset = NewObject<USceneManagementAsset>();
-    if (!NullAsset->IsRooted()) {
-        NullAsset->AddToRoot();
-    }
 
     if (USceneManagementAsset* SceneManagementAsset = Instance->AssetWrap->SceneManagementAsset) {
         return SceneManagementAsset;
@@ -155,8 +151,17 @@ USceneManagementAsset *SSettingsView::GetSceneManagementAsset(bool bShowMsgDialo
             FText Content = FText::FromString(TEXT("Please select a USceneManagementAsset before edit!"));
             FMessageDialog::Open(EAppMsgType::Ok, Content, &Title);
         }
-        return NullAsset;
+        return nullptr;
     }
+}
+
+USceneManagementAsset* SSettingsView::GetSceneManagementNullAsset()
+{
+    static USceneManagementAsset* NullAsset = NewObject<USceneManagementAsset>();
+    if (!NullAsset->IsRooted()) {
+        NullAsset->AddToRoot();
+    }
+    return NullAsset;
 }
 
 void SSettingsView::OnSceneManagementAssetChanged(const FPropertyChangedEvent& InEvent)

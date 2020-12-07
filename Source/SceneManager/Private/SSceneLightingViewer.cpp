@@ -91,9 +91,14 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
 
 
     SolutionSelector.CB_Active = [this](int SolutionIndex) {
-        ULightParams* LightParams = SSettingsView::GetSceneManagementAsset()->GetKeyLightParamsPtr(SolutionIndex);
-        LightActorDetailPanel->BindDataField(LightParams);
-        LightActorDetailPanel->ForceRefresh();
+        if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
+            ULightParams* LightParams = SceneManagementAsset->GetKeyLightParamsPtr(SolutionIndex);
+            LightActorDetailPanel->BindDataField(LightParams);
+            LightActorDetailPanel->ForceRefresh();
+        }
+        else {
+            LightActorDetailPanel->BindDataField(nullptr);
+        }
     };
 
 
@@ -158,12 +163,12 @@ END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SSceneLightingViewer::OnAssetDataChanged()
 {
-    USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
     SolutionSelector.Clear();
-
-    for (int i = 0; i < SceneManagementAsset->LightingSolutionNameList.Num(); ++i) {
-        const FString& SolutionName = SceneManagementAsset->LightingSolutionNameList[i];
-        SolutionSelector.AddSolution(SolutionName, "", false);
+    if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
+        for (int i = 0; i < SceneManagementAsset->LightingSolutionNameList.Num(); ++i) {
+            const FString& SolutionName = SceneManagementAsset->LightingSolutionNameList[i];
+            SolutionSelector.AddSolution(SolutionName, "", false);
+        }
     }
 }
 
