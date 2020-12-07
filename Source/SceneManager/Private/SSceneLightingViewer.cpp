@@ -41,6 +41,7 @@ public:
     }
 
     void OnAssetDataChanged();
+    void OnMPCChanged();
 
     void DebugSyncLightingSolutionRename(int SolutionIndex, FString SolutionName)
     {
@@ -216,6 +217,13 @@ void SSceneLightingViewer::OnAssetDataChanged()
     }
 }
 
+void SSceneLightingViewer::OnMPCChanged()
+{
+    if (UMaterialParameterCollection* MPC = SSettingsView::GetSceneLightingMPC()) {
+
+    }
+}
+
 namespace SceneLightingViewer {
 
 FName GetTabName()
@@ -248,6 +256,12 @@ void OnAssetDataChanged()
 {
     SSceneLightingViewer* SceneLightingViewer = SSceneLightingViewer::GetInstance();
     SceneLightingViewer->OnAssetDataChanged();
+}
+
+void OnMPCChanged()
+{
+    SSceneLightingViewer* SceneLightingViewer = SSceneLightingViewer::GetInstance();
+    SceneLightingViewer->OnMPCChanged();
 }
 
 void DebugSyncLightingSolutionRename(int SolutionIndex, FString SolutionName)

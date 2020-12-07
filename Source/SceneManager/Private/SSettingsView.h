@@ -6,6 +6,7 @@
 
 #include "SSettingsView.generated.h"
 
+class UMaterialParameterCollection;
 class USceneManagementAsset;
 
 UCLASS()
@@ -13,7 +14,13 @@ class UAssetWrap : public UObject {
     GENERATED_BODY()
 public:
     UPROPERTY(EditAnywhere, Category = "Select Scene Management Asset:")
-    USceneManagementAsset *SceneManagementAsset;
+        USceneManagementAsset *SceneManagementAsset;
+
+    UPROPERTY(EditAnywhere, Category = "Select Lighting Asset:")
+        UMaterialParameterCollection* SceneLightingMPC;
+
+    UPROPERTY(EditAnywhere, Category = "Select Lighting Asset:")
+        UMaterialParameterCollection* CharacterLightingMPC;
 };
 
 //UCLASS()
@@ -41,6 +48,8 @@ public:
 
     static USceneManagementAsset* GetSceneManagementAsset(bool bShowMsgDialog = true);
     static USceneManagementAsset* GetSceneManagementNullAsset();
+
+    static UMaterialParameterCollection* GetSceneLightingMPC();
 
     void OnSceneManagementAssetChanged(const FPropertyChangedEvent& InEvent);
 
