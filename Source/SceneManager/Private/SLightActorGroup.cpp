@@ -10,6 +10,7 @@
 #include "Widgets/Text/STextBlock.h"    // STextBlock
 #include "Widgets/Input/SComboBox.h"	// FArguments
 #include "Widgets/Layout/SSpacer.h"	// SSpacer
+#include "Engine/Light.h"   // ALight
 
 #include "InternalDataStructure.h"
 #include "SceneManagementAsset.h"
@@ -32,10 +33,24 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
+	void BindDataField(UObject* InObject);
+
 public:
 	TSharedPtr<SLightActorComboBox> ComboBox;
 	TSharedPtr<SLightActorDetailPanel> DetailPanel;
 };
+
+void SLightItem::BindDataField(UObject* InObject)
+{
+	if (ULightParams* LightParams = Cast<ULightParams>(InObject)) {
+		ComboBox->SetByActorName(LightParams->ActorName);
+		DetailPanel->BindDataField(LightParams);
+		DetailPanel->ForceRefresh();
+	}
+	else {
+		DetailPanel->BindDataField(nullptr);
+	}
+}
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -70,6 +85,10 @@ void SLightItem::Construct(const FArguments& InArgs)
 			]
 		]
 	];
+
+	ComboBox->CB_SelectionChange = [this](FString Name, ALight* Light) {
+		DetailPanel->SetActor(Light);
+	};
 }
 
 void SLightActorGroup::Construct(const FArguments& InArgs)
@@ -151,16 +170,18 @@ void SLightActorGroup::OnSolutionChanged(int SolutionIndex)
 		}
 		DataField = SceneManagementAsset->GetAuxLightGroupsPtr(SolutionIndex, (ELightCategory)LightCategory);
 		for (auto LightParams : DataField->Array) {
-			AddLightItemWidget();
+			auto Widget = AddLightItemWidget();
+			Widget->BindDataField(LightParams);
 		}
 	}
 }
 
-void SLightActorGroup::AddLightItemWidget()
+TSharedRef<SLightItem> SLightActorGroup::AddLightItemWidget()
 {
 	TSharedRef<SLightItem> Widget = SNew(SLightItem);
 	Group->AddSlot().AutoHeight()[Widget];
 	LightItemWidgets.Add(Widget);
+	return Widget;
 }
 
 void SLightActorGroup::AddLightItemDatafield()

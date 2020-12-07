@@ -13,16 +13,8 @@
 #include "SolutionSelector.h"
 #include "SLightActorComboBox.h"
 #include "SLightActorDetailPanel.h"
-
-// DETAIL PANEL
 #include "InternalDataStructure.h"
-
-// CONTENT BORWSER
-#include "ContentBrowserModule.h"   // FContentBrowserModule
-#include "IContentBrowserSingleton.h"   // IContentBrowserSingleton
-#include "AssetData.h"  // FAssetData
 #include "SceneManagementAsset.h"
-
 #include "SSettingsView.h"
 #include "SLightActorGroup.h"
 #include "EventHub.h"
@@ -101,20 +93,6 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
             ]
         ]
     ];
-
-    //SNew(SButton)
-    //.OnClicked_Lambda([this]() -> FReply {
-    //    FContentBrowserModule& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
-    //    IContentBrowserSingleton& ContentBrowserSingleton = ContentBrowserModule.Get();
-    //    TArray<FAssetData> AssetDatas;
-    //    ContentBrowserSingleton.GetSelectedAssets(AssetDatas);
-    //    for (auto AssetData : AssetDatas) {
-    //        UE_LOG(LogTemp, Warning, TEXT("Asset %s"), *AssetData.ObjectPath.ToString());
-    //        FName MyAssetClassName = USceneManagementAsset::StaticClass()->GetFName();
-    //        UE_LOG(LogTemp, Warning, TEXT("Asset %s"), *MyAssetClassName.ToString());
-    //    }
-    //    return FReply::Handled();
-    //})
 
     // Key Light
     MainLayout->AddSlot()

@@ -10,6 +10,7 @@ class STextBlock;
 class SLightItem;
 class FSolutionSelector;
 class UGroupLightParams;
+class SLightItem;
 
 /**
  * 
@@ -30,7 +31,7 @@ public:
 	void OnSolutionChanged(int SolutionIndex);
 
 private:
-	void AddLightItemWidget();
+	TSharedRef<SLightItem> AddLightItemWidget();
 	void AddLightItemDatafield();
 
 public:
