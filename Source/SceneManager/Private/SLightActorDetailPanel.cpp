@@ -31,7 +31,7 @@ void SLightActorDetailPanel::Construct(const FArguments& InArgs)
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-void SLightActorDetailPanel::BindActor(AActor *InActor)
+void SLightActorDetailPanel::SetActor(AActor *InActor)
 {
     if (!InActor || !LightParams) {
         return;
@@ -47,10 +47,15 @@ void SLightActorDetailPanel::BindActor(AActor *InActor)
 }
 
 
-void SLightActorDetailPanel::SetObject(UObject* InObject)
+void SLightActorDetailPanel::BindDataField(UObject* InObject)
 {
-    PlayerLightView->SetObject(InObject);
     LightParams = Cast<ULightParams>(InObject);
+    PlayerLightView->SetObject(InObject);
+}
+
+void SLightActorDetailPanel::ForceRefresh()
+{
+    PlayerLightView->ForceRefresh();
 }
 
 ULightParams *SLightActorDetailPanel::GetParam()

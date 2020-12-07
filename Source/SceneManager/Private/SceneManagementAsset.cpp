@@ -9,10 +9,11 @@
 void USceneManagementAsset::AddLightingSolution()
 {
     LightingSolutionNameList.Add("");
-    KeyLightParams.Add(NewObject<ULightParams>());
 
-    SceneAuxGroups.Add(NewObject<UGroupLightParamsArray>());
-    CharacterAuxGroups.Add(NewObject<UGroupLightParamsArray>());
+    // Attach to root object
+    KeyLightParams.Add(NewObject<ULightParams>(this));
+    SceneAuxGroups.Add(NewObject<UGroupLightParamsArray>(this));
+    CharacterAuxGroups.Add(NewObject<UGroupLightParamsArray>(this));
 
     SyncActorByName();
 }
@@ -74,6 +75,11 @@ void USceneManagementAsset::SyncActorByName()
     ensure(LightingSolutionNameList.Num() == CharacterAuxGroups.Num());
 
     auto SyncActor = [ActorList, NameList](ULightParams* LightParams) {
+        // TODO: why??
+        if (!LightParams) {
+            LightParams = NewObject<ULightParams>();
+        }
+
         FString ActorName = LightParams->ActorName;
         AActor* LightActor = nullptr;
         do {
@@ -94,15 +100,16 @@ void USceneManagementAsset::SyncActorByName()
         SyncActor(LightParams);
     }
 
+    // TODO
     // Aux Light
-    for (auto LightGroup : SceneAuxGroups) {
-        for (ULightParams* LightParams : LightGroup->Array) {
-            SyncActor(LightParams);
-        }
-    }
-    for (auto LightGroup : CharacterAuxGroups) {
-        for (ULightParams* LightParams : LightGroup->Array) {
-            SyncActor(LightParams);
-        }
-    }
+    //for (auto LightGroup : SceneAuxGroups) {
+    //    for (ULightParams* LightParams : LightGroup->Array) {
+    //        SyncActor(LightParams);
+    //    }
+    //}
+    //for (auto LightGroup : CharacterAuxGroups) {
+    //    for (ULightParams* LightParams : LightGroup->Array) {
+    //        SyncActor(LightParams);
+    //    }
+    //}
 }

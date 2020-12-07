@@ -40,6 +40,6 @@ class UGroupLightParamsArray : public UObject
 {
     GENERATED_BODY()
 public:
-    UPROPERTY(EditAnywhere, Category = "LightParams")
+    UPROPERTY(VisibleAnywhere, Instanced, EditFixedSize, Category = "LightParams")
         TArray<ULightParams *> Array;
 };

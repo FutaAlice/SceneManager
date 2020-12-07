@@ -5,13 +5,6 @@
 #include "Engine/DataAsset.h"   // UDataAsset
 #include "SceneManagementAsset.generated.h"
 
-UCLASS()
-class ULightSolutionData : public UObject
-{
-    GENERATED_BODY()
-public:
-};
-
 enum ELightCategory
 {
     KeyLight = 1,
@@ -25,7 +18,7 @@ enum ELightCategory
  * Scene Manager Asset Type
  */
 UCLASS()
-class USceneManagementAsset : public USaveGame
+class USceneManagementAsset : public UObject
 {
     GENERATED_BODY()
 public:
@@ -39,15 +32,15 @@ public:
     void SyncActorByName();
 
 public:
-    UPROPERTY(EditAnywhere, Category = "Lighting")
+    UPROPERTY(EditAnywhere, EditFixedSize, Category = "Lighting")
         TArray<FString> LightingSolutionNameList;
 
-    UPROPERTY(EditAnywhere, Category = "Lighting")
+    UPROPERTY(VisibleAnywhere, Instanced, EditFixedSize, Category = "Lighting")
         TArray<ULightParams*> KeyLightParams;
 
-    UPROPERTY(EditAnywhere, Category = "Scene Lighting")
+    UPROPERTY(VisibleAnywhere, Instanced, EditFixedSize, Category = "Scene Lighting")
         TArray<UGroupLightParamsArray*> SceneAuxGroups;
 
-    UPROPERTY(EditAnywhere, Category = "Character Lighting")
+    UPROPERTY(VisibleAnywhere, Instanced, EditFixedSize, Category = "Character Lighting")
         TArray<UGroupLightParamsArray*> CharacterAuxGroups;
 };

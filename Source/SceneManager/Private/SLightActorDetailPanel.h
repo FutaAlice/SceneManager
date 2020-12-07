@@ -24,8 +24,9 @@ public:
     // void SetParam(ULightParams *InData);
     ULightParams * GetParam();
 
-    void BindActor(AActor *InActor);
-    void SetObject(UObject* InObject);
+    void SetActor(AActor *InActor);
+    void BindDataField(UObject* InObject);
+    void ForceRefresh();
 
 private:
     void OnFinishedChangingProperties(const FPropertyChangedEvent& InEvent);

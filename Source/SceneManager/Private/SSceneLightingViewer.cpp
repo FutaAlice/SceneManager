@@ -83,14 +83,19 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
         USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
         SceneManagementAsset->RemoveLightingSolution(SolutionIndex);
     };
-    SolutionSelector.CB_Active = [](int SolutionIndex) {
-        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::Printf(TEXT("CB_Active Index %d"), SolutionIndex));
-    };
     SolutionSelector.CB_Rename = [](int SolutionIndex, FString SolutionName) {
         GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, SolutionName);
         USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
         SceneManagementAsset->RenameLightingSolution(SolutionIndex, SolutionName);
     };
+
+
+    SolutionSelector.CB_Active = [this](int SolutionIndex) {
+        ULightParams* LightParams = SSettingsView::GetSceneManagementAsset()->GetKeyLightParamsPtr(SolutionIndex);
+        LightActorDetailPanel->BindDataField(LightParams);
+        LightActorDetailPanel->ForceRefresh();
+    };
+
 
     ChildSlot
     [
@@ -118,27 +123,19 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
         ]
     ];
 
-    MainLayout->AddSlot()
-        .AutoHeight()
-        [
-            SNew(SButton)
-            .OnClicked_Lambda([this]() -> FReply {
-                FContentBrowserModule& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
-                IContentBrowserSingleton& ContentBrowserSingleton = ContentBrowserModule.Get();
-
-                TArray<FAssetData> AssetDatas;
-                ContentBrowserSingleton.GetSelectedAssets(AssetDatas);
-
-                for (auto AssetData : AssetDatas) {
-
-                    UE_LOG(LogTemp, Warning, TEXT("Asset %s"), *AssetData.ObjectPath.ToString());
-
-                    FName MyAssetClassName = USceneManagementAsset::StaticClass()->GetFName();
-                    UE_LOG(LogTemp, Warning, TEXT("Asset %s"), *MyAssetClassName.ToString());
-                }
-                return FReply::Handled();
-            })
-        ];
+    //SNew(SButton)
+    //.OnClicked_Lambda([this]() -> FReply {
+    //    FContentBrowserModule& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+    //    IContentBrowserSingleton& ContentBrowserSingleton = ContentBrowserModule.Get();
+    //    TArray<FAssetData> AssetDatas;
+    //    ContentBrowserSingleton.GetSelectedAssets(AssetDatas);
+    //    for (auto AssetData : AssetDatas) {
+    //        UE_LOG(LogTemp, Warning, TEXT("Asset %s"), *AssetData.ObjectPath.ToString());
+    //        FName MyAssetClassName = USceneManagementAsset::StaticClass()->GetFName();
+    //        UE_LOG(LogTemp, Warning, TEXT("Asset %s"), *MyAssetClassName.ToString());
+    //    }
+    //    return FReply::Handled();
+    //})
 
     MainLayout->AddSlot()
         .AutoHeight()
@@ -153,8 +150,7 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
         ];
 
     LightActorComboBox->CB_SelectionChange = [this](FString Name, ALight *Light) {
-        LightActorDetailPanel->SetObject(SSettingsView::GetSceneManagementAsset()->GetKeyLightParamsPtr(0));
-        LightActorDetailPanel->BindActor(Light);
+        LightActorDetailPanel->SetActor(Light);
     };
     // MainLayout->SetContent
 }

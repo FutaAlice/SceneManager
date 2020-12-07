@@ -78,9 +78,14 @@ void SSettingsView::Construct(const FArguments& InArgs)
                         //Asset->Modify(true);
                         
                         TArray<UPackage*> Packages;
-                        Packages.Add(Asset->GetOutermost()); // Fully load and check out is done in UEditorLoadingAndSavingUtils::SavePackages
+                        UPackage* Outermost = Asset->GetOutermost();
+                        Packages.Add(Outermost); // Fully load and check out is done in UEditorLoadingAndSavingUtils::SavePackages
 
-                        UEditorLoadingAndSavingUtils::SavePackages(Packages, true);
+                        for (auto Obj : Asset->KeyLightParams) {
+
+                        }
+
+                        UEditorLoadingAndSavingUtils::SavePackages(Packages, false);
 
                         //TArray<UObject *> AssetsToSave;
                         //AssetsToSave.Add(Asset);
