@@ -37,11 +37,12 @@ public:
 
 	void BindDataField(UObject* InObject);
 	ULightParams* GetDataField();
-	std::function<void(SLightItem*)> CB_Delete;
+	void SetOnDelete(FOnClicked OnClicked);
 
-public:
+private:
 	TSharedPtr<SLightActorComboBox> ComboBox;
 	TSharedPtr<SLightActorDetailPanel> DetailPanel;
+	TSharedPtr<SButton> DeleteButton;
 };
 
 void SLightItem::BindDataField(UObject* InObject)
@@ -59,6 +60,11 @@ void SLightItem::BindDataField(UObject* InObject)
 ULightParams* SLightItem::GetDataField()
 {
 	return DetailPanel->GetDataField();
+}
+
+void SLightItem::SetOnDelete(FOnClicked OnClicked)
+{
+	DeleteButton->SetOnClicked(OnClicked);
 }
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -83,13 +89,8 @@ void SLightItem::Construct(const FArguments& InArgs)
 				+ SHorizontalBox::Slot()
 				.AutoWidth()
 				[
-					SNew(SButton)
+					SAssignNew(DeleteButton, SButton)
 					.Text(FText::FromString("DELETE"))
-					.OnClicked_Lambda([this]() -> FReply {
-						ensure(CB_Delete);
-						CB_Delete(this);
-						return FReply::Handled();
-					})
 				]
 			]
 			+ SVerticalBox::Slot()
@@ -170,8 +171,9 @@ void SLightActorGroup::Clear()
 void SLightActorGroup::OnAddLightItem()
 {
 	if (DataField) {
-		AddLightItemWidget();
-		AddLightItemDatafield();
+		auto Widget = AddLightItemWidget();
+		auto Data = AddLightItemDatafield();
+		Widget->BindDataField(Data);
 	}
 }
 
@@ -190,34 +192,36 @@ void SLightActorGroup::OnSolutionChanged(int SolutionIndex)
 	}
 }
 
-void SLightActorGroup::RemoveLightItem(SLightItem *Widget)
+void SLightActorGroup::RemoveLightItem(TSharedRef<SLightItem> Widget)
 {
 	// remove slate UI
-	int Index = LightItemWidgets.Find(MakeShareable(Widget));
+	int Index = LightItemWidgets.Find((Widget));
 	ensure(Index >= 0);
 	LightItemWidgets.RemoveAt(Index);
-	Group->RemoveSlot(MakeShareable(Widget));
+	Group->RemoveSlot((Widget));
 	
 	// remove in datafield
-	//ensure(DataField);
-	//ULightParams *LightParams = Widget->GetDataField();
-	//DataField->RemoveLightParam(LightParams);
+	ensure(DataField);
+	ULightParams *LightParams = Widget->GetDataField();
+	DataField->RemoveLightParam(LightParams);
 }
 
 TSharedRef<SLightItem> SLightActorGroup::AddLightItemWidget()
 {
 	TSharedRef<SLightItem> Widget = SNew(SLightItem);
-	Widget->CB_Delete = [this](SLightItem* LightItem) {
-		RemoveLightItem(LightItem);
-	};
+	Widget->SetOnDelete(FOnClicked::CreateLambda([this, Widget]() -> FReply {
+		RemoveLightItem(Widget);
+		return FReply::Handled();
+	}));
 	Group->AddSlot().AutoHeight()[Widget];
 	LightItemWidgets.Add(Widget);
 	return Widget;
 }
 
-void SLightActorGroup::AddLightItemDatafield()
+ULightParams* SLightActorGroup::AddLightItemDatafield()
 {
 	if (DataField) {
-		DataField->AddLightParam();
+		return DataField->AddLightParam();
 	}
+	return nullptr;
 }

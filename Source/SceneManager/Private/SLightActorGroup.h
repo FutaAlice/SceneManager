@@ -30,11 +30,11 @@ public:
 	void OnAddLightItem();
 	void OnSolutionChanged(int SolutionIndex);
 
-	void RemoveLightItem(SLightItem *Widget);
+	void RemoveLightItem(TSharedRef<SLightItem> Widget);
 
 private:
 	TSharedRef<SLightItem> AddLightItemWidget();
-	void AddLightItemDatafield();
+	ULightParams* AddLightItemDatafield();
 
 public:
 	UGroupLightParams *DataField;

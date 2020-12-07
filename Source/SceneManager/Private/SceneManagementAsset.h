@@ -21,7 +21,7 @@ public:
     UPROPERTY(VisibleAnywhere, Instanced, EditFixedSize, Category = "LightParams")
         TArray<ULightParams*> Array;
 
-    void AddLightParam();
+    ULightParams* AddLightParam();
     void RemoveLightParam(ULightParams *LightParams);
 };
 

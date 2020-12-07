@@ -6,9 +6,11 @@
 #include "Engine/World.h"   // UWorld
 #include "Kismet/GameplayStatics.h" // UGameplayStatics
 
-void UGroupLightParams::AddLightParam()
+ULightParams* UGroupLightParams::AddLightParam()
 {
-    Array.Add(NewObject<ULightParams>(this));
+    ULightParams *LightParams = NewObject<ULightParams>(this);
+    Array.Add(LightParams);
+    return LightParams;
 }
 
 void UGroupLightParams::RemoveLightParam(ULightParams* LightParams)
