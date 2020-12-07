@@ -58,7 +58,6 @@ private:
     TSharedPtr<SLightActorComboBox> LightActorComboBox;
     TSharedPtr<SLightActorDetailPanel> LightActorDetailPanel;
     TSharedPtr<SLightActorGroup> LightActorGroup;
-
 };
 
 SSceneLightingViewer* SSceneLightingViewer::SceneLightingViewerInstance = nullptr;

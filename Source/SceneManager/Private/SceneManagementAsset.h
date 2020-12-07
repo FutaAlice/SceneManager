@@ -22,6 +22,7 @@ public:
         TArray<ULightParams*> Array;
 
     void AddLightParam();
+    void RemoveLightParam(ULightParams *LightParams);
 };
 
 /**

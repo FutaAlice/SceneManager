@@ -30,6 +30,8 @@ public:
 	void OnAddLightItem();
 	void OnSolutionChanged(int SolutionIndex);
 
+	void RemoveLightItem(SLightItem *Widget);
+
 private:
 	TSharedRef<SLightItem> AddLightItemWidget();
 	void AddLightItemDatafield();

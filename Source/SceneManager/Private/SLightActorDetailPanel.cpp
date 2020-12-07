@@ -53,6 +53,11 @@ void SLightActorDetailPanel::BindDataField(UObject* InObject)
     PlayerLightView->SetObject(InObject);
 }
 
+ULightParams* SLightActorDetailPanel::GetDataField()
+{
+    return LightParams;
+}
+
 void SLightActorDetailPanel::ForceRefresh()
 {
     PlayerLightView->ForceRefresh();

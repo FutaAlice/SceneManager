@@ -26,6 +26,7 @@ public:
 
     void SetActor(AActor *InActor);
     void BindDataField(UObject* InObject);
+    ULightParams* GetDataField();
     void ForceRefresh();
 
 private:

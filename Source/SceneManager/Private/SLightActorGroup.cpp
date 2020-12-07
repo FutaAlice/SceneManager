@@ -1,4 +1,6 @@
 #include "SLightActorGroup.h"
+
+#include <functional>
 #include "SlateOptMacros.h"
 #include "EditorStyleSet.h" // FEditorStyle
 #include "Widgets/SBoxPanel.h"  // SVerticalBox, SHorizontalBox
@@ -34,6 +36,8 @@ public:
 	void Construct(const FArguments& InArgs);
 
 	void BindDataField(UObject* InObject);
+	ULightParams* GetDataField();
+	std::function<void(SLightItem*)> CB_Delete;
 
 public:
 	TSharedPtr<SLightActorComboBox> ComboBox;
@@ -50,6 +54,11 @@ void SLightItem::BindDataField(UObject* InObject)
 	else {
 		DetailPanel->BindDataField(nullptr);
 	}
+}
+
+ULightParams* SLightItem::GetDataField()
+{
+	return DetailPanel->GetDataField();
 }
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -76,6 +85,11 @@ void SLightItem::Construct(const FArguments& InArgs)
 				[
 					SNew(SButton)
 					.Text(FText::FromString("DELETE"))
+					.OnClicked_Lambda([this]() -> FReply {
+						ensure(CB_Delete);
+						CB_Delete(this);
+						return FReply::Handled();
+					})
 				]
 			]
 			+ SVerticalBox::Slot()
@@ -176,9 +190,26 @@ void SLightActorGroup::OnSolutionChanged(int SolutionIndex)
 	}
 }
 
+void SLightActorGroup::RemoveLightItem(SLightItem *Widget)
+{
+	// remove slate UI
+	int Index = LightItemWidgets.Find(MakeShareable(Widget));
+	ensure(Index >= 0);
+	LightItemWidgets.RemoveAt(Index);
+	Group->RemoveSlot(MakeShareable(Widget));
+	
+	// remove in datafield
+	//ensure(DataField);
+	//ULightParams *LightParams = Widget->GetDataField();
+	//DataField->RemoveLightParam(LightParams);
+}
+
 TSharedRef<SLightItem> SLightActorGroup::AddLightItemWidget()
 {
 	TSharedRef<SLightItem> Widget = SNew(SLightItem);
+	Widget->CB_Delete = [this](SLightItem* LightItem) {
+		RemoveLightItem(LightItem);
+	};
 	Group->AddSlot().AutoHeight()[Widget];
 	LightItemWidgets.Add(Widget);
 	return Widget;

@@ -11,6 +11,13 @@ void UGroupLightParams::AddLightParam()
     Array.Add(NewObject<ULightParams>(this));
 }
 
+void UGroupLightParams::RemoveLightParam(ULightParams* LightParams)
+{
+    int Index = Array.Find(LightParams);
+    ensure(Index >= 0);
+    Array.RemoveAt(Index);
+}
+
 void USceneManagementAsset::AddLightingSolution()
 {
     LightingSolutionNameList.Add("");
