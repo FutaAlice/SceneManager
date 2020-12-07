@@ -17,6 +17,7 @@
 #include "SceneManagementAsset.h"
 #include "SSettingsView.h"
 #include "EventHub.h"
+#include "SSceneLightingViewer.h"
 
 #define LOCTEXT_NAMESPACE "CharacterLightViewer"
 
@@ -40,6 +41,11 @@ public:
     }
 
     void OnAssetDataChanged();
+
+    void DebugSyncLightingSolutionRename(int SolutionIndex, FString SolutionName)
+    {
+        SolutionSelector.RenameSolution(SolutionIndex, SolutionName, "", false);
+    }
 
     static SCharacterLightingViewer* GetInstance()
     {
@@ -163,6 +169,7 @@ void SCharacterLightingViewer::Construct(const FArguments& InArgs)
     SolutionSelector.CB_Rename = [](int SolutionIndex, FString SolutionName) {
         if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
             SceneManagementAsset->RenameLightingSolution(SolutionIndex, SolutionName);
+            SceneLightingViewer::DebugSyncLightingSolutionRename(SolutionIndex, SolutionName);
         }
     };
 
@@ -232,6 +239,13 @@ void OnAssetDataChanged()
 {
     SCharacterLightingViewer* CharacterLightingViewer = SCharacterLightingViewer::GetInstance();
     CharacterLightingViewer->OnAssetDataChanged();
+}
+
+void DebugSyncLightingSolutionRename(int SolutionIndex, FString SolutionName)
+{
+    if (SCharacterLightingViewer* CharacterLightingViewer = SCharacterLightingViewer::GetInstance()) {
+        CharacterLightingViewer->DebugSyncLightingSolutionRename(SolutionIndex, SolutionName);
+    }
 }
 
 } // namespace SceneLightingViewer
