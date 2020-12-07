@@ -1,7 +1,6 @@
 #include "SLightActorComboBox.h"
 #include "SlateOptMacros.h"
 #include "Widgets/Text/STextBlock.h"    // STextBlock
-#include "Widgets/Input/SComboBox.h"    // SComboBox
 #include "GameFramework/Actor.h"    // AActor
 #include "Editor.h" // GEditor
 #include "Editor/EditorEngine.h"    // UEditorEngine

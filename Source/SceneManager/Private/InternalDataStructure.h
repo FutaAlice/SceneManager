@@ -18,8 +18,8 @@ public:
     }
 
     void Clear();
-    void FromActor(AActor *Actor);
-    void ToActor(AActor *Actor);
+    void FromActor();
+    void ToActor();
 
     UPROPERTY(VisibleInstanceOnly, Category = "Light")
         FString ActorName;

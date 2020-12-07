@@ -32,7 +32,5 @@ private:
 
 private:
     IDetailsView* PlayerLightView;
-
-    AActor *Light;
     ULightParams *LightParams;
 };

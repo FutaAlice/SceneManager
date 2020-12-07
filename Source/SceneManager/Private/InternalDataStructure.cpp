@@ -5,25 +5,29 @@
 
 void ULightParams::Clear()
 {
+    LightActor = nullptr;
+    ActorName = "";
     Rotation = FRotator();
     Intensity = 0;
     LightColor = FLinearColor();
 }
 
-void ULightParams::FromActor(AActor *Actor)
+void ULightParams::FromActor()
 {
-    if (ALight *Light = Cast<ALight>(Actor)) {
-        Rotation = Light->GetLightComponent()->GetComponentRotation();
-        Intensity = Light->GetLightComponent()->Intensity;
-        LightColor = Light->GetLightColor();
+    if (LightActor) {
+        ActorName = LightActor->GetName();
+
+        Rotation = LightActor->GetLightComponent()->GetComponentRotation();
+        Intensity = LightActor->GetLightComponent()->Intensity;
+        LightColor = LightActor->GetLightColor();
     }
 }
 
-void ULightParams::ToActor(AActor *Actor)
+void ULightParams::ToActor()
 {
-    if (ALight *Light = Cast<ALight>(Actor)) {
-        Light->GetLightComponent()->SetWorldRotation(Rotation);
-        Light->GetLightComponent()->SetIntensity(Intensity);
-        Light->SetLightColor(LightColor);
+    if (LightActor) {
+        LightActor->GetLightComponent()->SetWorldRotation(Rotation);
+        LightActor->GetLightComponent()->SetIntensity(Intensity);
+        LightActor->SetLightColor(LightColor);
     }
 }

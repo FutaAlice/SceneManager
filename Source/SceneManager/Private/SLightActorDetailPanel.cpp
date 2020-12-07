@@ -10,8 +10,8 @@
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SLightActorDetailPanel::Construct(const FArguments& InArgs)
 {
-    ULightParams *fawef = NewObject<ULightParams>();
-    fawef->AddToRoot();
+    //ULightParams *fawef = NewObject<ULightParams>();
+    //fawef->AddToRoot();
 
     //// Debug
     //EventHub::Get();
@@ -21,7 +21,7 @@ void SLightActorDetailPanel::Construct(const FArguments& InArgs)
     TSharedRef<IDetailsView> PlayerLightViewRef = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
     PlayerLightViewRef->OnFinishedChangingProperties().AddRaw(this, &SLightActorDetailPanel::OnFinishedChangingProperties);
 
-     PlayerLightViewRef->SetObject(fawef);
+    // PlayerLightViewRef->SetObject(fawef);
     ChildSlot
     [
         PlayerLightViewRef
@@ -33,17 +33,17 @@ END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SLightActorDetailPanel::BindActor(AActor *InActor)
 {
-    ensure(InActor);
+    if (!InActor || !LightParams) {
+        return;
+    }
 
-    if (Light == InActor) {
+    ALight* InLight = Cast<ALight>(InActor);
+    if (InLight == LightParams->LightActor) {
         return; // nothing changed
     }
 
-    Light = InActor;
-
-    if (LightParams) {
-        LightParams->FromActor(InActor);
-    }
+    LightParams->LightActor = InLight;
+    LightParams->FromActor();
 }
 
 
@@ -51,20 +51,18 @@ void SLightActorDetailPanel::SetObject(UObject* InObject)
 {
     PlayerLightView->SetObject(InObject);
     LightParams = Cast<ULightParams>(InObject);
-    LightParams->FromActor(Light);
 }
 
 ULightParams *SLightActorDetailPanel::GetParam()
 {
-    return Light ? LightParams : nullptr;
+    return LightParams;
 }
 
 void SLightActorDetailPanel::OnFinishedChangingProperties(const FPropertyChangedEvent& InEvent)
 {
-    if (Light) {
-        LightParams->ToActor(Light);
+    if (LightParams->LightActor) {
+        LightParams->ToActor();
     }
     else {
-        
     }
 }
