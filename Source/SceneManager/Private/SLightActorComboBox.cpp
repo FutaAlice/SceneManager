@@ -41,6 +41,28 @@ FText SLightActorComboBox::GetCurrentItemLabel() const
     return LOCTEXT("InvalidComboEntryText", "<<Invalid option>>");
 }
 
+bool SLightActorComboBox::SetByActorName(const FString& ActorName)
+{
+    if (!CurrentItem.IsValid()) {
+        return false;
+    }
+
+    UWorld* World = GEditor->GetEditorWorldContext().World();
+    ULevel* Level = World->GetCurrentLevel();
+
+    TArray<AActor*> ActorList;
+    UGameplayStatics::GetAllActorsOfClass(World, ALight::StaticClass(), ActorList);
+
+    for (auto Actor : ActorList) {
+        if (Actor->GetName() == ActorName) {
+            *CurrentItem = ActorName;
+            return true;
+        }
+    }
+    *CurrentItem = "";
+    return false;
+}
+
 TSharedRef<SWidget> SLightActorComboBox::OnGenerateWidget(ItemType InOption)
 {
     return SNew(STextBlock).Text(FText::FromString(*InOption));

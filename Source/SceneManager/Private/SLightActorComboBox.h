@@ -22,6 +22,7 @@ public:
     void Construct(const FArguments& InArgs);
  
     FText GetCurrentItemLabel() const;
+    bool SetByActorName(const FString& ActorName);
     
 public:
     std::function<void(FString, ALight *)> CB_SelectionChange;

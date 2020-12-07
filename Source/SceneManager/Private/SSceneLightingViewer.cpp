@@ -93,6 +93,9 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
     SolutionSelector.CB_Active = [this](int SolutionIndex) {
         if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
             ULightParams* LightParams = SceneManagementAsset->GetKeyLightParamsPtr(SolutionIndex);
+            // update combo box
+            LightActorComboBox->SetByActorName(LightParams->ActorName);
+            // update details panel
             LightActorDetailPanel->BindDataField(LightParams);
             LightActorDetailPanel->ForceRefresh();
         }

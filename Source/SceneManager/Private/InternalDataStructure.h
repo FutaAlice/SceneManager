@@ -6,7 +6,7 @@
 class AActor;
 class ALight;
 
-UCLASS()
+UCLASS(hideCategories = Light)
 class ULightParams : public UObject
 {
     GENERATED_BODY()
