@@ -32,57 +32,6 @@ public:
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SMaterialViewer::Construct(const FArguments& InArgs)
 {
-    TSharedRef<SVerticalBox> Tabs = SNew(SVerticalBox);
-    Tabs->AddSlot()
-        .AutoHeight()
-        [
-
-            SNew(SCheckBox)
-            .Style(FEditorStyle::Get(), "PlacementBrowser.Tab")
-            // .OnCheckStateChanged(this, &SSceneManagerTools::OnPlacementTabChanged, Info.UniqueHandle)
-            // .IsChecked(this, &SSceneManagerTools::GetPlacementTabCheckedState, Info.UniqueHandle)
-            [
-                SNew(SOverlay)
-
-                + SOverlay::Slot()
-                .VAlign(VAlign_Center)
-                [
-                    SNew(SSpacer)
-                    .Size(FVector2D(1, 30))
-                ]
-
-                + SOverlay::Slot()
-                .Padding(FMargin(6, 0, 15, 0))
-                .VAlign(VAlign_Center)
-                [
-                    SNew(STextBlock)
-                    .Text(LOCTEXT("FUCK", "FUCK"))
-                    .ToolTipText(LOCTEXT("FUCK1", "FUCK1"))
-                ]
-
-                + SOverlay::Slot()
-                .VAlign(VAlign_Fill)
-                .HAlign(HAlign_Left)
-                [
-                    SNew(SImage)
-                    .Image(FEditorStyle::GetBrush("PlacementBrowser.ActiveTabBar"))
-                ]
-            ]
-        ];
-
-
-    ChildSlot
-    [
-        // Populate the widget
-        SNew(SHorizontalBox)
-        + SHorizontalBox::Slot()
-        .AutoWidth()
-        [
-            Tabs
-        ]
-        
-    ];
-    
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -93,7 +42,6 @@ FName GetTabName()
 {
     const FName TabName = TEXT("MaterialViewer");
     return TabName;
-
 }
 
 void RegisterTabSpawner(FTabManager& TabManager)

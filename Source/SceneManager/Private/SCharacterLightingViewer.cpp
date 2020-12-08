@@ -183,6 +183,8 @@ void SCharacterLightingViewer::Construct(const FArguments& InArgs)
         // update details panel
         LightActorDetailPanel->BindDataField(LightParams);
         LightActorDetailPanel->ForceRefresh();
+        // Sync to actor
+        LightParams->ToActor();
         // update groups
         LightActorGroup->OnSolutionChanged(SolutionIndex);
     };
