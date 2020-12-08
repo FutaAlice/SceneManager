@@ -31,7 +31,6 @@ public class SceneManager : ModuleRules
             "AssetTools",
             "DesktopPlatform",
             "EditorStyle",
-            "EditorScriptingUtilities",
             "InputCore",
             "PropertyEditor",
             "UnrealEd",

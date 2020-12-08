@@ -14,7 +14,6 @@
 #include "AssetRegistryModule.h"
 #include "FileHelpers.h"    // UEditorLoadingAndSavingUtils
 #include "IAssetRegistry.h" // IAssetRegistry
-#include "EditorAssetLibrary.h" // UEditorAssetLibrary
 #include "Widgets/SBoxPanel.h"  // SVerticalBox, SHorizontalBox
 #include "Widgets/Input/SButton.h"  // SButton
 #include "Misc/MessageDialog.h" // FMessageDialog
@@ -87,10 +86,6 @@ void SSettingsView::Construct(const FArguments& InArgs)
                         }
 
                         UEditorLoadingAndSavingUtils::SavePackages(Packages, false);
-
-                        //TArray<UObject *> AssetsToSave;
-                        //AssetsToSave.Add(Asset);
-                        // UEditorAssetLibrary::SaveLoadedAsset(Asset, true);
 
                     }
                     return FReply::Handled();
