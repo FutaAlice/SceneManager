@@ -18,6 +18,7 @@
 #include "SMaterialViewer.h"
 #include "SSceneLightingViewer.h"
 #include "SCharacterLightingViewer.h"
+#include "SceneManagementAssetActions.h"
 #include "EventHub.h"
 
 
@@ -26,12 +27,13 @@
 FSceneManagerModule::FSceneManagerModule()
     : Impl(MakeUnique<FSceneManagerImpl>())
 {
-    EventHub::Get();
 }
 
 void FSceneManagerModule::StartupModule()
 {
     // This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
+    EventHub::Get();
+    SceneManagementAssetActions::RegisterAssetTypeActions();
 }
 
 void FSceneManagerModule::ShutdownModule()
