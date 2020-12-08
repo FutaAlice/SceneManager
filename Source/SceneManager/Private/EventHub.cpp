@@ -61,7 +61,7 @@ EventHub::EventHub()
     // Modified (what's the different from 'OnObjectPropertyChanged'£¿)
     FCoreUObjectDelegates::OnObjectModified.AddLambda([](UObject* InObject) {
         if (InObject->IsA(ALight::StaticClass()) || InObject->IsA(ULightComponent::StaticClass())) {
-            if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
+            if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset(false)) {
                 SceneManagementAsset->SyncDataByActor();
             }
         }
