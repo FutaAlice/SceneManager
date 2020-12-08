@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
+#include "UObject/SoftObjectPath.h"
 
 #include "SSettingsView.generated.h"
 
@@ -21,6 +22,9 @@ public:
 
     UPROPERTY(EditAnywhere, Category = "Select Lighting Asset:")
         UMaterialParameterCollection* CharacterLightingMPC;
+
+    UPROPERTY(EditAnywhere, Category = "Select Lighting Asset:")
+        FStringAssetReference StringAssetReference;
 };
 
 //UCLASS()
