@@ -16,8 +16,8 @@ void ULightParams::FromActor()
 {
     if (LightActor) {
         ActorName = LightActor->GetName();
-
-        Rotation = LightActor->GetLightComponent()->GetComponentRotation();
+        // Rotation = LightActor->GetLightComponent()->GetComponentRotation();
+        Rotation = LightActor->GetActorRotation();
         Intensity = LightActor->GetLightComponent()->Intensity;
         LightColor = LightActor->GetLightColor();
     }
@@ -26,7 +26,8 @@ void ULightParams::FromActor()
 void ULightParams::ToActor()
 {
     if (LightActor) {
-        LightActor->GetLightComponent()->SetWorldRotation(Rotation);
+        //LightActor->GetLightComponent()->SetWorldRotation(Rotation);
+        LightActor->SetActorRotation(Rotation);
         LightActor->GetLightComponent()->SetIntensity(Intensity);
         LightActor->SetLightColor(LightColor);
     }
