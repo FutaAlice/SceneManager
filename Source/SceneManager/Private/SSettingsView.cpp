@@ -19,10 +19,8 @@
 #include "Misc/MessageDialog.h" // FMessageDialog
 #include "Materials/MaterialParameterCollection.h"  // UMaterialParameterCollection
 
-#include "InternalDataStructure.h"
 #include "SceneManagementAsset.h"
-#include "SSceneLightingViewer.h"
-#include "SCharacterLightingViewer.h"
+#include "SLightingViewer.h"
 #include "EventHub.h"
 
 SSettingsView *SSettingsView::Instance = nullptr;
@@ -189,15 +187,12 @@ void SSettingsView::OnSceneManagementAssetChanged(const FPropertyChangedEvent& I
         if (USceneManagementAsset* Asset = GetSceneManagementAsset(false)) {
             Asset->SyncActorByName();
         }
-        SceneLightingViewer::OnAssetDataChanged();
-        CharacterLightingViewer::OnAssetDataChanged();
+        LightingViewer::OnAssetDataChanged();
     }
 
     // MPC changed
-    if (InEvent.GetPropertyName().ToString() == FString(TEXT("SceneLightingMPC"))) {
-        SceneLightingViewer::OnMPCChanged();
-    }
-    if (InEvent.GetPropertyName().ToString() == FString(TEXT("CharacterLightingMPC"))) {
-        CharacterLightingViewer::OnMPCChanged();
+    if (InEvent.GetPropertyName().ToString() == FString(TEXT("SceneLightingMPC")) ||
+        InEvent.GetPropertyName().ToString() == FString(TEXT("CharacterLightingMPC"))) {
+        LightingViewer::OnMPCChanged();
     }
 }

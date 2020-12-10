@@ -1,4 +1,4 @@
-#include "SSceneLightingViewer.h"
+#include "SLightingViewer.h"
 
 #include "SlateOptMacros.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
@@ -14,13 +14,9 @@
 #include "SLightActorDetailPanel.h"
 #include "SLightActorGroup.h"
 #include "SMPCDetialsPanel.h"
-#include "InternalDataStructure.h"
 #include "SceneManagementAsset.h"
 #include "SSettingsView.h"
 #include "EventHub.h"
-#include "SCharacterLightingViewer.h"
-
-#define LOCTEXT_NAMESPACE "SceneLightViewer"
 
 /**
  * Scene Lighting Viewer
@@ -34,11 +30,12 @@ public:
     SLATE_END_ARGS()
 
     /** Constructs this widget with InArgs */
-    void Construct(const FArguments& InArgs);
+    void Construct(const FArguments& InArgs, ELightCategory LightCategory);
 
     ~SSceneLightingViewer()
     {
         SceneLightingViewerInstance = nullptr;
+        CharacterLightingViewerInstance = nullptr;
     }
 
     void OnAssetDataChanged();
@@ -52,13 +49,29 @@ public:
         OnAssetDataChanged();
     }
 
-    static SSceneLightingViewer* GetInstance()
+    static SSceneLightingViewer* GetInstance(ELightCategory LightCategory)
     {
-        return SceneLightingViewerInstance;
+        if (LightCategory | LightCategory_SceneLight)
+            return SceneLightingViewerInstance;
+        else if (LightCategory | LightCategory_CharacterLight)
+            return CharacterLightingViewerInstance;
+        else
+            return nullptr;
     }
 
+    static void SetInstance(SSceneLightingViewer* Instance, ELightCategory LightCategory)
+    {
+        if (LightCategory | LightCategory_SceneLight)
+            SceneLightingViewerInstance = Instance;
+        else if (LightCategory | LightCategory_CharacterLight)
+            CharacterLightingViewerInstance = Instance;
+        else
+            throw;
+    }
+    
 private:
     static SSceneLightingViewer* SceneLightingViewerInstance;
+    static SSceneLightingViewer* CharacterLightingViewerInstance;
 
 private:
     FSolutionSelector SolutionSelector;
@@ -71,12 +84,11 @@ private:
 };
 
 SSceneLightingViewer* SSceneLightingViewer::SceneLightingViewerInstance = nullptr;
+SSceneLightingViewer* SSceneLightingViewer::CharacterLightingViewerInstance = nullptr;
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
-void SSceneLightingViewer::Construct(const FArguments& InArgs)
+void SSceneLightingViewer::Construct(const FArguments& InArgs, ELightCategory LightCategory)
 {
-    SceneLightingViewerInstance = this;
-
     ChildSlot
     [
         SNew(SHorizontalBox)
@@ -156,11 +168,14 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
             ]
         ];
 
-    // Set group init variables
+    // Set selector pointer
     LightActorGroup->SolutionSelector = &SolutionSelector;
-    LightActorGroup->LightCategory = LightCategory_AuxLight | LightCategory_SceneLight;
 
-
+    // Set group init variables
+    ensure(LightCategory == LightCategory_SceneLight || LightCategory == LightCategory_CharacterLight);
+    LightActorGroup->LightCategory = LightCategory | LightCategory_AuxLight;
+    SetInstance(this, LightCategory);
+    
     // On data asset changed
     LightActorComboBox->CB_SelectionChange = [this](FString Name, ALight* Light) {
         LightActorDetailPanel->SetActor(Light);
@@ -193,7 +208,7 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
     SolutionSelector.CB_Rename = [](int SolutionIndex, FString SolutionName) {
         if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
             SceneManagementAsset->RenameLightingSolution(SolutionIndex, SolutionName);
-            CharacterLightingViewer::DebugSyncLightingSolutionRename(SolutionIndex, SolutionName);
+            // CharacterLightingViewer::DebugSyncLightingSolutionRename(SolutionIndex, SolutionName);
         }
     };
 
@@ -215,7 +230,7 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs)
     SolutionSelector.CB_Remove = [](int SolutionIndex) {
         if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
             SceneManagementAsset->RemoveLightingSolution(SolutionIndex);
-            CharacterLightingViewer::DebugSyncLightingSolutionRename(0, "");
+            // CharacterLightingViewer::DebugSyncLightingSolutionRename(0, "");
         }
     };
 }
@@ -240,53 +255,66 @@ void SSceneLightingViewer::OnMPCChanged()
     }
 }
 
-namespace SceneLightingViewer {
+namespace LightingViewer {
 
-FName GetTabName()
+FName GetTabName(ELightCategory LightCategory)
 {
-    const FName TabName = TEXT("SceneLightingViewer");
-    return TabName;
+    if (LightCategory | LightCategory_SceneLight) {
+        const FName TabName = TEXT("SceneLightingViewer");
+        return TabName;
+    }
+    else if (LightCategory | LightCategory_CharacterLight) {
+        const FName TabName = TEXT("CharacterLightingViewer");
+        return TabName;
+    }
+    else {
+        ensure(false);
+        return FName();
+    }
 }
 
-void RegisterTabSpawner(FTabManager& TabManager)
+void RegisterTabSpawner(FTabManager& TabManager, int LightCategory)
 {
-    const auto SpawnSceneLightingViewTab = [](const FSpawnTabArgs& Args) {
+    const auto SpawnCharacterLightingViewTab = [](const FSpawnTabArgs& Args) {
         return SNew(SDockTab)
             .TabRole(ETabRole::PanelTab)
-            .Label(LOCTEXT("TabTitle", "Scene Lighting"))
+            .Label(FText::FromString("Character Lighting"))
             [
                 SNew(SBorder)
                 .BorderImage(FEditorStyle::GetBrush("Docking.Tab.ContentAreaBrush"))
-                [
-                    SNew(SSceneLightingViewer/*, &Private_MaterialSource*/)
-                ]
-            ];
+            [
+                SNew(SSceneLightingViewer, LightCategory)
+            ]
+        ];
     };
 
-    TabManager.RegisterTabSpawner(SceneLightingViewer::GetTabName(), FOnSpawnTab::CreateStatic(SpawnSceneLightingViewTab))
-        .SetDisplayName(LOCTEXT("TabTitle", "Scene Lighting"))
-        .SetTooltipText(LOCTEXT("TooltipText", "Open the Scene Lighting tab"));
+    TabManager.RegisterTabSpawner(LightingViewer::GetTabName(LightCategory), FOnSpawnTab::CreateStatic(SpawnCharacterLightingViewTab))
+        .SetDisplayName(FText::FromString("Scene Lighting"))
+        .SetTooltipText(FText::FromString("Open the Scene Lighting tab"));
 }
 
 void OnAssetDataChanged()
 {
-    SSceneLightingViewer* SceneLightingViewer = SSceneLightingViewer::GetInstance();
+    SSceneLightingViewer* SceneLightingViewer = SSceneLightingViewer::GetInstance(LightCategory_SceneLight);
     SceneLightingViewer->OnAssetDataChanged();
+    SSceneLightingViewer* CharacterLightingViewer = SSceneLightingViewer::GetInstance(LightCategory_CharacterLight);
+    CharacterLightingViewer->OnAssetDataChanged();
 }
 
 void OnMPCChanged()
 {
-    SSceneLightingViewer* SceneLightingViewer = SSceneLightingViewer::GetInstance();
+    SSceneLightingViewer* SceneLightingViewer = SSceneLightingViewer::GetInstance(LightCategory_SceneLight);
     SceneLightingViewer->OnMPCChanged();
+    SSceneLightingViewer* CharacterLightingViewer = SSceneLightingViewer::GetInstance(LightCategory_CharacterLight);
+    CharacterLightingViewer->OnMPCChanged();
 }
 
 void DebugSyncLightingSolutionRename(int SolutionIndex, FString SolutionName)
 {
-    if (SSceneLightingViewer* SceneLightingViewer = SSceneLightingViewer::GetInstance()) {
-        SceneLightingViewer->DebugSyncLightingSolutionRename(SolutionIndex, SolutionName);
-    }
+    //if (SCharacterLightingViewer* CharacterLightingViewer = SCharacterLightingViewer::GetInstance()) {
+    //    CharacterLightingViewer->DebugSyncLightingSolutionRename(SolutionIndex, SolutionName);
+    //}
 }
 
-} // namespace SceneLightingViewer
+} // namespace LightingViewer
 
-#undef LOCTEXT_NAMESPACE

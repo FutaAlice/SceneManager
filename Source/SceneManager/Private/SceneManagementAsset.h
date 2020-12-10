@@ -5,12 +5,40 @@
 #include "Engine/DataAsset.h"   // UDataAsset
 #include "SceneManagementAsset.generated.h"
 
-enum ELightCategory
+typedef int ELightCategory;
+
+#define LightCategory_KeyLight          1
+#define LightCategory_AuxLight          2
+#define LightCategory_SceneLight        4
+#define LightCategory_CharacterLight    8
+
+UCLASS(hideCategories = Light)
+class ULightParams : public UObject
 {
-    LightCategory_KeyLight = 1,
-    LightCategory_AuxLight = 2,
-    LightCategory_SceneLight = 4,
-    LightCategory_CharacterLight = 8,
+    GENERATED_BODY()
+public:
+    ~ULightParams()
+    {
+        // TODO: FIX MEMORY LEAK
+        // GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, "SHIT");
+    }
+
+    void Clear();
+    void FromActor();
+    void ToActor();
+
+    UPROPERTY(VisibleInstanceOnly, Category = "Light")
+        FString ActorName;
+
+    UPROPERTY(EditAnywhere, Transient, Category = "Light")
+        class ALight *LightActor;
+
+    UPROPERTY(EditAnywhere, Category = "LightParams")
+        FRotator Rotation;
+    UPROPERTY(EditAnywhere, Category = "LightParams")
+        float Intensity;
+    UPROPERTY(EditAnywhere, Category = "LightParams")
+        FLinearColor LightColor;
 };
 
 UCLASS()
@@ -39,7 +67,7 @@ public:
     void RenameLightingSolution(int SolutionIndex, const FString& SolutionName);
 
     ULightParams* GetKeyLightParamsPtr(int SolutionIndex);
-    UGroupLightParams* GetAuxLightGroupsPtr(int SolutionIndex, ELightCategory LightCategory);
+    UGroupLightParams* GetAuxLightGroupsPtr(int SolutionIndex, int LightCategory);
     
     void SyncActorByName();
     void SyncDataByActor();

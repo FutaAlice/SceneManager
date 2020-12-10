@@ -3,13 +3,14 @@
 
 class FTabManager;
 
-namespace SceneLightingViewer {
+namespace LightingViewer {
 
-FName GetTabName();
-void RegisterTabSpawner(FTabManager& TabManager);
+FName GetTabName(int LightCategory);
+void RegisterTabSpawner(FTabManager& TabManagerk, int LightCategory);
+
 void OnAssetDataChanged();
 void OnMPCChanged();
 
 void DebugSyncLightingSolutionRename(int SolutionIndex, FString SolutionName);
 
-} // namespace SceneLightingViewer
+} // namespace LightingViewer
