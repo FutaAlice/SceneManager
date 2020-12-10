@@ -13,7 +13,7 @@ enum ELightCategory
     LightCategory_CharacterLight = 8,
 };
 
-UCLASS(BlueprintType)
+UCLASS()
 class UGroupLightParams : public UObject
 {
     GENERATED_BODY()
