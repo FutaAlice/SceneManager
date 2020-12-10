@@ -196,7 +196,7 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
             .SetTooltipText(LOCTEXT("SettingsTooltipText", "Open the Scenc manager setting tab."));
 
         MaterialViewer::RegisterTabSpawner(*ToolsTabManager);
-        LightingViewer::RegisterTabSpawner(*ToolsTabManager, LightCategory_CharacterLight);
+        LightingViewer::RegisterTabSpawner(*ToolsTabManager);
         // LightingViewer::RegisterTabSpawner(*ToolsTabManager);
         //WatchViewer::RegisterTabSpawner(*DebuggingToolsTabManager);
 

@@ -273,8 +273,25 @@ FName GetTabName(ELightCategory LightCategory)
     }
 }
 
-void RegisterTabSpawner(FTabManager& TabManager, int LightCategory)
+void RegisterTabSpawner(FTabManager& TabManager)
 {
+    const auto SpawnSceneLightingViewTab = [](const FSpawnTabArgs& Args) {
+        return SNew(SDockTab)
+            .TabRole(ETabRole::PanelTab)
+            .Label(FText::FromString("Scene Lighting"))
+            [
+                SNew(SBorder)
+                .BorderImage(FEditorStyle::GetBrush("Docking.Tab.ContentAreaBrush"))
+            [
+                SNew(SSceneLightingViewer, LightCategory_SceneLight)
+            ]
+        ];
+    };
+
+    TabManager.RegisterTabSpawner(LightingViewer::GetTabName(LightCategory_SceneLight), FOnSpawnTab::CreateStatic(SpawnSceneLightingViewTab))
+        .SetDisplayName(FText::FromString("Scene Lighting"))
+        .SetTooltipText(FText::FromString("Open the Scene Lighting tab"));
+
     const auto SpawnCharacterLightingViewTab = [](const FSpawnTabArgs& Args) {
         return SNew(SDockTab)
             .TabRole(ETabRole::PanelTab)
@@ -283,14 +300,14 @@ void RegisterTabSpawner(FTabManager& TabManager, int LightCategory)
                 SNew(SBorder)
                 .BorderImage(FEditorStyle::GetBrush("Docking.Tab.ContentAreaBrush"))
             [
-                SNew(SSceneLightingViewer, LightCategory)
+                SNew(SSceneLightingViewer, LightCategory_CharacterLight)
             ]
-        ];
+            ];
     };
 
-    TabManager.RegisterTabSpawner(LightingViewer::GetTabName(LightCategory), FOnSpawnTab::CreateStatic(SpawnCharacterLightingViewTab))
-        .SetDisplayName(FText::FromString("Scene Lighting"))
-        .SetTooltipText(FText::FromString("Open the Scene Lighting tab"));
+    TabManager.RegisterTabSpawner(LightingViewer::GetTabName(LightCategory_CharacterLight), FOnSpawnTab::CreateStatic(SpawnCharacterLightingViewTab))
+        .SetDisplayName(FText::FromString("Character Lighting"))
+        .SetTooltipText(FText::FromString("Open the Character Lighting tab"));
 }
 
 void OnAssetDataChanged()
