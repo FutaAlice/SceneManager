@@ -259,11 +259,11 @@ namespace LightingViewer {
 
 FName GetTabName(ELightCategory LightCategory)
 {
-    if (LightCategory | LightCategory_SceneLight) {
+    if (LightCategory & LightCategory_SceneLight) {
         const FName TabName = TEXT("SceneLightingViewer");
         return TabName;
     }
-    else if (LightCategory | LightCategory_CharacterLight) {
+    else if (LightCategory & LightCategory_CharacterLight) {
         const FName TabName = TEXT("CharacterLightingViewer");
         return TabName;
     }
