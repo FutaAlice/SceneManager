@@ -6,25 +6,23 @@
 #include "Framework/Docking/TabManager.h"   // FTabManager, FSpawnTabArgs
 #include "Widgets/SCompoundWidget.h"    // SCompoundWidget
 #include "Widgets/Docking/SDockTab.h"   // SDockTab
-#include "Widgets/Layout/SSplitter.h"   // SSplitter
 
-#include "Engine.h" // GEngine
 #include "SolutionSelector.h"
 #include "SLightActorComboBox.h"
 #include "SLightActorDetailPanel.h"
 #include "SLightActorGroup.h"
 #include "SMPCDetialsPanel.h"
 #include "SceneManagementAssetData.h"
-#include "SSettingsView.h"
 #include "EventHub.h"
 
 /**
  * Scene Lighting Viewer
  */
-class SSceneLightingViewer : public SCompoundWidget
+class SLightingViewer : public SCompoundWidget
 {
+    // Constructor and Destructor
 public:
-    SLATE_BEGIN_ARGS(SSceneLightingViewer)
+    SLATE_BEGIN_ARGS(SLightingViewer)
     {
     }
     SLATE_END_ARGS()
@@ -32,47 +30,29 @@ public:
     /** Constructs this widget with InArgs */
     void Construct(const FArguments& InArgs, ELightCategory LightCategory);
 
-    ~SSceneLightingViewer()
-    {
-        SceneLightingViewerInstance = nullptr;
-        CharacterLightingViewerInstance = nullptr;
-    }
+    ~SLightingViewer();
 
-    void OnAssetDataChanged();
+    // Callbacks
+public:
+    void OnAssetDataChanged(USceneManagementAssetData* AssetData);
     void OnMPCChanged();
+    void OnOtherInstanceModified(SLightingViewer* Modifier, int RemovedIndex);
 
-    void DebugSyncLightingSolutionRename(int SolutionIndex, FString SolutionName)
-    {
-        SolutionSelector.Clear();
-        LightActorGroup->Clear();
-        LightActorDetailPanel->BindDataField(nullptr);
-        OnAssetDataChanged();
-    }
-
-    static SSceneLightingViewer* GetInstance(ELightCategory LightCategory)
-    {
-        if (LightCategory | LightCategory_SceneLight)
-            return SceneLightingViewerInstance;
-        else if (LightCategory | LightCategory_CharacterLight)
-            return CharacterLightingViewerInstance;
-        else
-            return nullptr;
-    }
-
-    static void SetInstance(SSceneLightingViewer* Instance, ELightCategory LightCategory)
-    {
-        if (LightCategory | LightCategory_SceneLight)
-            SceneLightingViewerInstance = Instance;
-        else if (LightCategory | LightCategory_CharacterLight)
-            CharacterLightingViewerInstance = Instance;
-        else
-            throw;
-    }
+    // Static Fucntions
+public:
+    static SLightingViewer*
+        GetInstance(ELightCategory LightCategory);
+    static void
+        SetInstance(ELightCategory LightCategory, SLightingViewer* Instance);
+    static void
+        NotifyAssetDataModified(SLightingViewer* Modifier, int RemovedIndex = -1);
     
+    // Static Members
 private:
-    static SSceneLightingViewer* SceneLightingViewerInstance;
-    static SSceneLightingViewer* CharacterLightingViewerInstance;
+    static SLightingViewer* SceneLightingViewerInstance;
+    static SLightingViewer* CharacterLightingViewerInstance;
 
+    // Instance Members
 private:
     FSolutionSelector SolutionSelector;
 
@@ -83,11 +63,11 @@ private:
     TSharedPtr<SMPCDetialsPanel> MPCDetailsPanel;
 };
 
-SSceneLightingViewer* SSceneLightingViewer::SceneLightingViewerInstance = nullptr;
-SSceneLightingViewer* SSceneLightingViewer::CharacterLightingViewerInstance = nullptr;
+SLightingViewer* SLightingViewer::SceneLightingViewerInstance = nullptr;
+SLightingViewer* SLightingViewer::CharacterLightingViewerInstance = nullptr;
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
-void SSceneLightingViewer::Construct(const FArguments& InArgs, ELightCategory LightCategory)
+void SLightingViewer::Construct(const FArguments& InArgs, ELightCategory LightCategory)
 {
     ChildSlot
     [
@@ -174,7 +154,7 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs, ELightCategory Li
     // Set group init variables
     ensure(LightCategory == LightCategory_SceneLight || LightCategory == LightCategory_CharacterLight);
     LightActorGroup->LightCategory = LightCategory | LightCategory_AuxLight;
-    SetInstance(this, LightCategory);
+    SetInstance(LightCategory, this);
     
     // On data asset changed
     LightActorComboBox->CB_SelectionChange = [this](FString Name, ALight* Light) {
@@ -187,12 +167,12 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs, ELightCategory Li
             LightActorDetailPanel->BindDataField(nullptr);
             return;
         }
-        USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset();
-        if (!SceneManagementAsset) {
+        USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected();
+        if (!AssetData) {
             LightActorDetailPanel->BindDataField(nullptr);
             return;
         }
-        ULightParams* LightParams = SceneManagementAsset->GetKeyLightParamsPtr(SolutionIndex);
+        ULightParams* LightParams = AssetData->GetKeyLightParamsPtr(SolutionIndex);
         // update combo box
         LightActorComboBox->SetByActorName(LightParams->ActorName);
         // update details panel
@@ -205,54 +185,108 @@ void SSceneLightingViewer::Construct(const FArguments& InArgs, ELightCategory Li
     };
 
     // On solution rename
-    SolutionSelector.CB_Rename = [](int SolutionIndex, FString SolutionName) {
-        if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
-            SceneManagementAsset->RenameLightingSolution(SolutionIndex, SolutionName);
-            // CharacterLightingViewer::DebugSyncLightingSolutionRename(SolutionIndex, SolutionName);
+    SolutionSelector.CB_Rename = [this](int SolutionIndex, FString SolutionName) {
+        if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
+            AssetData->RenameLightingSolution(SolutionIndex, SolutionName);
+            NotifyAssetDataModified(this);
         }
     };
 
     // On solution append
-    SolutionSelector.CB_Append = [](int SolutionIndex) {
-        if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
-            SceneManagementAsset->AddLightingSolution();
+    SolutionSelector.CB_Append = [this](int SolutionIndex) {
+        if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
+            AssetData->AddLightingSolution();
+            NotifyAssetDataModified(this);
         }
     };
 
     // On solution duplicate
-    SolutionSelector.CB_Duplicate = [](int SolutionIndex) {
-        if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
-            SceneManagementAsset->DuplicateLightingSolution(SolutionIndex);
+    SolutionSelector.CB_Duplicate = [this](int SolutionIndex) {
+        if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
+            AssetData->DuplicateLightingSolution(SolutionIndex);
+            NotifyAssetDataModified(this);
         }
     };
 
     // On solution remove
-    SolutionSelector.CB_Remove = [](int SolutionIndex) {
-        if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
-            SceneManagementAsset->RemoveLightingSolution(SolutionIndex);
-            // CharacterLightingViewer::DebugSyncLightingSolutionRename(0, "");
+    SolutionSelector.CB_Remove = [this](int SolutionIndex) {
+        if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
+            AssetData->RemoveLightingSolution(SolutionIndex);
+            NotifyAssetDataModified(this, SolutionIndex);
         }
     };
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-void SSceneLightingViewer::OnAssetDataChanged()
+SLightingViewer::~SLightingViewer()
+{
+    if (SceneLightingViewerInstance == this) {
+        SceneLightingViewerInstance = nullptr;
+    }
+    if (CharacterLightingViewerInstance == this) {
+        CharacterLightingViewerInstance = nullptr;
+    }
+}
+
+void SLightingViewer::OnAssetDataChanged(USceneManagementAssetData * AssetData)
 {
     SolutionSelector.Clear();
-    LightActorGroup->OnSolutionChanged(-1);
-    if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset(false)) {
-        for (int i = 0; i < SceneManagementAsset->LightingSolutionNameList.Num(); ++i) {
-            const FString& SolutionName = SceneManagementAsset->LightingSolutionNameList[i];
+    LightActorGroup->Clear();
+    LightActorDetailPanel->BindDataField(nullptr);
+    if (AssetData) {
+        for (int i = 0; i < AssetData->LightingSolutionNameList.Num(); ++i) {
+            const FString& SolutionName = AssetData->LightingSolutionNameList[i];
             SolutionSelector.AddSolution(SolutionName, "", false);
         }
     }
 }
 
-void SSceneLightingViewer::OnMPCChanged()
+void SLightingViewer::OnMPCChanged()
 {
-    if (UMaterialParameterCollection* MPC = SSettingsView::GetSceneLightingMPC()) {
-        MPCDetailsPanel->SetObject(MPC);
+    //if (UMaterialParameterCollection* MPC = SSettingsView::GetSceneLightingMPC()) {
+    //    MPCDetailsPanel->SetObject(MPC);
+    //}
+}
+
+void SLightingViewer::OnOtherInstanceModified(SLightingViewer * Modifier, int RemovedIndex)
+{
+    if (Modifier == this) {
+        return;
     }
+    int PrevIndex = SolutionSelector.GetCurrentSelectedSolutionIndex();
+    if (RemovedIndex >= 0 && RemovedIndex <= PrevIndex) {
+        PrevIndex -= 1;
+    }
+    OnAssetDataChanged(USceneManagementAssetData::GetSelected());
+    SolutionSelector.UpdateClickButtonState(PrevIndex);
+}
+
+SLightingViewer * SLightingViewer::GetInstance(ELightCategory LightCategory)
+{
+    if (LightCategory & LightCategory_SceneLight)
+        return SceneLightingViewerInstance;
+    else if (LightCategory & LightCategory_CharacterLight)
+        return CharacterLightingViewerInstance;
+    else
+        return nullptr;
+}
+
+void SLightingViewer::SetInstance(ELightCategory LightCategory, SLightingViewer * Instance)
+{
+    if (LightCategory & LightCategory_SceneLight)
+        SceneLightingViewerInstance = Instance;
+    else if (LightCategory & LightCategory_CharacterLight)
+        CharacterLightingViewerInstance = Instance;
+    else
+        throw;
+}
+
+void SLightingViewer::NotifyAssetDataModified(SLightingViewer * Modifier, int RemovedIndex)
+{
+    ensure(SceneLightingViewerInstance);
+    ensure(CharacterLightingViewerInstance);
+    SceneLightingViewerInstance->OnOtherInstanceModified(Modifier, RemovedIndex);
+    CharacterLightingViewerInstance->OnOtherInstanceModified(Modifier, RemovedIndex);
 }
 
 namespace LightingViewer {
@@ -273,65 +307,47 @@ FName GetTabName(ELightCategory LightCategory)
     }
 }
 
-void RegisterTabSpawner(FTabManager& TabManager)
+void RegisterTabSpawner(FTabManager& TabManager, ELightCategory LightCategory)
 {
-    const auto SpawnSceneLightingViewTab = [](const FSpawnTabArgs& Args) {
+    bool bs = LightCategory & LightCategory_SceneLight;
+    bool bc = LightCategory & LightCategory_CharacterLight;
+
+    ensure(bs || bc); // is scene or character lighting
+    ensure(!(bs && bc)); // not both scene and character lighting
+
+    FString CategoryString = bs ? "Scene" : "Character";
+
+    const auto SpawnSceneLightingViewTab = [LightCategory, CategoryString](const FSpawnTabArgs& Args) {
         return SNew(SDockTab)
             .TabRole(ETabRole::PanelTab)
-            .Label(FText::FromString("Scene Lighting"))
+            .Label(FText::FromString(CategoryString + " Lighting"))
             [
                 SNew(SBorder)
                 .BorderImage(FEditorStyle::GetBrush("Docking.Tab.ContentAreaBrush"))
-            [
-                SNew(SSceneLightingViewer, LightCategory_SceneLight)
-            ]
-        ];
-    };
-
-    TabManager.RegisterTabSpawner(LightingViewer::GetTabName(LightCategory_SceneLight), FOnSpawnTab::CreateStatic(SpawnSceneLightingViewTab))
-        .SetDisplayName(FText::FromString("Scene Lighting"))
-        .SetTooltipText(FText::FromString("Open the Scene Lighting tab"));
-
-    const auto SpawnCharacterLightingViewTab = [](const FSpawnTabArgs& Args) {
-        return SNew(SDockTab)
-            .TabRole(ETabRole::PanelTab)
-            .Label(FText::FromString("Character Lighting"))
-            [
-                SNew(SBorder)
-                .BorderImage(FEditorStyle::GetBrush("Docking.Tab.ContentAreaBrush"))
-            [
-                SNew(SSceneLightingViewer, LightCategory_CharacterLight)
-            ]
+                [
+                    SNew(SLightingViewer, LightCategory)
+                ]
             ];
     };
 
-    TabManager.RegisterTabSpawner(LightingViewer::GetTabName(LightCategory_CharacterLight), FOnSpawnTab::CreateStatic(SpawnCharacterLightingViewTab))
-        .SetDisplayName(FText::FromString("Character Lighting"))
-        .SetTooltipText(FText::FromString("Open the Character Lighting tab"));
+    TabManager.RegisterTabSpawner(LightingViewer::GetTabName(LightCategory), FOnSpawnTab::CreateLambda(SpawnSceneLightingViewTab))
+        .SetDisplayName(FText::FromString(CategoryString + " Lighting"));
 }
 
-void OnAssetDataChanged()
+void OnAssetDataChanged(USceneManagementAssetData * AssetData)
 {
-    SSceneLightingViewer* SceneLightingViewer = SSceneLightingViewer::GetInstance(LightCategory_SceneLight);
-    SceneLightingViewer->OnAssetDataChanged();
-    SSceneLightingViewer* CharacterLightingViewer = SSceneLightingViewer::GetInstance(LightCategory_CharacterLight);
-    CharacterLightingViewer->OnAssetDataChanged();
+    SLightingViewer* SceneLightingViewer = SLightingViewer::GetInstance(LightCategory_SceneLight);
+    SceneLightingViewer->OnAssetDataChanged(AssetData);
+    SLightingViewer* CharacterLightingViewer = SLightingViewer::GetInstance(LightCategory_CharacterLight);
+    CharacterLightingViewer->OnAssetDataChanged(AssetData);
 }
 
 void OnMPCChanged()
 {
-    SSceneLightingViewer* SceneLightingViewer = SSceneLightingViewer::GetInstance(LightCategory_SceneLight);
+    SLightingViewer* SceneLightingViewer = SLightingViewer::GetInstance(LightCategory_SceneLight);
     SceneLightingViewer->OnMPCChanged();
-    SSceneLightingViewer* CharacterLightingViewer = SSceneLightingViewer::GetInstance(LightCategory_CharacterLight);
+    SLightingViewer* CharacterLightingViewer = SLightingViewer::GetInstance(LightCategory_CharacterLight);
     CharacterLightingViewer->OnMPCChanged();
 }
 
-void DebugSyncLightingSolutionRename(int SolutionIndex, FString SolutionName)
-{
-    //if (SCharacterLightingViewer* CharacterLightingViewer = SCharacterLightingViewer::GetInstance()) {
-    //    CharacterLightingViewer->DebugSyncLightingSolutionRename(SolutionIndex, SolutionName);
-    //}
-}
-
 } // namespace LightingViewer
-

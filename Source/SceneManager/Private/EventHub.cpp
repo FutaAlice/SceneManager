@@ -9,8 +9,8 @@
 #include "Misc/CoreDelegates.h" // FCoreDelegates
 #include "UObject/UObjectGlobals.h" // FCoreUObjectDelegates
 
-#include "SSettingsView.h"
 #include "SceneManagementAssetData.h"
+#include "SLightingViewer.h"
 
 std::shared_ptr<EventHub> EventHub::_instance;
 std::mutex EventHub::_mutex;
@@ -61,8 +61,8 @@ EventHub::EventHub()
     // Modified (what's the different from 'OnObjectPropertyChanged'£¿)
     FCoreUObjectDelegates::OnObjectModified.AddLambda([](UObject* InObject) {
         if (InObject->IsA(ALight::StaticClass()) || InObject->IsA(ULightComponent::StaticClass())) {
-            if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset(false)) {
-                SceneManagementAsset->SyncDataByActor();
+            if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected(false)) {
+                AssetData->SyncDataByActor();
             }
         }
     });
@@ -91,4 +91,17 @@ std::shared_ptr<EventHub> EventHub::Get()
         }
     }
     return _instance;
+}
+
+void EventHub::OnAssetDataSelected(USceneManagementAssetData * AssetData)
+{
+    // post initialize while input asset not empty
+    if (AssetData) {
+        AssetData->SyncActorByName();
+    }
+    LightingViewer::OnAssetDataChanged(AssetData);
+}
+
+void EventHub::OnMPCSelected(UMaterialParameterCollection * MPC)
+{
 }

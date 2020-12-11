@@ -8,14 +8,14 @@
 #include "SSettingsView.generated.h"
 
 class UMaterialParameterCollection;
-class USceneManagementAsset;
+class USceneManagementAssetData;
 
 UCLASS()
 class UAssetWrap : public UObject {
     GENERATED_BODY()
 public:
     UPROPERTY(EditAnywhere, Category = "Select Scene Management Asset:")
-        USceneManagementAsset *SceneManagementAsset;
+        USceneManagementAssetData *AssetData;
 
     UPROPERTY(EditAnywhere, Category = "Select Lighting Asset:")
         UMaterialParameterCollection* SceneLightingMPC;
@@ -27,20 +27,12 @@ public:
         FStringAssetReference StringAssetReference;
 };
 
-//UCLASS()
-//class UAssetWrap : public UObject
-//{
-//    GENERATED_BODY()
-//public:
-//    UPROPERTY(EditAnywhere, Category = "Select Scene Management Asset:")
-//        USceneManagementAsset* SceneManagementAsset;
-//};
-
 /**
  *
  */
 class SSettingsView : public SCompoundWidget
 {
+    friend USceneManagementAssetData;   // give accessibility to query current selected asset
 public:
     SLATE_BEGIN_ARGS(SSettingsView)
     {
@@ -50,8 +42,9 @@ public:
     /** Constructs this widget with InArgs */
     void Construct(const FArguments& InArgs);
 
-    static USceneManagementAsset* GetSceneManagementAsset(bool bShowMsgDialog = true);
-    static USceneManagementAsset* GetSceneManagementNullAsset();
+    ~SSettingsView();
+
+    static SSettingsView* Get();
 
     static UMaterialParameterCollection* GetSceneLightingMPC();
     static UMaterialParameterCollection* GetCharacterLightingMPC();

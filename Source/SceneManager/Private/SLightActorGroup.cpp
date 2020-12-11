@@ -18,7 +18,6 @@
 #include "SolutionSelector.h"
 #include "SLightActorComboBox.h"
 #include "SLightActorDetailPanel.h"
-#include "SSettingsView.h"
 
 /**
  *
@@ -182,13 +181,13 @@ void SLightActorGroup::OnSolutionChanged(int SolutionIndex)
 	if (SolutionIndex < 0) {
 		return;
 	}
-	if (USceneManagementAsset* SceneManagementAsset = SSettingsView::GetSceneManagementAsset()) {
-		DataField = SceneManagementAsset->GetAuxLightGroupsPtr(SolutionIndex, LightCategory);
-		for (auto LightParams : DataField->Array) {
-			auto Widget = AddLightItemWidget();
-			Widget->BindDataField(LightParams);
-			LightParams->ToActor();
-		}
+    USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected();
+    ensure(AssetData);
+	DataField = AssetData->GetAuxLightGroupsPtr(SolutionIndex, LightCategory);
+	for (auto LightParams : DataField->Array) {
+		auto Widget = AddLightItemWidget();
+		Widget->BindDataField(LightParams);
+		LightParams->ToActor();
 	}
 }
 

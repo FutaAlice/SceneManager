@@ -1,6 +1,5 @@
 #include "SolutionSelector.h"
 
-#include "Misc/Guid.h"  // FGuid
 #include "Misc/MessageDialog.h" // FMessageDialog
 #include "EditorStyleSet.h" // FEditorStyle
 #include "Widgets/SBoxPanel.h"  // SVerticalBox, SHorizontalBox
@@ -11,10 +10,8 @@
 #include "Widgets/Images/SImage.h"  // SImage
 #include "Widgets/Text/STextBlock.h"    // STextBlock
 #include "Widgets/Layout/SSpacer.h" // SSpacer
-#include "Editor/EditorEngine.h"    // EditorAddModalWindow
+#include "Editor/EditorEngine.h"    // UEditorEngine::EditorAddModalWindow
 #include "Editor.h" // GEditor
-
-#include "Engine.h" // GEngine
 
 #define SetImageBrush(Name) Me() [          \
     SNew(SImage)                            \
@@ -279,8 +276,6 @@ int FSolutionSelector::InferClickedButtonIndex(ECheckBoxState CheckState)
             if (IsChecked) {
                 CheckedIndex.Push(i);
             }
-            //GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow,
-            //    FString::Printf(TEXT("Index %d check status %d"), i, int(IsChecked)));
         }
 
         if (CurrentSelectedSolutionIndex >= 0) {

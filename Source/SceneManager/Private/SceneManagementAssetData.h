@@ -56,7 +56,7 @@ public:
  * Scene Manager Asset Type
  */
 UCLASS()
-class USceneManagementAsset : public UObject
+class USceneManagementAssetData : public UObject
 {
     GENERATED_BODY()
 public:
@@ -70,6 +70,9 @@ public:
     
     void SyncActorByName();
     void SyncDataByActor();
+
+    static USceneManagementAssetData* GetSelected(bool bAlertWhenEmpty = true);
+    static USceneManagementAssetData* GetEmpty();   // FOR DEBUG
 
 public:
     UPROPERTY(EditAnywhere, EditFixedSize, Category = "Lighting")

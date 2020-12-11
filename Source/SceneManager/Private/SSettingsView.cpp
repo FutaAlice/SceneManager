@@ -16,11 +16,9 @@
 #include "IAssetRegistry.h" // IAssetRegistry
 #include "Widgets/SBoxPanel.h"  // SVerticalBox, SHorizontalBox
 #include "Widgets/Input/SButton.h"  // SButton
-#include "Misc/MessageDialog.h" // FMessageDialog
 #include "Materials/MaterialParameterCollection.h"  // UMaterialParameterCollection
 
 #include "SceneManagementAssetData.h"
-#include "SLightingViewer.h"
 #include "EventHub.h"
 
 SSettingsView *SSettingsView::Instance = nullptr;
@@ -32,7 +30,7 @@ void SSettingsView::Construct(const FArguments& InArgs)
 
     // Init AssetWrap
     AssetWrap = NewObject<UAssetWrap>();
-    AssetWrap->SceneManagementAsset = nullptr;
+    AssetWrap->AssetData = nullptr;
     AssetWrap->AddToRoot();
 
     // Create AssetWrap DetailView widget
@@ -62,24 +60,20 @@ void SSettingsView::Construct(const FArguments& InArgs)
                 SNew(SButton)
                 .Text(FText::FromString("Save"))
                 .OnClicked_Lambda([this]() -> FReply {
-                    if (USceneManagementAsset *Asset = GetSceneManagementAsset()) {
+                    if (USceneManagementAssetData *AssetData = USceneManagementAssetData::GetSelected()) {
                         // FSoftObjectPath
-                        FStringAssetReference StringAssetReference(Asset);
+                        FStringAssetReference StringAssetReference(AssetData);
                         FString AssetPath = StringAssetReference.GetAssetPathString();  // /Game/NewSceneManagementAsset.NewSceneManagementAsset
                         FString BaseFilePath = FPaths::GetBaseFilename(AssetPath, false);   // /Game/NewSceneManagementAsset
                         UE_LOG(LogTemp, Warning, TEXT("FSoftObjectPath AssetPath: %s"), *AssetPath);
                         UE_LOG(LogTemp, Warning, TEXT("FSoftObjectPath BaseFilePath: %s"), *BaseFilePath);
                         UE_LOG(LogTemp, Warning, TEXT("ProjectContentDir: %s"), *FPaths::ProjectContentDir());  //  D:/Unreal Projects/SMRefactor/Content/
-
-                        //// Try add something
-                        //Asset->LightingSolutionNameList.Add("FUCK");
-                        //Asset->Modify(true);
                         
                         TArray<UPackage*> Packages;
-                        UPackage* Outermost = Asset->GetOutermost();
+                        UPackage* Outermost = AssetData->GetOutermost();
                         Packages.Add(Outermost); // Fully load and check out is done in UEditorLoadingAndSavingUtils::SavePackages
 
-                        for (auto Obj : Asset->KeyLightParams) {
+                        for (auto Obj : AssetData->KeyLightParams) {
 
                         }
 
@@ -114,13 +108,13 @@ void SSettingsView::Construct(const FArguments& InArgs)
                     UE_LOG(LogTemp, Warning, TEXT("NewName: %s"), *NewName);
                     UE_LOG(LogTemp, Warning, TEXT("NewPath: %s"), *NewPath);
 
-                    if (USceneManagementAsset* Asset = GetSceneManagementAsset()) {
+                    if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
                         FAssetToolsModule &AssetToolModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
                         IAssetTools &AssetTools = AssetToolModule.Get();
 
                         // TODO: fix RENAME
                         TArray<FAssetRenameData> AssetsAndNames;
-                        new(AssetsAndNames) FAssetRenameData(Asset, NewPath, NewName);
+                        new(AssetsAndNames) FAssetRenameData(AssetData, NewPath, NewName);
                         AssetTools.RenameAssets(AssetsAndNames);
                     }
                     return FReply::Handled();
@@ -132,32 +126,14 @@ void SSettingsView::Construct(const FArguments& InArgs)
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-USceneManagementAsset *SSettingsView::GetSceneManagementAsset(bool bShowMsgDialog)
+SSettingsView::~SSettingsView()
 {
-    if (!Instance) {
-        return nullptr;
-    }
-
-    if (USceneManagementAsset* SceneManagementAsset = Instance->AssetWrap->SceneManagementAsset) {
-        return SceneManagementAsset;
-    }
-    else {
-        if (bShowMsgDialog) {
-            FText Title = FText::FromString("Warning");
-            FText Content = FText::FromString(TEXT("Please select a USceneManagementAsset before edit!"));
-            FMessageDialog::Open(EAppMsgType::Ok, Content, &Title);
-        }
-        return nullptr;
-    }
+    Instance = nullptr;
 }
 
-USceneManagementAsset* SSettingsView::GetSceneManagementNullAsset()
+SSettingsView* SSettingsView::Get()
 {
-    static USceneManagementAsset* NullAsset = NewObject<USceneManagementAsset>();
-    if (!NullAsset->IsRooted()) {
-        NullAsset->AddToRoot();
-    }
-    return NullAsset;
+    return Instance;
 }
 
 UMaterialParameterCollection* SSettingsView::GetSceneLightingMPC()
@@ -178,21 +154,15 @@ UMaterialParameterCollection* SSettingsView::GetCharacterLightingMPC()
 
 void SSettingsView::OnSceneManagementAssetChanged(const FPropertyChangedEvent& InEvent)
 {
-    auto N1 = InEvent.GetPropertyName().ToString();
-    auto N2 = USceneManagementAsset::StaticClass()->GetName();
-    auto N3 = UMaterialParameterCollection::StaticClass()->GetName();
-
     // AssetData changed
-    if (InEvent.GetPropertyName() == USceneManagementAsset::StaticClass()->GetFName()) {
-        if (USceneManagementAsset* Asset = GetSceneManagementAsset(false)) {
-            Asset->SyncActorByName();
-        }
-        LightingViewer::OnAssetDataChanged();
+    if (InEvent.GetPropertyName() == "AssetData") {
+        EventHub::Get()->OnAssetDataSelected(USceneManagementAssetData::GetSelected(false));
     }
 
-    // MPC changed
-    if (InEvent.GetPropertyName().ToString() == FString(TEXT("SceneLightingMPC")) ||
-        InEvent.GetPropertyName().ToString() == FString(TEXT("CharacterLightingMPC"))) {
-        LightingViewer::OnMPCChanged();
-    }
+    //// MPC changed
+    //// if (InEvent.GetPropertyName().ToString().Contains("MPC")) {
+    //if (InEvent.HasArchetypeInstanceChanged(UMaterialParameterCollection::StaticClass())) {
+    //    EventHub::Get()->OnMPCSelected(nullptr);
+    //    // LightingViewer::OnMPCChanged();
+    //}
 }

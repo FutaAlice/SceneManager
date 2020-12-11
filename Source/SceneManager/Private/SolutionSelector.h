@@ -63,7 +63,6 @@ public:
      */
     void Clear();
 
-private:
     /**
      * @brief Update solution tabs check state
      * 
@@ -71,6 +70,7 @@ private:
      */
     void UpdateClickButtonState(int CheckedIndex = -1);
 
+private:
     /**
      * @brief Update all solution tooltip, automatically called after remove solution
      */

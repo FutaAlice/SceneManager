@@ -6,6 +6,9 @@
 #include "Engine/World.h"   // UWorld
 #include "Components/LightComponent.h"  // ULightComponent
 #include "Kismet/GameplayStatics.h" // UGameplayStatics
+#include "Misc/MessageDialog.h" // FMessageDialog
+
+#include "SSettingsView.h"
 
 void ULightParams::Clear()
 {
@@ -51,7 +54,7 @@ void UGroupLightParams::RemoveLightParam(ULightParams* LightParams)
     Array.RemoveAt(Index);
 }
 
-void USceneManagementAsset::AddLightingSolution()
+void USceneManagementAssetData::AddLightingSolution()
 {
     LightingSolutionNameList.Add("");
 
@@ -62,7 +65,7 @@ void USceneManagementAsset::AddLightingSolution()
     SyncActorByName();
 }
 
-void USceneManagementAsset::DuplicateLightingSolution(int SolutionIndex)
+void USceneManagementAssetData::DuplicateLightingSolution(int SolutionIndex)
 {
     int TargetIndex = LightingSolutionNameList.Num() - 1;
     KeyLightParams[TargetIndex] = DuplicateObject<ULightParams>(KeyLightParams[SolutionIndex], this);
@@ -77,7 +80,7 @@ void USceneManagementAsset::DuplicateLightingSolution(int SolutionIndex)
     SyncActorByName();
 }
 
-void USceneManagementAsset::RemoveLightingSolution(int SolutionIndex)
+void USceneManagementAssetData::RemoveLightingSolution(int SolutionIndex)
 {
     LightingSolutionNameList.RemoveAt(SolutionIndex);
     KeyLightParams.RemoveAt(SolutionIndex);
@@ -85,18 +88,18 @@ void USceneManagementAsset::RemoveLightingSolution(int SolutionIndex)
     CharacterAuxGroups.RemoveAt(SolutionIndex);
 }
 
-void USceneManagementAsset::RenameLightingSolution(int SolutionIndex, const FString& SolutionName)
+void USceneManagementAssetData::RenameLightingSolution(int SolutionIndex, const FString& SolutionName)
 {
     LightingSolutionNameList[SolutionIndex] = SolutionName;
 }
 
-ULightParams* USceneManagementAsset::GetKeyLightParamsPtr(int SolutionIndex)
+ULightParams* USceneManagementAssetData::GetKeyLightParamsPtr(int SolutionIndex)
 {
     ensure(KeyLightParams.Num() > SolutionIndex);
     return KeyLightParams[SolutionIndex];
 }
 
-UGroupLightParams* USceneManagementAsset::GetAuxLightGroupsPtr(int SolutionIndex, int LightCategory)
+UGroupLightParams* USceneManagementAssetData::GetAuxLightGroupsPtr(int SolutionIndex, int LightCategory)
 {
     TArray<UGroupLightParams*>* GroupArray = nullptr;
     if (LightCategory & LightCategory_SceneLight) {
@@ -111,7 +114,7 @@ UGroupLightParams* USceneManagementAsset::GetAuxLightGroupsPtr(int SolutionIndex
     return (*GroupArray)[SolutionIndex];
 }
 
-void USceneManagementAsset::SyncActorByName()
+void USceneManagementAssetData::SyncActorByName()
 {
     // gather all ALight actor in level
     TArray<AActor*> ActorList;
@@ -163,7 +166,7 @@ void USceneManagementAsset::SyncActorByName()
     }
 }
 
-void USceneManagementAsset::SyncDataByActor()
+void USceneManagementAssetData::SyncDataByActor()
 {
     for (ULightParams* LightParams : KeyLightParams) {
         LightParams->FromActor();
@@ -180,4 +183,33 @@ void USceneManagementAsset::SyncDataByActor()
             LightParams->FromActor();
         }
     }
+}
+
+USceneManagementAssetData* USceneManagementAssetData::GetSelected(bool bAlertWhenEmpty)
+{
+    USceneManagementAssetData* AssetData = nullptr;
+    do {
+        SSettingsView *SettingView = SSettingsView::Get();
+        if (!SettingView) {
+            break;  // failed to get SettingView slate instance
+        }
+
+        AssetData = SettingView->AssetWrap->AssetData;
+        if (!AssetData && bAlertWhenEmpty) {
+            FText Title = FText::FromString("Warning");
+            FText Content = FText::FromString(TEXT("Please select a USceneManagementAsset before edit!"));
+            FMessageDialog::Open(EAppMsgType::Ok, Content, &Title);
+        }
+
+    } while (0);
+    return AssetData;
+}
+
+USceneManagementAssetData* USceneManagementAssetData::GetEmpty()
+{
+    static USceneManagementAssetData* NullAsset = NewObject<USceneManagementAssetData>();
+    if (!NullAsset->IsRooted()) {
+        NullAsset->AddToRoot();
+    }
+    return NullAsset;
 }

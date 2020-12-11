@@ -13,8 +13,8 @@ public:
     virtual void OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<class IToolkitHost> EditWithinLevelEditor = TSharedPtr<IToolkitHost>()) override;
 
     // IAssetTypeActions Implementation
-    virtual FText GetName() const override { return FText::FromName(TEXT("Scene Management Asset")); }
-    virtual UClass* GetSupportedClass() const override { return USceneManagementAsset::StaticClass(); }
+    virtual FText GetName() const override { return FText::FromName(TEXT("Scene Management Asset Data")); }
+    virtual UClass* GetSupportedClass() const override { return USceneManagementAssetData::StaticClass(); }
     virtual uint32 GetCategories() override { return MyAssetCategory; }
 
     static void RegisterAssetTypeActions();
