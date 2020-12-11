@@ -1,9 +1,8 @@
 #pragma once
 #include "CoreMinimal.h"
-#include "InternalDataStructure.h"
 #include "GameFramework/SaveGame.h" // USaveGame
 #include "Engine/DataAsset.h"   // UDataAsset
-#include "SceneManagementAsset.generated.h"
+#include "SceneManagementAssetData.generated.h"
 
 typedef int ELightCategory;
 

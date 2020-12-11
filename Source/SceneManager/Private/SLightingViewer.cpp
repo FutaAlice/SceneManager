@@ -14,7 +14,7 @@
 #include "SLightActorDetailPanel.h"
 #include "SLightActorGroup.h"
 #include "SMPCDetialsPanel.h"
-#include "SceneManagementAsset.h"
+#include "SceneManagementAssetData.h"
 #include "SSettingsView.h"
 #include "EventHub.h"
 

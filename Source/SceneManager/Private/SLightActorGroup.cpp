@@ -14,8 +14,7 @@
 #include "Widgets/Layout/SSpacer.h"	// SSpacer
 #include "Engine/Light.h"   // ALight
 
-#include "InternalDataStructure.h"
-#include "SceneManagementAsset.h"
+#include "SceneManagementAssetData.h"
 #include "SolutionSelector.h"
 #include "SLightActorComboBox.h"
 #include "SLightActorDetailPanel.h"

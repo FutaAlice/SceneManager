@@ -1,4 +1,4 @@
-#include "SceneManagementAsset.h"
+#include "SceneManagementAssetData.h"
 
 #include "Editor.h" // GEditor
 #include "Engine/Level.h"   // ULevel

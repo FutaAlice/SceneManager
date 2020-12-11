@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "AssetTypeActions_Base.h"
-#include "SceneManagementAsset.h"
+#include "SceneManagementAssetData.h"
 
 class SceneManagementAssetActions : public FAssetTypeActions_Base
 {

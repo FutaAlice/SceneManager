@@ -10,7 +10,7 @@
 #include "UObject/UObjectGlobals.h" // FCoreUObjectDelegates
 
 #include "SSettingsView.h"
-#include "SceneManagementAsset.h"
+#include "SceneManagementAssetData.h"
 
 std::shared_ptr<EventHub> EventHub::_instance;
 std::mutex EventHub::_mutex;

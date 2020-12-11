@@ -1,5 +1,5 @@
 #include "SceneManagementAssetFactory.h"
-#include "SceneManagementAsset.h"
+#include "SceneManagementAssetData.h"
 
 USceneManagementAssetFactory::USceneManagementAssetFactory()
     :Super()

@@ -17,7 +17,7 @@
 #include "SSettingsView.h"
 #include "SMaterialViewer.h"
 #include "SLightingViewer.h"
-#include "SceneManagementAsset.h"
+#include "SceneManagementAssetData.h"
 #include "SceneManagementAssetActions.h"
 #include "EventHub.h"
 

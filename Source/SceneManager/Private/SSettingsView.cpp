@@ -19,7 +19,7 @@
 #include "Misc/MessageDialog.h" // FMessageDialog
 #include "Materials/MaterialParameterCollection.h"  // UMaterialParameterCollection
 
-#include "SceneManagementAsset.h"
+#include "SceneManagementAssetData.h"
 #include "SLightingViewer.h"
 #include "EventHub.h"
 

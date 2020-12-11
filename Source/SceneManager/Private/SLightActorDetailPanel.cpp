@@ -4,7 +4,7 @@
 #include "IDetailsView.h"   // FDetailsViewArgs
 #include "PropertyEditorModule.h"   // FPropertyEditorModule
 
-#include "InternalDataStructure.h"
+#include "SceneManagementAssetData.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SLightActorDetailPanel::Construct(const FArguments& InArgs)
