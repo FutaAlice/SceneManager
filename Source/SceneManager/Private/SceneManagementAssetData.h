@@ -71,6 +71,8 @@ public:
     void SyncActorByName();
     void SyncDataByActor();
 
+    void CleanUp();
+
     static USceneManagementAssetData* GetSelected(bool bAlertWhenEmpty = true);
     static USceneManagementAssetData* GetEmpty();   // FOR DEBUG
 

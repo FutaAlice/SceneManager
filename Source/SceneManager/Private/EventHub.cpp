@@ -8,6 +8,7 @@
 #include "Components/LightComponent.h"  // ULightComponent
 #include "Misc/CoreDelegates.h" // FCoreDelegates
 #include "UObject/UObjectGlobals.h" // FCoreUObjectDelegates
+#include "Engine/World.h"   // FWorldDelegates
 
 #include "SceneManagementAssetData.h"
 #include "SLightingViewer.h"
@@ -57,6 +58,14 @@ EventHub::EventHub()
     //FCoreUObjectDelegates::OnObjectPropertyChanged.AddLambda([](UObject*, struct FPropertyChangedEvent &) {
     //    UE_LOG(LogTemp, Warning, TEXT("OnObjectPropertyChanged"));
     //});
+
+    FWorldDelegates::OnWorldCleanup.AddLambda([](UWorld* World, bool bSessionEnded, bool bCleanupResources) {
+        UE_LOG(LogTemp, Warning, TEXT("OnWorldCleanup: %s"), *World->GetName());
+        USceneManagementAssetData *AssetData = USceneManagementAssetData::GetSelected();
+        if (AssetData) {
+            AssetData->CleanUp();
+        }
+    });
 
     // Modified (what's the different from 'OnObjectPropertyChanged'£¿)
     FCoreUObjectDelegates::OnObjectModified.AddLambda([](UObject* InObject) {

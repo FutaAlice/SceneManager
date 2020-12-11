@@ -185,6 +185,25 @@ void USceneManagementAssetData::SyncDataByActor()
     }
 }
 
+void USceneManagementAssetData::CleanUp()
+{
+    for (ULightParams* LightParams : KeyLightParams) {
+        LightParams->LightActor = nullptr;
+    }
+
+    for (auto Group : SceneAuxGroups) {
+        for (ULightParams* LightParams : Group->Array) {
+            LightParams->LightActor = nullptr;
+        }
+    }
+
+    for (auto Group : CharacterAuxGroups) {
+        for (ULightParams* LightParams : Group->Array) {
+            LightParams->LightActor = nullptr;
+        }
+    }
+}
+
 USceneManagementAssetData* USceneManagementAssetData::GetSelected(bool bAlertWhenEmpty)
 {
     USceneManagementAssetData* AssetData = nullptr;
