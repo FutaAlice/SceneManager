@@ -61,13 +61,6 @@ public:
     void RemoveLightParam(ULightParams *LightParams);
 };
 
-//UCLASS()
-//class UMaterialGroup : public UObject
-//{
-//    GENERATED_BODY()
-//public:
-//};
-
 UCLASS()
 class UMaterialInfo : public UObject
 {
@@ -86,6 +79,15 @@ public:
         TArray<float> ScalarArray;
     UPROPERTY(EditAnywhere)
         TArray<FLinearColor> VectorArray;
+};
+
+UCLASS()
+class UGroupMaterialInfo : public UObject
+{
+    GENERATED_BODY()
+public:
+    UPROPERTY(VisibleAnywhere, Instanced, EditFixedSize, Category = "Material")
+        TArray<UMaterialInfo*> Array;
 };
 
 /**
@@ -124,6 +126,17 @@ public:
 
     UPROPERTY(VisibleAnywhere, Instanced, EditFixedSize, Category = "Character Lighting")
         TArray<UGroupLightParams*> CharacterAuxGroups;
+
+
+    UPROPERTY(EditAnywhere, EditFixedSize, Category = "Material")
+        TArray<FString> MaterialSolutionNameList;
+    UPROPERTY(EditAnywhere, EditFixedSize, Category = "Material")
+        TArray<FString> MaterialGroupNameList;
+    UPROPERTY(EditAnywhere, EditFixedSize, Category = "Material")
+        TArray<int> MaterialGroupStartIndex;
+    UPROPERTY(EditAnywhere, EditFixedSize, Category = "Material")
+        TArray<UGroupMaterialInfo*> MaterialGroups;
+
 
     UPROPERTY(VisibleAnywhere, Instanced, Category = "Material")
         UMaterialInfo* TestMaterialInfo;

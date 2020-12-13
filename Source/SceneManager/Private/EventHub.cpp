@@ -12,6 +12,7 @@
 
 #include "SceneManagementAssetData.h"
 #include "SLightingViewer.h"
+#include "SMaterialViewer.h"
 
 std::shared_ptr<EventHub> EventHub::_instance;
 std::mutex EventHub::_mutex;
@@ -101,6 +102,7 @@ void EventHub::OnAssetDataSelected(USceneManagementAssetData * AssetData)
         AssetData->SyncActorByName();
     }
     LightingViewer::OnAssetDataChanged(AssetData);
+    MaterialViewer::OnAssetDataChanged(AssetData);
 }
 
 void EventHub::OnMPCSelected(UMaterialParameterCollection * MPC, EMPCOwner Owner)

@@ -10,6 +10,7 @@
 #include "Widgets/Text/STextBlock.h"    // STextBlock
 #include "Widgets/Images/SImage.h"  // SImage
 #include "Widgets/Layout/SSpacer.h" // SSpacer
+#include "Widgets/Layout/SBox.h"    // SBox
 
 #include "Modules/ModuleManager.h"  // FModuleManager
 #include "IDetailsView.h"   // FDetailsViewArgs
@@ -20,6 +21,34 @@
 #include "SceneManagementAssetData.h"
 
 #define LOCTEXT_NAMESPACE "MaterialViewer"
+
+TSharedRef<SHorizontalBox> CreateVectorParamSlot(FString name, FLinearColor value)
+{
+    return
+        SNew(SHorizontalBox)
+            + SHorizontalBox::Slot()
+            //.HAlign(EHorizontalAlignment::HAlign_Right)
+            //.VAlign(EVerticalAlignment::VAlign_Bottom)
+            //.AutoWidth()
+            [
+                SNew(STextBlock)
+                .Text(FText::FromString(name))
+            ]
+
+            + SHorizontalBox::Slot()
+            .AutoWidth()
+            [
+                SNew(SBox)
+                .WidthOverride(5)
+            ]
+            + SHorizontalBox::Slot()
+            .Padding(10, 0, 10, 0)
+            [
+                SNew(SImage)
+                .ColorAndOpacity(FSlateColor(value))
+                // .OnMouseButtonDown(this, &SMaterialGroupItemWidget::OnClickColorBlock, name, value, index)
+            ];
+}
 
 /**
  * Material Viewer
@@ -35,53 +64,71 @@ public:
     /** Constructs this widget with InArgs */
     void Construct(const FArguments& InArgs);
 
-    // Static Members
-private:
     static SMaterialViewer* MaterialViewerInstance;
+    void OnAssetDataChanged(USceneManagementAssetData* AssetData);
 
-    // Instance Members
 private:
     FSolutionSelector SolutionSelector;
     TSharedPtr<SVerticalBox> MainLayout;
 
     // DEBUG
-
     IDetailsView* DetailsView;
-    TSharedPtr<SUniformGridPanel> UniformGridPanel;
     UMaterialInfo* MaterialInfo;
+    TSharedPtr<SUniformGridPanel> UniformGridPanel;
+
     UMaterialInstance* MaterialInstance;
 
     void OnFinishedChangingProperties(const FPropertyChangedEvent& InEvent)
     {
         FSoftObjectPath SoftObjectPath = MaterialInfo->SoftObjectPath;
+        if (SoftObjectPath.IsNull()) {
+            UniformGridPanel->ClearChildren();
+            return;
+        }
         UObject* Instance = SoftObjectPath.ResolveObject();
         if (!Instance) {
             Instance = SoftObjectPath.TryLoad();
         }
-        ensure(Instance);
 
         MaterialInstance = Cast<UMaterialInstance>(Instance);
+        ensure(MaterialInstance);
 
-        //UniformGridPanel->AddSlot(0, 0)
-        //    [
-        //    ];
 
         if (MaterialInstance) {
             TArray<FMaterialParameterInfo> ParameterInfo;
             TArray<FGuid> ParameterGuids;
 
             MaterialInstance->GetAllVectorParameterInfo(ParameterInfo, ParameterGuids);
+            FString Name = ParameterInfo[0].Name.ToString();
+            FLinearColor VectorValue;
+            MaterialInstance->GetVectorParameterValue(ParameterInfo[0], VectorValue);
 
+            UniformGridPanel->AddSlot(0, 0)
+                [
+                    CreateVectorParamSlot(Name, FLinearColor(1, 0, 0, 1))
+                ];
+            UniformGridPanel->AddSlot(1, 0)
+                [
+                    CreateVectorParamSlot(Name, FLinearColor(0, 1, 0, 1))
+                ];
+
+            UniformGridPanel->AddSlot(0, 1)
+                [
+                    CreateVectorParamSlot(Name, FLinearColor(0, 0, 1, 1))
+                ];
             //MaterialInstance->GetVectorParameterValue(ParameterInfo[0], Color);
             //DetailsView->SetObject(&Color);
         }
     }
 };
 
+SMaterialViewer* SMaterialViewer::MaterialViewerInstance = nullptr;
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SMaterialViewer::Construct(const FArguments& InArgs)
 {
+    MaterialViewerInstance = this;
+
     ChildSlot
     [
         SNew(SHorizontalBox)
@@ -116,19 +163,26 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
     FDetailsViewArgs DetailsViewArgs(false, false, false, FDetailsViewArgs::HideNameArea, true);
     TSharedRef<IDetailsView> DetailsViewRef = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
+    DetailsViewRef->OnFinishedChangingProperties().AddRaw(this, &SMaterialViewer::OnFinishedChangingProperties);
+    DetailsView = DetailsViewRef.operator->();
 
     MainLayout->AddSlot().AutoHeight()[DetailsViewRef];
 
-    MaterialInfo = NewObject<UMaterialInfo>();
-    MaterialInfo->AddToRoot();
 
-    DetailsViewRef->SetObject(MaterialInfo);
-    DetailsViewRef->OnFinishedChangingProperties().AddRaw(this, &SMaterialViewer::OnFinishedChangingProperties);
 
-    DetailsView = DetailsViewRef.operator->();
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
+void SMaterialViewer::OnAssetDataChanged(USceneManagementAssetData* AssetData)
+{
+    if (AssetData) {
+        if (!AssetData->TestMaterialInfo) {
+            AssetData->TestMaterialInfo = NewObject<UMaterialInfo>(AssetData);
+        }
+        MaterialInfo = AssetData->TestMaterialInfo;
+        DetailsView->SetObject(AssetData->TestMaterialInfo);
+    }
+}
 
 namespace MaterialViewer {
 
@@ -156,6 +210,13 @@ void RegisterTabSpawner(FTabManager& TabManager)
     TabManager.RegisterTabSpawner(MaterialViewer::GetTabName(), FOnSpawnTab::CreateStatic(SpawnMaterialViewTab))
         .SetDisplayName(LOCTEXT("TabTitle", "Material"))
         .SetTooltipText(LOCTEXT("TooltipText", "Open the Material tab"));
+}
+
+void OnAssetDataChanged(USceneManagementAssetData* AssetData)
+{
+    if (SMaterialViewer::MaterialViewerInstance) {
+        SMaterialViewer::MaterialViewerInstance->OnAssetDataChanged(AssetData);
+    }
 }
 
 } // namespace MaterialViewer
