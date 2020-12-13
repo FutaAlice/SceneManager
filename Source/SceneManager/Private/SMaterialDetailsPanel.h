@@ -11,6 +11,7 @@ class UMaterialInfo;
 class IDetailsView;
 class SUniformGridPanel;
 class SBoxPanel;
+class SColorBlock;
 
 /**
  * 
@@ -18,9 +19,10 @@ class SBoxPanel;
 class SMaterialDetailsPanel : public SCompoundWidget
 {
 private:
-    TSharedRef<SBoxPanel> CreateVectorParamSlot(FString Key, FLinearColor Value, TSharedPtr<SImage> Image);
-    FReply OnClickColorBlock(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent, FString Key, FLinearColor Value);
-    //void OnColorCommitted(FString Name, FLinearColor NewColor);
+    TSharedRef<SBoxPanel> CreateVectorParamSlot(FString Key, FLinearColor Value, TSharedPtr<SColorBlock> ColorBlock);
+    FReply OnClickColorBlock(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent, FString Name);
+    void OnColorCommitted(FLinearColor NewColor, FString Name);
+    void OnColorPickerWindowClosed(const TSharedRef<SWindow>& Window);
 
 public:
 	SLATE_BEGIN_ARGS(SMaterialDetailsPanel)
@@ -38,6 +40,8 @@ private:
     void ResetDataBySelectedAsset();
     void SyncToGridPanel();
     void OnFinishedChangingProperties(const FPropertyChangedEvent& InEvent);
+
+    FLinearColor GetVectorByName(FString Name) const;
 
 private:
     UMaterialInfo* MaterialInfo;
