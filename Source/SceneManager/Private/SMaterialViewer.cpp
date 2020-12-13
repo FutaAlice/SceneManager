@@ -10,6 +10,7 @@
 #include "Widgets/Text/STextBlock.h"    // STextBlock
 #include "Widgets/Images/SImage.h"  // SImage
 #include "Widgets/Layout/SSpacer.h" // SSpacer
+#include "Widgets/Input/SButton.h"  // SButton
 #include "Widgets/Layout/SBox.h"    // SBox
 
 #include "Modules/ModuleManager.h"  // FModuleManager
@@ -22,14 +23,11 @@
 
 #define LOCTEXT_NAMESPACE "MaterialViewer"
 
-TSharedRef<SHorizontalBox> CreateVectorParamSlot(FString name, FLinearColor value)
+TSharedRef<SBoxPanel> CreateVectorParamSlot(FString name, FLinearColor value)
 {
     return
         SNew(SHorizontalBox)
             + SHorizontalBox::Slot()
-            //.HAlign(EHorizontalAlignment::HAlign_Right)
-            //.VAlign(EVerticalAlignment::VAlign_Bottom)
-            //.AutoWidth()
             [
                 SNew(STextBlock)
                 .Text(FText::FromString(name))
@@ -69,6 +67,7 @@ public:
 
 private:
     FSolutionSelector SolutionSelector;
+    TSharedPtr<SHorizontalBox> Toolbar;
     TSharedPtr<SVerticalBox> MainLayout;
 
     // DEBUG
@@ -105,13 +104,12 @@ private:
 
             UniformGridPanel->AddSlot(0, 0)
                 [
-                    CreateVectorParamSlot(Name, FLinearColor(1, 0, 0, 1))
+                    CreateVectorParamSlot(Name, FLinearColor(1, 0, 0, 0))
                 ];
             UniformGridPanel->AddSlot(1, 0)
                 [
-                    CreateVectorParamSlot(Name, FLinearColor(0, 1, 0, 1))
+                    CreateVectorParamSlot(Name, FLinearColor(0, 1, 0, 0.5))
                 ];
-
             UniformGridPanel->AddSlot(0, 1)
                 [
                     CreateVectorParamSlot(Name, FLinearColor(0, 0, 1, 1))
@@ -144,13 +142,48 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
             ]
         ]
         + SHorizontalBox::Slot()
-        .Padding(1, 1, 1, 1)
         [
-            SNew(SBorder)
-            .Padding(4)
-            .BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
+            SNew(SVerticalBox)
+            + SVerticalBox::Slot()
+            .Padding(1, 1, 1, 1)
+            .AutoHeight()
             [
-                SAssignNew(MainLayout, SVerticalBox)
+                // Toolbar
+                SAssignNew(Toolbar, SHorizontalBox)
+                + SHorizontalBox::Slot()
+                [
+                    SNew(SButton)
+                    .Text(FText::FromString("Add Group"))
+                    .OnClicked_Lambda([this]() -> FReply {
+                        return FReply::Handled();
+                    })
+                ]
+                + SHorizontalBox::Slot()
+                [
+                    SNew(SButton)
+                    .Text(FText::FromString("Rename Selected Group"))
+                    .OnClicked_Lambda([this]() -> FReply {
+                        return FReply::Handled();
+                    })
+                ]
+                + SHorizontalBox::Slot()
+                [
+                    SNew(SButton)
+                    .Text(FText::FromString("Remove Selected Group"))
+                    .OnClicked_Lambda([this]() -> FReply {
+                        return FReply::Handled();
+                    })
+                ]
+            ]
+            + SVerticalBox::Slot()
+            .Padding(1, 1, 1, 1)
+            [
+                SNew(SBorder)
+                .Padding(4)
+                .BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
+                [
+                    SAssignNew(MainLayout, SVerticalBox)
+                ]
             ]
         ]
         + SHorizontalBox::Slot()
