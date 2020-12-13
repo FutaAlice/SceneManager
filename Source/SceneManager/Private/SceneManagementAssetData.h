@@ -76,6 +76,16 @@ public:
     // or MaterialInterface
     UPROPERTY(EditAnywhere, meta=(AllowedClasses="MaterialInstance"))
         FSoftObjectPath SoftObjectPath;
+
+    UPROPERTY(EditAnywhere)
+        TArray<FString> ScalarNames;
+    UPROPERTY(EditAnywhere)
+        TArray<FString> VectorNames;
+
+    UPROPERTY(EditAnywhere)
+        TArray<float> ScalarArray;
+    UPROPERTY(EditAnywhere)
+        TArray<FLinearColor> VectorArray;
 };
 
 /**
@@ -114,4 +124,7 @@ public:
 
     UPROPERTY(VisibleAnywhere, Instanced, EditFixedSize, Category = "Character Lighting")
         TArray<UGroupLightParams*> CharacterAuxGroups;
+
+    UPROPERTY(VisibleAnywhere, Instanced, Category = "Material")
+        UMaterialInfo* TestMaterialInfo;
 };

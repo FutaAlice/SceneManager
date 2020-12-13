@@ -14,6 +14,7 @@
 #include "Modules/ModuleManager.h"  // FModuleManager
 #include "IDetailsView.h"   // FDetailsViewArgs
 #include "PropertyEditorModule.h"   // FPropertyEditorModule
+#include "Widgets/Layout/SUniformGridPanel.h"   // SUniformGridPanel
 
 #include "SolutionSelector.h"
 #include "SceneManagementAssetData.h"
@@ -44,9 +45,12 @@ private:
     TSharedPtr<SVerticalBox> MainLayout;
 
     // DEBUG
+
     IDetailsView* DetailsView;
+    TSharedPtr<SUniformGridPanel> UniformGridPanel;
     UMaterialInfo* MaterialInfo;
     UMaterialInstance* MaterialInstance;
+
     void OnFinishedChangingProperties(const FPropertyChangedEvent& InEvent)
     {
         FSoftObjectPath SoftObjectPath = MaterialInfo->SoftObjectPath;
@@ -57,6 +61,20 @@ private:
         ensure(Instance);
 
         MaterialInstance = Cast<UMaterialInstance>(Instance);
+
+        //UniformGridPanel->AddSlot(0, 0)
+        //    [
+        //    ];
+
+        if (MaterialInstance) {
+            TArray<FMaterialParameterInfo> ParameterInfo;
+            TArray<FGuid> ParameterGuids;
+
+            MaterialInstance->GetAllVectorParameterInfo(ParameterInfo, ParameterGuids);
+
+            //MaterialInstance->GetVectorParameterValue(ParameterInfo[0], Color);
+            //DetailsView->SetObject(&Color);
+        }
     }
 };
 
@@ -88,6 +106,11 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
                 SAssignNew(MainLayout, SVerticalBox)
             ]
         ]
+        + SHorizontalBox::Slot()
+        .Padding(1, 1, 1, 1)
+        [
+            SAssignNew(UniformGridPanel, SUniformGridPanel)
+        ]
     ];
 
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -101,6 +124,8 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
 
     DetailsViewRef->SetObject(MaterialInfo);
     DetailsViewRef->OnFinishedChangingProperties().AddRaw(this, &SMaterialViewer::OnFinishedChangingProperties);
+
+    DetailsView = DetailsViewRef.operator->();
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
