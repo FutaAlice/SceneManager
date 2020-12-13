@@ -23,7 +23,7 @@ void SMPCDetialsPanel::Construct(const FArguments& InArgs)
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-void SMPCDetialsPanel::SetObject(UObject* InObject)
+void SMPCDetialsPanel::SetObject(UMaterialParameterCollection* InObject)
 {
     DetailsView->SetObject(InObject);
 }

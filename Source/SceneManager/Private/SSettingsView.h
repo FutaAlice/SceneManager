@@ -14,17 +14,20 @@ UCLASS()
 class UAssetWrap : public UObject {
     GENERATED_BODY()
 public:
-    UPROPERTY(EditAnywhere, Category = "Select Scene Management Asset:")
+    UPROPERTY(EditAnywhere, Category = "Select Scene Management Asset")
         USceneManagementAssetData *AssetData;
 
-    UPROPERTY(EditAnywhere, Category = "Select Lighting Asset:")
+    UPROPERTY(EditAnywhere, Category = "MPC")
         UMaterialParameterCollection* SceneLightingMPC;
 
-    UPROPERTY(EditAnywhere, Category = "Select Lighting Asset:")
+    UPROPERTY(EditAnywhere, Category = "MPC")
         UMaterialParameterCollection* CharacterLightingMPC;
 
-    UPROPERTY(EditAnywhere, Category = "Select Lighting Asset:")
-        FStringAssetReference StringAssetReference;
+    UPROPERTY(EditAnywhere, Category = "MPC")
+        UMaterialParameterCollection* WindMPC;
+
+    UPROPERTY(EditAnywhere, Category = "MPC")
+        UMaterialParameterCollection* PostProcessingMPC;
 };
 
 /**
@@ -45,10 +48,8 @@ public:
     ~SSettingsView();
 
     static SSettingsView* Get();
-
-    static UMaterialParameterCollection* GetSceneLightingMPC();
-    static UMaterialParameterCollection* GetCharacterLightingMPC();
     
+private:
     void OnSceneManagementAssetChanged(const FPropertyChangedEvent& InEvent);
 
 private:

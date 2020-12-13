@@ -19,7 +19,7 @@ public:
     static std::shared_ptr<EventHub> Get();
 
     void OnAssetDataSelected(class USceneManagementAssetData* AssetData);
-    void OnMPCSelected(class UMaterialParameterCollection* MPC);
+    void OnMPCSelected(class UMaterialParameterCollection* MPC, int Owner);
 private:
     EventHub();
     EventHub(const EventHub &) = delete;

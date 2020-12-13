@@ -136,33 +136,36 @@ SSettingsView* SSettingsView::Get()
     return Instance;
 }
 
-UMaterialParameterCollection* SSettingsView::GetSceneLightingMPC()
-{
-    if (!Instance) {
-        return nullptr;
-    }
-    return Instance->AssetWrap->SceneLightingMPC;
-}
-
-UMaterialParameterCollection* SSettingsView::GetCharacterLightingMPC()
-{
-    if (!Instance) {
-        return nullptr;
-    }
-    return Instance->AssetWrap->CharacterLightingMPC;
-}
-
 void SSettingsView::OnSceneManagementAssetChanged(const FPropertyChangedEvent& InEvent)
 {
+    FString PropertyName = InEvent.GetPropertyName().ToString();
     // AssetData changed
-    if (InEvent.GetPropertyName() == "AssetData") {
+    if (PropertyName == "AssetData") {
         EventHub::Get()->OnAssetDataSelected(USceneManagementAssetData::GetSelected(false));
     }
 
-    //// MPC changed
-    //// if (InEvent.GetPropertyName().ToString().Contains("MPC")) {
-    //if (InEvent.HasArchetypeInstanceChanged(UMaterialParameterCollection::StaticClass())) {
-    //    EventHub::Get()->OnMPCSelected(nullptr);
-    //    // LightingViewer::OnMPCChanged();
-    //}
+    // MPC changed
+    if (PropertyName.Contains("MPC")) {
+        EMPCOwner Owner = -1;
+        UMaterialParameterCollection* MPC = nullptr;
+        if (PropertyName.Contains("Scene")) {
+            Owner = MPCOwner_ScenLight;
+            MPC = Instance->AssetWrap->SceneLightingMPC;
+        }
+        if (PropertyName.Contains("Character")) {
+            Owner = MPCOwner_CharacterLight;
+            MPC = Instance->AssetWrap->CharacterLightingMPC;
+        }
+        if (PropertyName.Contains("Wind")) {
+            Owner = MPCOwner_Wind;
+            MPC = Instance->AssetWrap->WindMPC;
+        }
+        if (PropertyName.Contains("Post")) {
+            Owner = MPCOwner_PostProc;
+            MPC = Instance->AssetWrap->PostProcessingMPC;
+        }
+        ensure(Owner >= 0);
+
+        EventHub::Get()->OnMPCSelected(MPC, Owner);
+    }
 }

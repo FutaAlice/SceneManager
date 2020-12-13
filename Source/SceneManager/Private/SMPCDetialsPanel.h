@@ -18,7 +18,7 @@ public:
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 
-	void SetObject(UObject* InObject);
+	void SetObject(class UMaterialParameterCollection* InObject);
 
 private:
 	void OnFinishedChangingProperties(const FPropertyChangedEvent& InEvent);

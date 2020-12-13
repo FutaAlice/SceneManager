@@ -1,15 +1,17 @@
 #include "SMaterialViewer.h"
 
+#include "SlateOptMacros.h"
+#include "Widgets/SCompoundWidget.h"
 #include "EditorStyleSet.h" // FEditorStyle
 #include "Framework/Docking/TabManager.h"   // FTabManager, FSpawnTabArgs
-#include "Widgets/SCompoundWidget.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/Docking/SDockTab.h"   // SDockTab
 #include "Widgets/Input/SCheckBox.h"    // SCheckBox
 #include "Widgets/Text/STextBlock.h"    // STextBlock
 #include "Widgets/Images/SImage.h"  // SImage
 #include "Widgets/Layout/SSpacer.h" // SSpacer
-#include "SlateOptMacros.h"
+
+#include "SolutionSelector.h"
 
 #define LOCTEXT_NAMESPACE "MaterialViewer"
 
@@ -26,12 +28,46 @@ public:
 
     /** Constructs this widget with InArgs */
     void Construct(const FArguments& InArgs);
+
+    // Static Members
+private:
+    static SMaterialViewer* MaterialViewerInstance;
+
+    // Instance Members
+private:
+    FSolutionSelector SolutionSelector;
+    TSharedPtr<SVerticalBox> MainLayout;
 };
 
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SMaterialViewer::Construct(const FArguments& InArgs)
 {
+    ChildSlot
+    [
+        SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
+        .Padding(1, 1, 1, 1)
+        .AutoWidth()
+        [
+            SNew(SBorder)
+            .Padding(4)
+            .BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
+            [
+                SolutionSelector.Self()
+            ]
+        ]
+        + SHorizontalBox::Slot()
+        .Padding(1, 1, 1, 1)
+        [
+            SNew(SBorder)
+            .Padding(4)
+            .BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
+            [
+                SAssignNew(MainLayout, SVerticalBox)
+            ]
+        ]
+    ];
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 

@@ -35,7 +35,7 @@ public:
     // Callbacks
 public:
     void OnAssetDataChanged(USceneManagementAssetData* AssetData);
-    void OnMPCChanged();
+    void OnMPCChanged(UMaterialParameterCollection* MPC);
     void OnOtherInstanceModified(SLightingViewer* Modifier, int RemovedIndex);
 
     // Static Fucntions
@@ -241,11 +241,9 @@ void SLightingViewer::OnAssetDataChanged(USceneManagementAssetData * AssetData)
     }
 }
 
-void SLightingViewer::OnMPCChanged()
+void SLightingViewer::OnMPCChanged(UMaterialParameterCollection* MPC)
 {
-    //if (UMaterialParameterCollection* MPC = SSettingsView::GetSceneLightingMPC()) {
-    //    MPCDetailsPanel->SetObject(MPC);
-    //}
+    MPCDetailsPanel->SetObject(MPC);
 }
 
 void SLightingViewer::OnOtherInstanceModified(SLightingViewer * Modifier, int RemovedIndex)
@@ -342,12 +340,10 @@ void OnAssetDataChanged(USceneManagementAssetData * AssetData)
     CharacterLightingViewer->OnAssetDataChanged(AssetData);
 }
 
-void OnMPCChanged()
+void OnMPCChanged(UMaterialParameterCollection* MPC, int LightCategory)
 {
-    SLightingViewer* SceneLightingViewer = SLightingViewer::GetInstance(LightCategory_SceneLight);
-    SceneLightingViewer->OnMPCChanged();
-    SLightingViewer* CharacterLightingViewer = SLightingViewer::GetInstance(LightCategory_CharacterLight);
-    CharacterLightingViewer->OnMPCChanged();
+    SLightingViewer* LightingViewer = SLightingViewer::GetInstance(LightCategory);
+    LightingViewer->OnMPCChanged(MPC);
 }
 
 } // namespace LightingViewer

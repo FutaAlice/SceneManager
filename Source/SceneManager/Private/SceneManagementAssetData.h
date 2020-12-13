@@ -11,6 +11,13 @@ typedef int ELightCategory;
 #define LightCategory_SceneLight        4
 #define LightCategory_CharacterLight    8
 
+typedef int EMPCOwner;
+
+#define MPCOwner_ScenLight      1
+#define MPCOwner_CharacterLight 2
+#define MPCOwner_Wind           3
+#define MPCOwner_PostProc       4
+
 UCLASS(hideCategories = Light)
 class ULightParams : public UObject
 {
