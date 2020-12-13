@@ -3,7 +3,6 @@
 #include "GameFramework/SaveGame.h" // USaveGame
 #include "Engine/DataAsset.h"   // UDataAsset
 #include "Materials/MaterialInstance.h" // UMaterialInstance
-#include "Materials/Material.h" // UMaterial
 #include "SceneManagementAssetData.generated.h"
 
 typedef int ELightCategory;
@@ -70,15 +69,15 @@ public:
     UPROPERTY(EditAnywhere, meta=(AllowedClasses="MaterialInstance"))
         FSoftObjectPath SoftObjectPath;
 
-    UPROPERTY(EditAnywhere)
-        TArray<FString> ScalarNames;
-    UPROPERTY(EditAnywhere)
-        TArray<FString> VectorNames;
+    //UPROPERTY(EditAnywhere)
+    //    TMap<FString, float> ScalarParams;
+    //UPROPERTY(EditAnywhere)
+    //    TMap<FString, FLinearColor> VectorParams;
 
-    UPROPERTY(EditAnywhere)
-        TArray<float> ScalarArray;
-    UPROPERTY(EditAnywhere)
-        TArray<FLinearColor> VectorArray;
+    UPROPERTY(BlueprintReadOnly)
+        TMap<FString, float> ScalarParams;
+    UPROPERTY(BlueprintReadOnly)
+        TMap<FString, FLinearColor> VectorParams;
 };
 
 UCLASS()
@@ -87,7 +86,16 @@ class UGroupMaterialInfo : public UObject
     GENERATED_BODY()
 public:
     UPROPERTY(VisibleAnywhere, Instanced, EditFixedSize, Category = "Material")
-        TArray<UMaterialInfo*> Array;
+        TArray<UMaterialInfo*> GroupItems;
+};
+
+UCLASS()
+class USolutionMaterialInfo : public UObject
+{
+    GENERATED_BODY()
+public:
+    UPROPERTY(VisibleAnywhere, Instanced, EditFixedSize, Category = "Material")
+        TArray<UMaterialInfo*> SolutionItems;
 };
 
 /**
@@ -130,12 +138,12 @@ public:
 
     UPROPERTY(EditAnywhere, EditFixedSize, Category = "Material")
         TArray<FString> MaterialSolutionNameList;
+
     UPROPERTY(EditAnywhere, EditFixedSize, Category = "Material")
         TArray<FString> MaterialGroupNameList;
+
     UPROPERTY(EditAnywhere, EditFixedSize, Category = "Material")
-        TArray<int> MaterialGroupStartIndex;
-    UPROPERTY(EditAnywhere, EditFixedSize, Category = "Material")
-        TArray<UGroupMaterialInfo*> MaterialGroups;
+        TArray<USolutionMaterialInfo*> MaterialSolutions;
 
 
     UPROPERTY(VisibleAnywhere, Instanced, Category = "Material")

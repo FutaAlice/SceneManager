@@ -20,33 +20,9 @@
 
 #include "SolutionSelector.h"
 #include "SceneManagementAssetData.h"
+#include "SMaterialDetailsPanel.h"
 
 #define LOCTEXT_NAMESPACE "MaterialViewer"
-
-TSharedRef<SBoxPanel> CreateVectorParamSlot(FString name, FLinearColor value)
-{
-    return
-        SNew(SHorizontalBox)
-            + SHorizontalBox::Slot()
-            [
-                SNew(STextBlock)
-                .Text(FText::FromString(name))
-            ]
-
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            [
-                SNew(SBox)
-                .WidthOverride(5)
-            ]
-            + SHorizontalBox::Slot()
-            .Padding(10, 0, 10, 0)
-            [
-                SNew(SImage)
-                .ColorAndOpacity(FSlateColor(value))
-                // .OnMouseButtonDown(this, &SMaterialGroupItemWidget::OnClickColorBlock, name, value, index)
-            ];
-}
 
 /**
  * Material Viewer
@@ -71,53 +47,7 @@ private:
     TSharedPtr<SVerticalBox> MainLayout;
 
     // DEBUG
-    IDetailsView* DetailsView;
-    UMaterialInfo* MaterialInfo;
-    TSharedPtr<SUniformGridPanel> UniformGridPanel;
-
-    UMaterialInstance* MaterialInstance;
-
-    void OnFinishedChangingProperties(const FPropertyChangedEvent& InEvent)
-    {
-        FSoftObjectPath SoftObjectPath = MaterialInfo->SoftObjectPath;
-        if (SoftObjectPath.IsNull()) {
-            UniformGridPanel->ClearChildren();
-            return;
-        }
-        UObject* Instance = SoftObjectPath.ResolveObject();
-        if (!Instance) {
-            Instance = SoftObjectPath.TryLoad();
-        }
-
-        MaterialInstance = Cast<UMaterialInstance>(Instance);
-        ensure(MaterialInstance);
-
-
-        if (MaterialInstance) {
-            TArray<FMaterialParameterInfo> ParameterInfo;
-            TArray<FGuid> ParameterGuids;
-
-            MaterialInstance->GetAllVectorParameterInfo(ParameterInfo, ParameterGuids);
-            FString Name = ParameterInfo[0].Name.ToString();
-            FLinearColor VectorValue;
-            MaterialInstance->GetVectorParameterValue(ParameterInfo[0], VectorValue);
-
-            UniformGridPanel->AddSlot(0, 0)
-                [
-                    CreateVectorParamSlot(Name, FLinearColor(1, 0, 0, 0))
-                ];
-            UniformGridPanel->AddSlot(1, 0)
-                [
-                    CreateVectorParamSlot(Name, FLinearColor(0, 1, 0, 0.5))
-                ];
-            UniformGridPanel->AddSlot(0, 1)
-                [
-                    CreateVectorParamSlot(Name, FLinearColor(0, 0, 1, 1))
-                ];
-            //MaterialInstance->GetVectorParameterValue(ParameterInfo[0], Color);
-            //DetailsView->SetObject(&Color);
-        }
-    }
+    TSharedPtr<SMaterialDetailsPanel> MaterialDetailsPanel;
 };
 
 SMaterialViewer* SMaterialViewer::MaterialViewerInstance = nullptr;
@@ -189,20 +119,9 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
         + SHorizontalBox::Slot()
         .Padding(1, 1, 1, 1)
         [
-            SAssignNew(UniformGridPanel, SUniformGridPanel)
+            SAssignNew(MaterialDetailsPanel, SMaterialDetailsPanel)
         ]
     ];
-
-    FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    FDetailsViewArgs DetailsViewArgs(false, false, false, FDetailsViewArgs::HideNameArea, true);
-    TSharedRef<IDetailsView> DetailsViewRef = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
-    DetailsViewRef->OnFinishedChangingProperties().AddRaw(this, &SMaterialViewer::OnFinishedChangingProperties);
-    DetailsView = DetailsViewRef.operator->();
-
-    MainLayout->AddSlot().AutoHeight()[DetailsViewRef];
-
-
-
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -212,8 +131,7 @@ void SMaterialViewer::OnAssetDataChanged(USceneManagementAssetData* AssetData)
         if (!AssetData->TestMaterialInfo) {
             AssetData->TestMaterialInfo = NewObject<UMaterialInfo>(AssetData);
         }
-        MaterialInfo = AssetData->TestMaterialInfo;
-        DetailsView->SetObject(AssetData->TestMaterialInfo);
+        MaterialDetailsPanel->BindDataField(AssetData->TestMaterialInfo);
     }
 }
 
