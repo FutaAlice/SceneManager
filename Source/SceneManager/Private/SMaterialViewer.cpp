@@ -11,7 +11,12 @@
 #include "Widgets/Images/SImage.h"  // SImage
 #include "Widgets/Layout/SSpacer.h" // SSpacer
 
+#include "Modules/ModuleManager.h"  // FModuleManager
+#include "IDetailsView.h"   // FDetailsViewArgs
+#include "PropertyEditorModule.h"   // FPropertyEditorModule
+
 #include "SolutionSelector.h"
+#include "SceneManagementAssetData.h"
 
 #define LOCTEXT_NAMESPACE "MaterialViewer"
 
@@ -37,6 +42,22 @@ private:
 private:
     FSolutionSelector SolutionSelector;
     TSharedPtr<SVerticalBox> MainLayout;
+
+    // DEBUG
+    IDetailsView* DetailsView;
+    UMaterialInfo* MaterialInfo;
+    UMaterialInstance* MaterialInstance;
+    void OnFinishedChangingProperties(const FPropertyChangedEvent& InEvent)
+    {
+        FSoftObjectPath SoftObjectPath = MaterialInfo->SoftObjectPath;
+        UObject* Instance = SoftObjectPath.ResolveObject();
+        if (!Instance) {
+            Instance = SoftObjectPath.TryLoad();
+        }
+        ensure(Instance);
+
+        MaterialInstance = Cast<UMaterialInstance>(Instance);
+    }
 };
 
 
@@ -68,6 +89,18 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
             ]
         ]
     ];
+
+    FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    FDetailsViewArgs DetailsViewArgs(false, false, false, FDetailsViewArgs::HideNameArea, true);
+    TSharedRef<IDetailsView> DetailsViewRef = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
+
+    MainLayout->AddSlot().AutoHeight()[DetailsViewRef];
+
+    MaterialInfo = NewObject<UMaterialInfo>();
+    MaterialInfo->AddToRoot();
+
+    DetailsViewRef->SetObject(MaterialInfo);
+    DetailsViewRef->OnFinishedChangingProperties().AddRaw(this, &SMaterialViewer::OnFinishedChangingProperties);
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 

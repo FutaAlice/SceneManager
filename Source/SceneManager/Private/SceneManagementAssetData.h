@@ -2,6 +2,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h" // USaveGame
 #include "Engine/DataAsset.h"   // UDataAsset
+#include "Materials/MaterialInstance.h" // UMaterialInstance
+#include "Materials/Material.h" // UMaterial
 #include "SceneManagementAssetData.generated.h"
 
 typedef int ELightCategory;
@@ -57,6 +59,23 @@ public:
 
     ULightParams* AddLightParam();
     void RemoveLightParam(ULightParams *LightParams);
+};
+
+//UCLASS()
+//class UMaterialGroup : public UObject
+//{
+//    GENERATED_BODY()
+//public:
+//};
+
+UCLASS()
+class UMaterialInfo : public UObject
+{
+    GENERATED_BODY()
+public:
+    // or MaterialInterface
+    UPROPERTY(EditAnywhere, meta=(AllowedClasses="MaterialInstance"))
+        FSoftObjectPath SoftObjectPath;
 };
 
 /**
