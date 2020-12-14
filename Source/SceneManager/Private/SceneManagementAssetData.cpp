@@ -5,6 +5,7 @@
 #include "Engine/Light.h"   // ALight
 #include "Engine/World.h"   // UWorld
 #include "Components/LightComponent.h"  // ULightComponent
+#include "Materials/MaterialInstanceConstant.h" // UMaterialInstanceConstant
 #include "Kismet/GameplayStatics.h" // UGameplayStatics
 #include "Misc/MessageDialog.h" // FMessageDialog
 
@@ -52,6 +53,57 @@ void UGroupLightParams::RemoveLightParam(ULightParams* LightParams)
     int Index = Array.Find(LightParams);
     ensure(Index >= 0);
     Array.RemoveAt(Index);
+}
+
+void UMaterialInfo::ClearParams()
+{
+    VectorParams.Empty();
+    ScalarParams.Empty();
+}
+
+void UMaterialInfo::FromMaterial()
+{
+    ClearParams();
+
+    if (UMaterialInstance* Material = GetMaterial<UMaterialInstance>()) {
+        TArray<FMaterialParameterInfo> ParameterInfos;
+        TArray<FGuid> ParameterGuids;
+
+        Material->GetAllVectorParameterInfo(ParameterInfos, ParameterGuids);
+        for (auto MaterialParameterInfo : ParameterInfos) {
+            FString Key = MaterialParameterInfo.Name.ToString();
+            float Value;
+            Material->GetScalarParameterValue(MaterialParameterInfo, Value);
+            ScalarParams.Add(Key, Value);
+        }
+        ParameterInfos.Empty();
+        ParameterGuids.Empty();
+
+        Material->GetAllVectorParameterInfo(ParameterInfos, ParameterGuids);
+        for (auto MaterialParameterInfo : ParameterInfos) {
+            FString Key = MaterialParameterInfo.Name.ToString();
+            FLinearColor Value;
+            Material->GetVectorParameterValue(MaterialParameterInfo, Value);
+            VectorParams.Add(Key, Value);
+        }
+    }
+}
+
+void UMaterialInfo::ToMaterial()
+{
+    if (UMaterialInstanceConstant* Material = GetMaterial<UMaterialInstanceConstant>()) {
+        //Get scalar parameters name and value
+        TArray<FMaterialParameterInfo> ParameterInfos;
+        TArray<FGuid> ParameterGuids;
+        Material->GetAllVectorParameterInfo(ParameterInfos, ParameterGuids);
+
+        for (size_t i = 0; i < ParameterInfos.Num(); i++) {
+            FString ParamName = ParameterInfos[i].Name.ToString();
+            if (FLinearColor *Color = VectorParams.Find(ParamName)) {
+                Material->SetVectorParameterValueEditorOnly(ParameterInfos[i], *Color);
+            }
+        }
+    }
 }
 
 void USceneManagementAssetData::AddLightingSolution()

@@ -65,6 +65,24 @@ class UMaterialInfo : public UObject
 {
     GENERATED_BODY()
 public:
+    template<typename OutType>
+    OutType* GetMaterial()
+    {
+        if (!SoftObjectPath.IsAsset()) {
+            return nullptr;
+        }
+        UObject* Object = SoftObjectPath.ResolveObject();
+        if (!Object) {
+            Object = SoftObjectPath.TryLoad();
+        }
+        return Cast<OutType>(Object);
+    }
+
+public:
+    void ClearParams();
+    void FromMaterial();
+    void ToMaterial();
+
     // or MaterialInterface
     UPROPERTY(EditAnywhere, meta=(AllowedClasses="MaterialInstance"))
         FSoftObjectPath SoftObjectPath;

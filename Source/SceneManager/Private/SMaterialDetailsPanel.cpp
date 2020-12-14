@@ -63,6 +63,9 @@ void SMaterialDetailsPanel::OnColorCommitted(FLinearColor NewColor, FString Name
 void SMaterialDetailsPanel::OnColorPickerWindowClosed(const TSharedRef<SWindow>& Window)
 {
     // TODO
+    if (MaterialInfo) {
+        MaterialInfo->ToMaterial();
+    }
 }
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -109,34 +112,9 @@ void SMaterialDetailsPanel::ForceRefresh()
 
 void SMaterialDetailsPanel::ResetDataBySelectedAsset()
 {
-    FSoftObjectPath SoftObjectPath = MaterialInfo->SoftObjectPath;
-    if (SoftObjectPath.IsNull()) {
-        // TODO: clear
-        UniformGridPanel->ClearChildren();
-        MaterialInfo->VectorParams.Empty();
-        MaterialInfo->ScalarParams.Empty();
-        return;
-    }
+    UniformGridPanel->ClearChildren();
 
-    UObject* Object = SoftObjectPath.ResolveObject();
-    if (!Object) {
-        Object = SoftObjectPath.TryLoad();
-    }
-
-    UMaterialInstance* MaterialInstance = Cast<UMaterialInstance>(Object);
-    ensure(MaterialInstance);
-
-    TArray<FMaterialParameterInfo> ParameterInfos;
-    TArray<FGuid> ParameterGuids;
-
-    MaterialInstance->GetAllVectorParameterInfo(ParameterInfos, ParameterGuids);
-
-    for (auto MaterialParameterInfo : ParameterInfos) {
-        FString Key = MaterialParameterInfo.Name.ToString();
-        FLinearColor Value;
-        MaterialInstance->GetVectorParameterValue(MaterialParameterInfo, Value);
-        MaterialInfo->VectorParams.Add(Key, Value);
-    }
+    MaterialInfo->FromMaterial();
 
     SyncToGridPanel();
 }
