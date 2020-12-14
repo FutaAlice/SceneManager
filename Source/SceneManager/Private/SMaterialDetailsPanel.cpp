@@ -11,8 +11,11 @@
 #include "Widgets/Input/SButton.h"  // SButton
 #include "Widgets/Layout/SBox.h"    // SBox
 
+#include "Editor.h"
 #include "Engine.h"
+#include "Editor/EditorEngine.h"
 #include "Engine/Engine.h"
+
 
 #include "SceneManagementAssetData.h"
 
@@ -42,11 +45,19 @@ FReply SMaterialDetailsPanel::OnClickColorBlock(const FGeometry& MyGeometry, con
     FColorPickerArgs PickerArgs;
     PickerArgs.bUseAlpha = true;
     PickerArgs.bOnlyRefreshOnOk = false;
-    PickerArgs.bOnlyRefreshOnMouseUp = true;
-
+    PickerArgs.bOnlyRefreshOnMouseUp = false;
     PickerArgs.DisplayGamma = TAttribute<float>::Create(TAttribute<float>::FGetter::CreateUObject(GEngine, &UEngine::GetDisplayGamma));
     PickerArgs.InitialColorOverride = GetVectorByName(Name);
     PickerArgs.OnColorCommitted = FOnLinearColorValueChanged::CreateSP(this, &SMaterialDetailsPanel::OnColorCommitted, Name);
+
+    // UNDO not work?
+    PickerArgs.OnInteractivePickBegin = FSimpleDelegate::CreateLambda([Name] {
+        GEditor->BeginTransaction(FText::FromString(FString("Edit ") + Name));
+    });
+    PickerArgs.OnInteractivePickEnd = FSimpleDelegate::CreateLambda([] {
+        GEditor->EndTransaction();
+    });
+
     PickerArgs.OnColorPickerWindowClosed = FOnWindowClosed::CreateSP(this, &SMaterialDetailsPanel::OnColorPickerWindowClosed);
     PickerArgs.ParentWidget = nullptr;
 
@@ -56,6 +67,7 @@ FReply SMaterialDetailsPanel::OnClickColorBlock(const FGeometry& MyGeometry, con
 
 void SMaterialDetailsPanel::OnColorCommitted(FLinearColor NewColor, FString Name)
 {
+    UE_LOG(LogTemp, Warning, TEXT("OnColorCommitted"));
     MaterialInfo->VectorParams[Name] = NewColor;
     SyncToGridPanel();
 }

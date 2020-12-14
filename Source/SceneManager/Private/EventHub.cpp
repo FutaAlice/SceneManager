@@ -35,10 +35,29 @@ EventHub::EventHub()
 
     // sync asset when editor modified (what's the different from 'OnObjectPropertyChanged'£¿)
     FCoreUObjectDelegates::OnObjectModified.AddLambda([](UObject* InObject) {
+
+
         if (InObject->IsA(ALight::StaticClass()) || InObject->IsA(ULightComponent::StaticClass())) {
             if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected(false)) {
                 AssetData->SyncDataByActor();
             }
+        }
+        else {
+            static TSet<FString> Fuck{
+                "MaterialEditorInstanceConstant",
+                "DEditorScalarParameterValue",
+                "DEditorVectorParameterValue",
+                "DEditorTextureParameterValue",
+                "DEditorStaticSwitchParameterValue",
+                "MaterialExpressionScalarParameter",
+                "MaterialExpressionVectorParameter",
+            };
+
+            UClass *InClass = InObject->GetClass();
+            if (Fuck.Contains(InClass->GetName())) {
+                UE_LOG(LogTemp, Warning, TEXT("Material modified"));
+            }
+
         }
     });
 
