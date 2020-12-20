@@ -3,8 +3,6 @@
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/SCompoundWidget.h"
 
-#include "IDetailCustomization.h"   // IDetailCustomization
-
 class IDetailsView;
 class IDetailCustomization;
 class UMaterialParameterCollection;
@@ -30,18 +28,5 @@ private:
 
 private:
 	IDetailsView* DetailsView;
-	UMaterialParameterCollection* MPC;
+	UMaterialParameterCollection* MPC;  // unused
 };
-
-//class FMPCDetailsCustomization : public IDetailCustomization
-//{
-//public:
-//	virtual void CustomizeDetails(IDetailLayoutBuilder& DetailBuilder) override;
-//	void ColorPicked(FLinearColor SelectedColor);
-//	static TSharedRef<IDetailCustomization> MakeInstance()
-//	{
-//		return MakeShareable(new FMPCDetailsCustomization);
-//	}
-//
-//	TWeakObjectPtr<UMaterialParameterCollection> MPC;
-//};
