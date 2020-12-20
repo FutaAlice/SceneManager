@@ -9,7 +9,6 @@
 class UMaterialInstance;
 class UMaterialInfo;
 class IDetailsView;
-class SUniformGridPanel;
 class SBoxPanel;
 class SColorBlock;
 
@@ -38,13 +37,9 @@ public:
 
 private:
     void ResetDataBySelectedAsset();
-    void SyncToGridPanel();
     void OnFinishedChangingProperties(const FPropertyChangedEvent& InEvent);
-
-    FLinearColor GetVectorByName(FString Name) const;
-
+    
 private:
     UMaterialInfo* MaterialInfo;
     IDetailsView* DetailView;
-    TSharedPtr<SUniformGridPanel> UniformGridPanel;
 };

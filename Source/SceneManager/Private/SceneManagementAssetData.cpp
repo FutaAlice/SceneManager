@@ -69,7 +69,7 @@ void UMaterialInfo::FromMaterial()
         TArray<FMaterialParameterInfo> ParameterInfos;
         TArray<FGuid> ParameterGuids;
 
-        Material->GetAllVectorParameterInfo(ParameterInfos, ParameterGuids);
+        Material->GetAllScalarParameterInfo(ParameterInfos, ParameterGuids);
         for (auto MaterialParameterInfo : ParameterInfos) {
             FString Key = MaterialParameterInfo.Name.ToString();
             float Value;

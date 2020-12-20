@@ -73,10 +73,11 @@ FReply FMPCDetailsCustomization::OnClickColorBlock(const FGeometry&, const FPoin
     return FReply::Handled();
 }
 
+BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void FMPCDetailsCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
 {
-    auto DetailView = DetailBuilder.GetDetailsView();
-    const TArray< TWeakObjectPtr<UObject>>& SelectedObjects = DetailView->GetSelectedObjects();
+    const IDetailsView* DetailView = DetailBuilder.GetDetailsView();
+    const TArray<TWeakObjectPtr<UObject>>& SelectedObjects = DetailView->GetSelectedObjects();
 
     for (int32 ObjectIndex = 0; !MPC.IsValid() && ObjectIndex < SelectedObjects.Num(); ++ObjectIndex) {
         const TWeakObjectPtr<UObject>& CurrentObject = SelectedObjects[ObjectIndex];
@@ -129,7 +130,6 @@ void FMPCDetailsCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuil
     }
 }
 
-BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SMPCDetialsPanel::Construct(const FArguments& InArgs)
 {
 	FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
