@@ -135,6 +135,8 @@ public:
     void SyncActorByName();
     void SyncDataByActor();
 
+    void SyncDataByMaterial();
+
     void CleanUp();
 
     static USceneManagementAssetData* GetSelected(bool bAlertWhenEmpty = true);

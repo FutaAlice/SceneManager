@@ -237,6 +237,12 @@ void USceneManagementAssetData::SyncDataByActor()
     }
 }
 
+void USceneManagementAssetData::SyncDataByMaterial()
+{
+    // DEBUG
+    TestMaterialInfo->FromMaterial();
+}
+
 void USceneManagementAssetData::CleanUp()
 {
     for (ULightParams* LightParams : KeyLightParams) {

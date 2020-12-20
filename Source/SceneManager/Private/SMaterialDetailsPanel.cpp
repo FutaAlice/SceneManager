@@ -59,7 +59,10 @@ void FMaterialInfoCustomization::SetScalar(float NewValue, FString Name)
         return;
     }
     if (float *Value = MaterialInfo->ScalarParams.Find(Name)) {
-        *Value = NewValue;
+        if (*Value != NewValue) {
+            *Value = NewValue;
+            MaterialInfo->ToMaterial();
+        }
     }
 }
 
@@ -81,7 +84,10 @@ void FMaterialInfoCustomization::SetVector(FLinearColor NewValue, FString Name)
         return;
     }
     if (FLinearColor *Value = MaterialInfo->VectorParams.Find(Name)) {
-        *Value = NewValue;
+        if (*Value != NewValue) {
+            *Value = NewValue;
+            MaterialInfo->ToMaterial();
+        }
     }
 }
 
@@ -202,29 +208,14 @@ void SMaterialDetailsPanel::ResetDataBySelectedAsset()
 {
     MaterialInfo->FromMaterial();
     DetailView->ForceRefresh();
-    //SyncToGridPanel();
 }
-
-//void SMaterialDetailsPanel::SyncToGridPanel()
-//{
-//    UniformGridPanel->ClearChildren();
-//    int i = 0, j = 0, col = 2;
-//    for (auto Item : MaterialInfo->VectorParams) {
-//        TSharedPtr<SColorBlock> ColorBlock;
-//        UniformGridPanel->AddSlot(i, j)
-//            [
-//                CreateVectorParamSlot(Item.Key, Item.Value, ColorBlock)
-//            ];
-//        if (++i == col) {
-//            i = 0;
-//            j++;
-//        }
-//    }
-//}
 
 void SMaterialDetailsPanel::OnFinishedChangingProperties(const FPropertyChangedEvent& InEvent)
 {
     if (InEvent.GetPropertyName() == "SoftObjectPath") {
         ResetDataBySelectedAsset();
+    } 
+    else {
+        UE_LOG(LogTemp, Warning, TEXT("SMaterialDetailsPanel::OnFinishedChangingProperties"));
     }
 }
