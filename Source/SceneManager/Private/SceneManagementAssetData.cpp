@@ -166,6 +166,45 @@ UGroupLightParams* USceneManagementAssetData::GetAuxLightGroupsPtr(int SolutionI
     return (*GroupArray)[SolutionIndex];
 }
 
+void USceneManagementAssetData::AddMaterialSolution()
+{
+    MaterialSolutionNameList.Add("");
+    MaterialSolutions.Add(NewObject<USolutionMaterialInfo>(this));
+
+    // first time, create default group
+    if (MaterialGroupNameList.Num() == 0) {
+        MaterialGroupNameList.Add("Default");
+        MaterialGroupIndexList.Add(0);
+    }
+    // otherwise, copy SoftObjectPath
+    else {
+        ensure(MaterialSolutions.Num() > 1);
+        USolutionMaterialInfo* From = MaterialSolutions[0];
+        USolutionMaterialInfo* To = MaterialSolutions.Last();
+
+        for (auto MaterialInfo : From->SolutionItems) {
+            UMaterialInfo *NewItem = NewObject<UMaterialInfo>(this);
+            NewItem->SoftObjectPath = MaterialInfo->SoftObjectPath;
+            NewItem->FromMaterial();
+            To->SolutionItems.Add(NewItem);
+        }
+    }
+
+    // TODO
+    SyncMaterialByName();
+}
+
+void USceneManagementAssetData::RemoveMaterialSolution(int SolutionIndex)
+{
+    MaterialSolutionNameList.RemoveAt(SolutionIndex);
+    MaterialSolutions.RemoveAt(SolutionIndex);
+}
+
+void USceneManagementAssetData::RenameMaterialSolution(int SolutionIndex, const FString & SolutionName)
+{
+    MaterialSolutionNameList[SolutionIndex] = SolutionName;
+}
+
 void USceneManagementAssetData::SyncActorByName()
 {
     // gather all ALight actor in level
@@ -235,6 +274,10 @@ void USceneManagementAssetData::SyncDataByActor()
             LightParams->FromActor();
         }
     }
+}
+
+void USceneManagementAssetData::SyncMaterialByName()
+{
 }
 
 void USceneManagementAssetData::SyncDataByMaterial()

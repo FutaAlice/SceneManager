@@ -131,10 +131,16 @@ public:
 
     ULightParams* GetKeyLightParamsPtr(int SolutionIndex);
     UGroupLightParams* GetAuxLightGroupsPtr(int SolutionIndex, int LightCategory);
+
+    void AddMaterialSolution();
+    void DuplicateMaterialSolution(int SolutionIndex);
+    void RemoveMaterialSolution(int SolutionIndex);
+    void RenameMaterialSolution(int SolutionIndex, const FString& SolutionName);
     
     void SyncActorByName();
     void SyncDataByActor();
 
+    void SyncMaterialByName();
     void SyncDataByMaterial();
 
     void CleanUp();
@@ -161,6 +167,9 @@ public:
 
     UPROPERTY(EditAnywhere, EditFixedSize, Category = "Material")
         TArray<FString> MaterialGroupNameList;
+
+    UPROPERTY(EditAnywhere, EditFixedSize, Category = "Material")
+        TArray<int> MaterialGroupIndexList; // group start index
 
     UPROPERTY(EditAnywhere, EditFixedSize, Category = "Material")
         TArray<USolutionMaterialInfo*> MaterialSolutions;

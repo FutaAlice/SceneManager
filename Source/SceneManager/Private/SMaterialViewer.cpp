@@ -104,6 +104,14 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
                         return FReply::Handled();
                     })
                 ]
+                + SHorizontalBox::Slot()
+                [
+                    SNew(SButton)
+                    .Text(FText::FromString("Add From Content Browser"))
+                    .OnClicked_Lambda([this]() -> FReply {
+                        return FReply::Handled();
+                    })
+                ]
             ]
             + SVerticalBox::Slot()
             .Padding(1, 1, 1, 1)
@@ -122,11 +130,63 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
             SAssignNew(MaterialDetailsPanel, SMaterialDetailsPanel)
         ]
     ];
+
+    // On solution changed
+    SolutionSelector.CB_Active = [this](int SolutionIndex) {
+        //if (SolutionIndex < 0) {
+        //    LightActorDetailPanel->BindDataField(nullptr);
+        //    return;
+        //}
+        //USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected();
+        //if (!AssetData) {
+        //    LightActorDetailPanel->BindDataField(nullptr);
+        //    return;
+        //}
+        //ULightParams* LightParams = AssetData->GetKeyLightParamsPtr(SolutionIndex);
+        //// update combo box
+        //LightActorComboBox->SetByActorName(LightParams->ActorName);
+        //// update details panel
+        //LightActorDetailPanel->BindDataField(LightParams);
+        //LightActorDetailPanel->ForceRefresh();
+        //// Sync to actor
+        //LightParams->ToActor();
+        //// update groups
+        //LightActorGroup->OnSolutionChanged(SolutionIndex);
+    };
+    
+    // On solution rename
+    SolutionSelector.CB_Rename = [this](int SolutionIndex, FString SolutionName) {
+        if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
+            AssetData->RenameMaterialSolution(SolutionIndex, SolutionName);
+        }
+    };
+
+    // On solution append
+    SolutionSelector.CB_Append = [this](int SolutionIndex) {
+        if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
+            AssetData->AddMaterialSolution();
+        }
+    };
+
+    // On solution duplicate
+    SolutionSelector.CB_Duplicate = [this](int SolutionIndex) {
+        if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
+            // AssetData->DuplicateMaterialSolution(SolutionIndex);
+        }
+    };
+
+    // On solution remove
+    SolutionSelector.CB_Remove = [this](int SolutionIndex) {
+        if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
+            AssetData->RemoveMaterialSolution(SolutionIndex);
+        }
+    };
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SMaterialViewer::OnAssetDataChanged(USceneManagementAssetData* AssetData)
 {
+    SolutionSelector.Clear();
     if (AssetData) {
         if (!AssetData->TestMaterialInfo) {
             AssetData->TestMaterialInfo = NewObject<UMaterialInfo>(AssetData);
