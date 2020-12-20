@@ -37,6 +37,7 @@ public:
 
     /** Constructs this widget with InArgs */
     void Construct(const FArguments& InArgs);
+    void ForceRefresh(int SolutionIndex);
 
     static SMaterialViewer* MaterialViewerInstance;
     void OnAssetDataChanged(USceneManagementAssetData* AssetData);
@@ -47,7 +48,7 @@ private:
     TSharedPtr<SVerticalBox> MainLayout;
 
     // DEBUG
-    TSharedPtr<SMaterialDetailsPanel> MaterialDetailsPanel;
+    // TSharedPtr<SMaterialDetailsPanel> MaterialDetailsPanel;
 };
 
 SMaterialViewer* SMaterialViewer::MaterialViewerInstance = nullptr;
@@ -124,30 +125,16 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
                 ]
             ]
         ]
-        + SHorizontalBox::Slot()
-        .Padding(1, 1, 1, 1)
-        [
-            SAssignNew(MaterialDetailsPanel, SMaterialDetailsPanel)
-        ]
+        //+ SHorizontalBox::Slot()
+        //.Padding(1, 1, 1, 1)
+        //[
+        //    SAssignNew(MaterialDetailsPanel, SMaterialDetailsPanel)
+        //]
     ];
 
     // On solution changed
     SolutionSelector.CB_Active = [this](int SolutionIndex) {
-        //if (SolutionIndex < 0) {
-        //    LightActorDetailPanel->BindDataField(nullptr);
-        //    return;
-        //}
-        //USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected();
-        //if (!AssetData) {
-        //    LightActorDetailPanel->BindDataField(nullptr);
-        //    return;
-        //}
-        //ULightParams* LightParams = AssetData->GetKeyLightParamsPtr(SolutionIndex);
-        //// update combo box
-        //LightActorComboBox->SetByActorName(LightParams->ActorName);
-        //// update details panel
-        //LightActorDetailPanel->BindDataField(LightParams);
-        //LightActorDetailPanel->ForceRefresh();
+        ForceRefresh(SolutionIndex);
         //// Sync to actor
         //LightParams->ToActor();
         //// update groups
@@ -182,17 +169,44 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
         }
     };
 }
+
+void SMaterialViewer::ForceRefresh(int SolutionIndex)
+{
+    MainLayout->ClearChildren();
+    USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected();
+    if (!AssetData) {
+        // TODO
+        return;
+    }
+
+    for (int i = 0; i < AssetData->MaterialGroupNameList.Num(); ++i) {
+        const FString GroupName = AssetData->MaterialGroupNameList[i];
+        MainLayout->AddSlot()[SNew(STextBlock).Text(FText::FromString(GroupName + " Group"))];
+
+        USolutionMaterialInfo* CurrentSolution = AssetData->MaterialSolutions[SolutionIndex];
+        const int GroupBeginIndex = AssetData->MaterialGroupIndexList[i];
+        const int GroupEndIndex = (i == AssetData->MaterialGroupNameList.Num() - 1) ?   // is the last group ?
+            CurrentSolution->SolutionItems.Num() :
+            AssetData->MaterialGroupIndexList[i + 1];
+
+        for (int j = GroupBeginIndex; j < GroupEndIndex; ++j) {
+            // TODO
+            CurrentSolution[j];
+        }
+    }
+}
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SMaterialViewer::OnAssetDataChanged(USceneManagementAssetData* AssetData)
 {
     SolutionSelector.Clear();
     if (AssetData) {
-        if (!AssetData->TestMaterialInfo) {
-            AssetData->TestMaterialInfo = NewObject<UMaterialInfo>(AssetData);
-        }
-        MaterialDetailsPanel->BindDataField(AssetData->TestMaterialInfo);
+        //if (!AssetData->TestMaterialInfo) {
+        //    AssetData->TestMaterialInfo = NewObject<UMaterialInfo>(AssetData);
+        //}
+        // MaterialDetailsPanel->BindDataField(AssetData->TestMaterialInfo);
     }
+    ForceRefresh(-1);
 }
 
 namespace MaterialViewer {
