@@ -133,6 +133,7 @@ public:
     UGroupLightParams* GetAuxLightGroupsPtr(int SolutionIndex, int LightCategory);
 
     void AddMaterialSolution();
+    void AddMaterialGroup();
     void DuplicateMaterialSolution(int SolutionIndex);
     void RemoveMaterialSolution(int SolutionIndex);
     void RenameMaterialSolution(int SolutionIndex, const FString& SolutionName);

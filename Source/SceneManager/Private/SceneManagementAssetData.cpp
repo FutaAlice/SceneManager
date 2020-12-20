@@ -194,6 +194,22 @@ void USceneManagementAssetData::AddMaterialSolution()
     SyncMaterialByName();
 }
 
+void USceneManagementAssetData::AddMaterialGroup()
+{
+    // generate a group name
+    FString GroupName;
+    for (int i = MaterialGroupNameList.Num();;) {
+        GroupName = FString::Printf(TEXT("NUM %d"), ++i);
+        if (MaterialGroupNameList.Find(GroupName) == INDEX_NONE) {
+            break;
+        }
+    }
+
+    ensure(MaterialSolutions.Num() > 0);
+    MaterialGroupNameList.Add(GroupName);
+    MaterialGroupIndexList.Add(MaterialSolutions[0]->SolutionItems.Num());
+}
+
 void USceneManagementAssetData::RemoveMaterialSolution(int SolutionIndex)
 {
     MaterialSolutionNameList.RemoveAt(SolutionIndex);
