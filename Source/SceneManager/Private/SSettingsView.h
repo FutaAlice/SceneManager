@@ -9,6 +9,7 @@
 
 class UMaterialParameterCollection;
 class USceneManagementAssetData;
+class IDetailsView;
 
 UCLASS()
 class UAssetWrap : public UObject {
@@ -51,8 +52,11 @@ public:
     
 private:
     void OnSceneManagementAssetChanged(const FPropertyChangedEvent& InEvent);
+    FReply SaveAssetData();
 
 private:
     static SSettingsView *Instance;
     UAssetWrap *AssetWrap;
+
+    IDetailsView* GroupNameView;
 };

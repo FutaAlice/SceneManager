@@ -16,6 +16,7 @@
 #include "IAssetRegistry.h" // IAssetRegistry
 #include "Widgets/SBoxPanel.h"  // SVerticalBox, SHorizontalBox
 #include "Widgets/Input/SButton.h"  // SButton
+#include "Widgets/Layout/SScrollBox.h"  // SScrollBox
 #include "Materials/MaterialParameterCollection.h"  // UMaterialParameterCollection
 
 #include "SceneManagementAssetData.h"
@@ -30,7 +31,6 @@ void SSettingsView::Construct(const FArguments& InArgs)
 
     // Init AssetWrap
     AssetWrap = NewObject<UAssetWrap>();
-    AssetWrap->AssetData = nullptr;
     AssetWrap->AddToRoot();
 
     // Create AssetWrap DetailView widget
@@ -40,44 +40,42 @@ void SSettingsView::Construct(const FArguments& InArgs)
     PlayerLightView->SetObject(AssetWrap);
     PlayerLightView->OnFinishedChangingProperties().AddRaw(this, &SSettingsView::OnSceneManagementAssetChanged);
 
+    TSharedRef<IDetailsView> GroupNameViewRef = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
+    GroupNameView = GroupNameViewRef.operator->();
+
     ChildSlot
     [
-        SNew(SVerticalBox)
-        + SVerticalBox::Slot()
-        .AutoHeight()
+        SNew(SHorizontalBox)
+        + SHorizontalBox::Slot()
+        .AutoWidth()
         [
-            PlayerLightView
-        ]
-        + SVerticalBox::Slot()
-        .AutoHeight()
-        [
-            SNew(SHorizontalBox)
-            + SHorizontalBox::Slot()
-            .AutoWidth()
+            SNew(SVerticalBox)
+            + SVerticalBox::Slot()
+            .AutoHeight()
             [
                 SNew(SButton)
                 .Text(FText::FromString("Save"))
-                .OnClicked_Lambda([this]() -> FReply {
-                    if (USceneManagementAssetData *AssetData = USceneManagementAssetData::GetSelected()) {
-                        // FSoftObjectPath
-                        FStringAssetReference StringAssetReference(AssetData);
-                        FString AssetPath = StringAssetReference.GetAssetPathString();  // /Game/NewSceneManagementAsset.NewSceneManagementAsset
-                        FString BaseFilePath = FPaths::GetBaseFilename(AssetPath, false);   // /Game/NewSceneManagementAsset
-                        UE_LOG(LogTemp, Warning, TEXT("FSoftObjectPath AssetPath: %s"), *AssetPath);
-                        UE_LOG(LogTemp, Warning, TEXT("FSoftObjectPath BaseFilePath: %s"), *BaseFilePath);
-                        UE_LOG(LogTemp, Warning, TEXT("ProjectContentDir: %s"), *FPaths::ProjectContentDir());  //  D:/Unreal Projects/SMRefactor/Content/
-                        
-                        TArray<UPackage*> Packages;
-                        UPackage* Outermost = AssetData->GetOutermost();
-                        // Fully load and check out is done in UEditorLoadingAndSavingUtils::SavePackages
-                        Packages.Add(Outermost);
-                        UEditorLoadingAndSavingUtils::SavePackages(Packages, false);
-                    }
-                    return FReply::Handled();
-                })
+                .OnClicked_Raw(this, &SSettingsView::SaveAssetData)
+            ]
+            + SVerticalBox::Slot()
+            .AutoHeight()
+            [
+                SNew(SScrollBox)
+                + SScrollBox::Slot()
+                [
+                    PlayerLightView
+                ]
             ]
         ]
-
+        + SHorizontalBox::Slot()
+        .AutoWidth()
+        [
+            SNew(SScrollBox)
+            + SScrollBox::Slot()
+            [
+                GroupNameViewRef
+            ]
+        ]
     ];
 }
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -97,7 +95,9 @@ void SSettingsView::OnSceneManagementAssetChanged(const FPropertyChangedEvent& I
     FString PropertyName = InEvent.GetPropertyName().ToString();
     // AssetData changed
     if (PropertyName == "AssetData") {
-        EventHub::Get()->OnAssetDataSelected(USceneManagementAssetData::GetSelected(false));
+        USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected(false);
+        EventHub::Get()->OnAssetDataSelected(AssetData);
+        GroupNameView->SetObject(AssetData ? AssetData->EnabledGroupName : nullptr);
     }
 
     // MPC changed
@@ -124,4 +124,24 @@ void SSettingsView::OnSceneManagementAssetChanged(const FPropertyChangedEvent& I
 
         EventHub::Get()->OnMPCSelected(MPC, Owner);
     }
+}
+
+FReply SSettingsView::SaveAssetData()
+{
+    if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
+        // FSoftObjectPath
+        FStringAssetReference StringAssetReference(AssetData);
+        FString AssetPath = StringAssetReference.GetAssetPathString();  // /Game/NewSceneManagementAsset.NewSceneManagementAsset
+        FString BaseFilePath = FPaths::GetBaseFilename(AssetPath, false);   // /Game/NewSceneManagementAsset
+        UE_LOG(LogTemp, Warning, TEXT("FSoftObjectPath AssetPath: %s"), *AssetPath);
+        UE_LOG(LogTemp, Warning, TEXT("FSoftObjectPath BaseFilePath: %s"), *BaseFilePath);
+        UE_LOG(LogTemp, Warning, TEXT("ProjectContentDir: %s"), *FPaths::ProjectContentDir());  //  D:/Unreal Projects/SMRefactor/Content/
+
+        TArray<UPackage*> Packages;
+        UPackage* Outermost = AssetData->GetOutermost();
+        // Fully load and check out is done in UEditorLoadingAndSavingUtils::SavePackages
+        Packages.Add(Outermost);
+        UEditorLoadingAndSavingUtils::SavePackages(Packages, false);
+    }
+    return FReply::Handled();
 }

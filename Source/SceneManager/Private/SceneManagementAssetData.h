@@ -122,7 +122,9 @@ class UEnabledGroupName : public UObject
     GENERATED_BODY()
 public:
     UPROPERTY(EditAnywhere, Category = "Material")
-        TArray<FString> GroupName;
+        TSet<FString> GroupName;
+
+    bool IsEmpty() const;
 };
 
 /**

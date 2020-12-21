@@ -433,3 +433,9 @@ USceneManagementAssetData* USceneManagementAssetData::GetEmpty()
     }
     return NullAsset;
 }
+
+bool UEnabledGroupName::IsEmpty() const
+{
+    return GroupName.Num() == 0 ||
+        (GroupName.Num() == 1 && GroupName.Contains(""));
+}
