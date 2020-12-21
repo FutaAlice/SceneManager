@@ -118,6 +118,11 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
                     SNew(SButton)
                     .Text(FText::FromString("Remove Selected Group"))
                     .OnClicked_Lambda([this]() -> FReply {
+                        if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
+                            AssetData->RemoveMaterialGroup(ComboBox->GetCurrentItemLabel().ToString());
+                            ComboBox->SetCurrentItemLabel("Default");
+                            ForceRefresh(SolutionSelector.GetCurrentSelectedSolutionIndex());
+                        }
                         return FReply::Handled();
                     })
                 ]
@@ -236,12 +241,11 @@ void SMaterialViewer::ForceRefresh(int SolutionIndex)
             [SNew(STextBlock).Text(FText::FromString(FString("Group: ") + GroupName))];
 
         USolutionMaterialInfo* CurrentSolution = AssetData->MaterialSolutions[SolutionIndex];
-        const int GroupBeginIndex = AssetData->MaterialGroupIndexList[i];
-        const int GroupEndIndex = (i == AssetData->MaterialGroupNameList.Num() - 1) ?   // is the last group ?
-            CurrentSolution->SolutionItems.Num() :
-            AssetData->MaterialGroupIndexList[i + 1];
 
-        for (int j = GroupBeginIndex; j < GroupEndIndex; ++j) {
+        int BeginIndex, EndIndex;
+        AssetData->GetGroupRange(GroupName, BeginIndex, EndIndex);
+
+        for (int j = BeginIndex; j < EndIndex; ++j) {
             TSharedPtr<SMaterialDetailsPanel> DetailsPanel;
             MainLayout->AddSlot()
                 .AutoHeight()

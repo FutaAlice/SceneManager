@@ -132,11 +132,13 @@ public:
     ULightParams* GetKeyLightParamsPtr(int SolutionIndex);
     UGroupLightParams* GetAuxLightGroupsPtr(int SolutionIndex, int LightCategory);
 
+    bool GetGroupRange(FString GroupName, int &BeginIndex, int &EndIndex);
     void AddMaterialSolution();
     void AddMaterialGroup();
     void AddMaterial(FString GroupName, FSoftObjectPath DefaultValue = FSoftObjectPath());
     void DuplicateMaterialSolution(int SolutionIndex);
     void RemoveMaterialSolution(int SolutionIndex);
+    void RemoveMaterialGroup(FString GroupName);
     void RenameMaterialSolution(int SolutionIndex, const FString& SolutionName);
     bool RenameMaterialGroup(FString OldName, FString NewName);
     

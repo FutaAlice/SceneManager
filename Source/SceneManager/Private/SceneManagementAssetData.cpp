@@ -166,6 +166,21 @@ UGroupLightParams* USceneManagementAssetData::GetAuxLightGroupsPtr(int SolutionI
     return (*GroupArray)[SolutionIndex];
 }
 
+bool USceneManagementAssetData::GetGroupRange(FString GroupName, int & BeginIndex, int & EndIndex)
+{
+    int GroupIndex = MaterialGroupNameList.Find(GroupName);
+    if (GroupIndex == INDEX_NONE) {
+        BeginIndex = EndIndex = 0;
+        return false;
+    }
+
+    BeginIndex = MaterialGroupIndexList[GroupIndex];
+    EndIndex = (GroupIndex == MaterialGroupNameList.Num() - 1) ?   // is the last group ?
+        MaterialSolutions[0]->SolutionItems.Num() :
+        MaterialGroupIndexList[GroupIndex + 1];
+    return true;
+}
+
 void USceneManagementAssetData::AddMaterialSolution()
 {
     MaterialSolutionNameList.Add("");
@@ -216,15 +231,13 @@ void USceneManagementAssetData::AddMaterial(FString GroupName, FSoftObjectPath D
         return;
     }
 
-    int GroupIndex = INDEX_NONE;
-    MaterialGroupNameList.Find(GroupName, GroupIndex);
+    int GroupIndex = MaterialGroupNameList.Find(GroupName);
     if (GroupIndex == INDEX_NONE) {
         return;
     }
 
-    const int GroupEndIndex = (GroupIndex == MaterialGroupNameList.Num() - 1) ?   // is the last group ?
-        MaterialSolutions[0]->SolutionItems.Num() :
-        MaterialGroupIndexList[GroupIndex + 1];
+    int Unused, EndIndex;
+    GetGroupRange(GroupName, Unused, EndIndex);
 
     // all index after this gourp name +1
     for (int i = GroupIndex + 1; i < MaterialGroupNameList.Num(); ++i) {
@@ -235,7 +248,7 @@ void USceneManagementAssetData::AddMaterial(FString GroupName, FSoftObjectPath D
         UMaterialInfo* MaterialInfo = NewObject<UMaterialInfo>(this);
         MaterialInfo->SoftObjectPath = DefaultValue;
         MaterialInfo->FromMaterial();
-        SO->SolutionItems.Insert(MaterialInfo, GroupEndIndex);
+        SO->SolutionItems.Insert(MaterialInfo, EndIndex);
     }
 }
 
@@ -243,6 +256,32 @@ void USceneManagementAssetData::RemoveMaterialSolution(int SolutionIndex)
 {
     MaterialSolutionNameList.RemoveAt(SolutionIndex);
     MaterialSolutions.RemoveAt(SolutionIndex);
+}
+
+void USceneManagementAssetData::RemoveMaterialGroup(FString GroupName)
+{
+    int GroupIndex = MaterialGroupNameList.Find(GroupName);
+    if (GroupIndex == INDEX_NONE) {
+        return;
+    }
+
+    int BeginIndex, EndIndex;
+    GetGroupRange(GroupName, BeginIndex, EndIndex);
+
+    // remove group label and index
+    MaterialGroupNameList.RemoveAt(GroupIndex);
+    MaterialGroupIndexList.RemoveAt(GroupIndex);
+
+    // fix other group indices
+    const int RemoveCount = EndIndex - BeginIndex;
+    for (int i = GroupIndex; i < MaterialGroupIndexList.Num(); ++i) {
+        MaterialGroupIndexList[i] -= RemoveCount;
+    }
+
+    // remove item data
+    for (auto SolutionMaterialInfo : MaterialSolutions) {
+        SolutionMaterialInfo->SolutionItems.RemoveAt(BeginIndex, RemoveCount);
+    }
 }
 
 void USceneManagementAssetData::RenameMaterialSolution(int SolutionIndex, const FString & SolutionName)
