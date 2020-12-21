@@ -225,19 +225,30 @@ void USceneManagementAssetData::AddMaterialGroup()
     MaterialGroupIndexList.Add(MaterialSolutions[0]->SolutionItems.Num());
 }
 
-void USceneManagementAssetData::AddMaterial(FString GroupName, FSoftObjectPath DefaultValue)
+int USceneManagementAssetData::AddMaterial(FString GroupName, FSoftObjectPath DefaultValue)
 {
     if (MaterialSolutions.Num() <= 0) {
-        return;
+        return ERR_MAT_SOLUTION;
     }
 
     int GroupIndex = MaterialGroupNameList.Find(GroupName);
     if (GroupIndex == INDEX_NONE) {
-        return;
+        return ERR_MAT_GROUP;
+    }
+
+    if (!DefaultValue.IsNull()) {
+        TSet<FSoftObjectPath> PathCollection;
+        for (UMaterialInfo* MaterialInfo : MaterialSolutions[0]->SolutionItems) {
+            PathCollection.Add(MaterialInfo->SoftObjectPath);
+        }
+        if (PathCollection.Contains(DefaultValue)) {
+            return ERR_MAT_EXIST_INS;
+        }
     }
 
     int Unused, EndIndex;
-    GetGroupRange(GroupName, Unused, EndIndex);
+    bool bGetRange = GetGroupRange(GroupName, Unused, EndIndex);
+    ensure(bGetRange);
 
     // all index after this gourp name +1
     for (int i = GroupIndex + 1; i < MaterialGroupNameList.Num(); ++i) {
@@ -250,6 +261,8 @@ void USceneManagementAssetData::AddMaterial(FString GroupName, FSoftObjectPath D
         MaterialInfo->FromMaterial();
         SO->SolutionItems.Insert(MaterialInfo, EndIndex);
     }
+
+    return 0;
 }
 
 void USceneManagementAssetData::RemoveMaterialSolution(int SolutionIndex)

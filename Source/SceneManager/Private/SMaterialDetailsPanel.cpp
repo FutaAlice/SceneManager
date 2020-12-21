@@ -108,14 +108,14 @@ FReply FMaterialInfoCustomization::OnClickColorBlock(const FGeometry&, const FPo
 
 static void DEBUG_PRINT_GROUP_NAME(UMaterialInstance* MaterialInstance)
 {
-    TArray<FGuid> OutParameterIds;
-    TArray<FMaterialParameterInfo> OutParameterInfo;
-    MaterialInstance->GetAllParameterInfo<UMaterialExpressionParameter>(OutParameterInfo, OutParameterIds);
-    for (auto MaterialParaterInfo : OutParameterInfo) {
-        FName OutGroup;
-        MaterialInstance->GetGroupName(MaterialParaterInfo, OutGroup);
-        UE_LOG(LogTemp, Warning, TEXT("%s: %s"), *OutGroup.ToString(), *MaterialParaterInfo.Name.ToString());
-    }
+    //TArray<FGuid> OutParameterIds;
+    //TArray<FMaterialParameterInfo> OutParameterInfo;
+    //MaterialInstance->GetAllParameterInfo<UMaterialExpressionParameter>(OutParameterInfo, OutParameterIds);
+    //for (auto MaterialParaterInfo : OutParameterInfo) {
+    //    FName OutGroup;
+    //    MaterialInstance->GetGroupName(MaterialParaterInfo, OutGroup);
+    //    UE_LOG(LogTemp, Warning, TEXT("%s: %s"), *OutGroup.ToString(), *MaterialParaterInfo.Name.ToString());
+    //}
 }
 
 

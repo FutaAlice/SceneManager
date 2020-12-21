@@ -1,6 +1,7 @@
 #include "SMaterialViewer.h"
 
 #include "SlateOptMacros.h"
+#include "Misc/MessageDialog.h" // FMessageDialog
 #include "Widgets/SCompoundWidget.h"
 #include "EditorStyleSet.h" // FEditorStyle
 #include "Framework/Docking/TabManager.h"   // FTabManager, FSpawnTabArgs
@@ -359,15 +360,31 @@ void SMaterialViewer::AddFromContentBrowser()
     }
 
     // add to data field
+    TSet<FSoftObjectPath> PathFailedToAdd;
+
     if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
         FString GroupName = ComboBox->GetCurrentItemLabel().ToString();
         int Unused;
         if (AssetData->GetGroupRange(GroupName, Unused, Unused)) {
             for (FSoftObjectPath SoftObjectPath : Paths) {
-                AssetData->AddMaterial(GroupName, SoftObjectPath);
+                int Err = AssetData->AddMaterial(GroupName, SoftObjectPath);
+                if (Err == ERR_MAT_EXIST_INS) {
+                    PathFailedToAdd.Add(SoftObjectPath);
+                }
             }
         }
     }
+
+    // hit message dialog
+    FString args;
+    for (auto SoftObjectPath : PathFailedToAdd) {
+        args += "\n\t\"";
+        args += SoftObjectPath.ToString();
+        args += "\'";
+    }
+    const FText Message = FText::Format(LOCTEXT("AddFromContentBrowser_Message",
+        "SoftObjectPath:{0}, already exist."), FText::AsCultureInvariant(args));
+    FMessageDialog::Open(EAppMsgType::Ok, Message);
 
     // refresh
     ForceRefresh(SolutionSelector.GetCurrentSelectedSolutionIndex());

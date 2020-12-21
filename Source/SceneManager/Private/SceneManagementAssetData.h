@@ -19,6 +19,11 @@ typedef int EMPCOwner;
 #define MPCOwner_Wind           3
 #define MPCOwner_PostProc       4
 
+#define ERR_MAT_SOLUTION    -1
+#define ERR_MAT_GROUP       -2
+#define ERR_MAT_EXIST_INS   -3
+
+
 UCLASS(hideCategories = Light)
 class ULightParams : public UObject
 {
@@ -148,7 +153,7 @@ public:
     bool GetGroupRange(FString GroupName, int &BeginIndex, int &EndIndex);
     void AddMaterialSolution();
     void AddMaterialGroup();
-    void AddMaterial(FString GroupName, FSoftObjectPath DefaultValue = FSoftObjectPath());
+    int AddMaterial(FString GroupName, FSoftObjectPath DefaultValue = FSoftObjectPath());
     void DuplicateMaterialSolution(int SolutionIndex);
     void RemoveMaterialSolution(int SolutionIndex);
     void RemoveMaterialGroup(FString GroupName);
