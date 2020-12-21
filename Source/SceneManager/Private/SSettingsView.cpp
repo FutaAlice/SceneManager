@@ -43,13 +43,11 @@ void SSettingsView::Construct(const FArguments& InArgs)
     ChildSlot
     [
         SNew(SVerticalBox)
-
         + SVerticalBox::Slot()
         .AutoHeight()
         [
             PlayerLightView
         ]
-
         + SVerticalBox::Slot()
         .AutoHeight()
         [
@@ -71,51 +69,9 @@ void SSettingsView::Construct(const FArguments& InArgs)
                         
                         TArray<UPackage*> Packages;
                         UPackage* Outermost = AssetData->GetOutermost();
-                        Packages.Add(Outermost); // Fully load and check out is done in UEditorLoadingAndSavingUtils::SavePackages
-
-                        for (auto Obj : AssetData->KeyLightParams) {
-
-                        }
-
+                        // Fully load and check out is done in UEditorLoadingAndSavingUtils::SavePackages
+                        Packages.Add(Outermost);
                         UEditorLoadingAndSavingUtils::SavePackages(Packages, false);
-
-                    }
-                    return FReply::Handled();
-                })
-            ]
-            + SHorizontalBox::Slot()
-            .AutoWidth()
-            [
-                SNew(SButton)
-                .Text(FText::FromString("Save as ..."))
-                .OnClicked_Lambda([this]() -> FReply {
-                    TArray<FString> OutFilenames;
-                    FString DialogTitle = "Save as ...";
-                    FString DefaultPath = FPaths::ProjectContentDir();
-                    FString DefaultFile = "";
-                    FString FileTypes = "uasset files (*.uasset;)|*.uasset;";
-                    uint32 Flags = 0;
-
-                    IDesktopPlatform *DesktopPlatform = FDesktopPlatformModule::Get();
-                    DesktopPlatform->SaveFileDialog(nullptr, DialogTitle, DefaultPath, DefaultFile, FileTypes, Flags, OutFilenames);
-
-                    FString ContentDir = FPaths::ProjectContentDir();
-                    FString RootDir = "/Game/";
-                    FString InGamePath = OutFilenames[0].Replace(*ContentDir, *RootDir);
-
-                    FString NewName = FPaths::GetBaseFilename(InGamePath);
-                    FString NewPath = FPaths::GetPath(InGamePath);
-                    UE_LOG(LogTemp, Warning, TEXT("NewName: %s"), *NewName);
-                    UE_LOG(LogTemp, Warning, TEXT("NewPath: %s"), *NewPath);
-
-                    if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
-                        FAssetToolsModule &AssetToolModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools");
-                        IAssetTools &AssetTools = AssetToolModule.Get();
-
-                        // TODO: fix RENAME
-                        TArray<FAssetRenameData> AssetsAndNames;
-                        new(AssetsAndNames) FAssetRenameData(AssetData, NewPath, NewName);
-                        AssetTools.RenameAssets(AssetsAndNames);
                     }
                     return FReply::Handled();
                 })

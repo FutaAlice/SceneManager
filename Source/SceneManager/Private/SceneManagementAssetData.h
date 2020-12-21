@@ -116,6 +116,15 @@ public:
         TArray<UMaterialInfo*> SolutionItems;
 };
 
+UCLASS()
+class UEnabledGroupName : public UObject
+{
+    GENERATED_BODY()
+public:
+    UPROPERTY(EditAnywhere, Category = "Material")
+        TArray<FString> GroupName;
+};
+
 /**
  * Scene Manager Asset Type
  */
@@ -179,4 +188,6 @@ public:
     UPROPERTY(EditAnywhere, Instanced, EditFixedSize, Category = "Material")
         TArray<USolutionMaterialInfo*> MaterialSolutions;
 
+    UPROPERTY(EditAnywhere, Instanced, Category = "Material")
+        UEnabledGroupName* EnabledGroupName;
 };
