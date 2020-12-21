@@ -6,9 +6,9 @@
 #include "Widgets/SWindow.h"    // SWindow
 #include "Widgets/Input/SButton.h"  // SButton
 #include "Widgets/Input/SCheckBox.h"    // SCheckBox
+#include "Widgets/Input/SEditableTextBox.h"    // SEditableTextBox
 #include "Widgets/Input/SEditableText.h"    // SEditableText
 #include "Widgets/Images/SImage.h"  // SImage
-#include "Widgets/Text/STextBlock.h"    // STextBlock
 #include "Widgets/Layout/SSpacer.h" // SSpacer
 #include "Editor/EditorEngine.h"    // UEditorEngine::EditorAddModalWindow
 #include "Editor.h" // GEditor
@@ -296,7 +296,9 @@ int FSolutionSelector::InferClickedButtonIndex(ECheckBoxState CheckState)
     }
 }
 
-void FSolutionSelector::CreateRenameDialog(int Index) {
+void FSolutionSelector::CreateRenameDialog(int Index)
+{
+#define LOCTEXT_NAMESPACE "SolutionSelector"
     if (Index < 0) {
         FText Title = FText::FromString("Warning");
         FText Content = FText::FromString(TEXT("Please select a target solution to rename!"));
@@ -304,30 +306,41 @@ void FSolutionSelector::CreateRenameDialog(int Index) {
         return;
     }
 
-    TSharedRef<SWindow> ModalWindow = SNew(SWindow)
-        .Title(FText::FromString("Rename Solution"))
+    TSharedPtr<SEditableTextBox> TextBlock;
+    TSharedPtr<SWindow> ModalWindow;
+    GEditor->EditorAddModalWindow(SAssignNew(ModalWindow, SWindow)
+        .Title(LOCTEXT("RenameSolution", "Rename Solution")) 
         .HasCloseButton(true)
-        .SizingRule(ESizingRule::FixedSize)
-        .ClientSize(FVector2D(200.0f, 60.0f));
-    TSharedRef<SEditableText> EditableText = SNew(SEditableText)
-        .HintText(FText::FromString("Input new solution name"));
-    TSharedRef<SWidget> ResultWidget = SNew(SVerticalBox)
-        + SVerticalBox::Slot()
+        .SizingRule(ESizingRule::Autosized)
         [
-            EditableText
-        ]
-        + SVerticalBox::Slot()
-        [
-            SNew(SButton)
-            .Text(FText::FromString("OK"))
-            .OnClicked_Lambda([&]() -> FReply {
-                FText Text = EditableText->GetText();
-                ModalWindow->RequestDestroyWindow();
-                RenameSolution(CurrentSelectedSolutionIndex, Text.ToString(), "TODO");
-                return FReply::Handled();
-            })
-        ];
+            SNew(SVerticalBox)
+            + SVerticalBox::Slot()
+            .HAlign(HAlign_Center)
+            .AutoHeight()
+            .Padding(5)
+            [
+                SAssignNew(TextBlock, SEditableTextBox)
+                .HintText(FText::FromString("Input new solution name"))
+                .SelectAllTextWhenFocused(true)
+                .MinDesiredWidth(160)
 
-    ModalWindow->SetContent(ResultWidget);
-    GEditor->EditorAddModalWindow(ModalWindow);
+            ]
+            + SVerticalBox::Slot()
+            .HAlign(HAlign_Center)
+            .AutoHeight()
+            .Padding(5)
+            [
+                SNew(SButton)
+                .Text(FText::FromString("OK"))
+                .OnClicked_Lambda([&]() -> FReply {
+                    FText Text = TextBlock->GetText();
+                    ModalWindow->RequestDestroyWindow();
+                    RenameSolution(CurrentSelectedSolutionIndex, Text.ToString(), "TODO");
+                    return FReply::Handled();
+                })
+            ]
+        ]);
+
+
+#undef LOCTEXT_NAMESPACE
 }

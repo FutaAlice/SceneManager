@@ -7,7 +7,7 @@
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/Docking/SDockTab.h"   // SDockTab
 #include "Widgets/Input/SCheckBox.h"    // SCheckBox
-#include "Widgets/Text/STextBlock.h"    // STextBlock
+#include "Widgets/Input/SEditableTextBox.h" // SEditableTextBox
 #include "Widgets/Images/SImage.h"  // SImage
 #include "Widgets/Layout/SBox.h"    // SBox
 #include "Widgets/Layout/SScrollBox.h"  // SScrollBox
@@ -273,31 +273,38 @@ void SMaterialViewer::OnEditorModified()
 
 void SMaterialViewer::CreateRenameDialog()
 {
-    USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected();
-    if (!AssetData) {
+    if (!USceneManagementAssetData::GetSelected()) {
         return;
     }
 
-    TSharedPtr<SEditableText> EditableText;
+    TSharedPtr<SEditableTextBox> TextBlock;
     TSharedPtr<SWindow> ModalWindow;
     GEditor->EditorAddModalWindow(SAssignNew(ModalWindow, SWindow)
-        .Title(FText::FromString("Rename Solution"))
+        .Title(LOCTEXT("RenameGroup", "Rename Group")) 
         .HasCloseButton(true)
-        .SizingRule(ESizingRule::FixedSize)
-        .ClientSize(FVector2D(200.0f, 60.0f))
+        .SizingRule(ESizingRule::Autosized)
         [
             SNew(SVerticalBox)
             + SVerticalBox::Slot()
+            .HAlign(HAlign_Center)
+            .AutoHeight()
+            .Padding(5)
             [
-                SAssignNew(EditableText, SEditableText)
+                SAssignNew(TextBlock, SEditableTextBox)
                 .HintText(FText::FromString("Input new solution name"))
+                .SelectAllTextWhenFocused(true)
+                .MinDesiredWidth(160)
+
             ]
             + SVerticalBox::Slot()
+            .HAlign(HAlign_Center)
+            .AutoHeight()
+            .Padding(5)
             [
                 SNew(SButton)
                 .Text(FText::FromString("OK"))
                 .OnClicked_Lambda([&]() -> FReply {
-                    FText Text = EditableText->GetText();
+                    FText Text = TextBlock->GetText();
                     ModalWindow->RequestDestroyWindow();
                     RenameGroup(Text.ToString());
                     ForceRefresh(SolutionSelector.GetCurrentSelectedSolutionIndex());
