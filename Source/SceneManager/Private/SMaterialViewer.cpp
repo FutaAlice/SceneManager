@@ -21,6 +21,7 @@
 #include "SolutionSelector.h"
 #include "SceneManagementAssetData.h"
 #include "SMaterialDetailsPanel.h"
+#include "SMaterialGroupComboBox.h"
 
 #define LOCTEXT_NAMESPACE "MaterialViewer"
 
@@ -46,6 +47,7 @@ private:
     FSolutionSelector SolutionSelector;
     TSharedPtr<SHorizontalBox> Toolbar;
     TSharedPtr<SVerticalBox> MainLayout;
+    TSharedPtr<SMaterialGroupComboBox> ComboBox;
 
     // DEBUG
     // TSharedPtr<SMaterialDetailsPanel> MaterialDetailsPanel;
@@ -80,7 +82,12 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
             .AutoHeight()
             [
                 // Toolbar
-                SAssignNew(Toolbar, SHorizontalBox)
+                SAssignNew(Toolbar, SHorizontalBox)                
+                + SHorizontalBox::Slot()
+                .AutoWidth()
+                [
+                    SAssignNew(ComboBox, SMaterialGroupComboBox)
+                ]
                 + SHorizontalBox::Slot()
                 [
                     SNew(SButton)
@@ -112,6 +119,14 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
                 + SHorizontalBox::Slot()
                 [
                     SNew(SButton)
+                    .Text(FText::FromString("Add Empty Material"))
+                    .OnClicked_Lambda([this]() -> FReply {
+                        return FReply::Handled();
+                    })
+                ]
+                + SHorizontalBox::Slot()
+                [
+                    SNew(SButton)
                     .Text(FText::FromString("Add From Content Browser"))
                     .OnClicked_Lambda([this]() -> FReply {
                         return FReply::Handled();
@@ -135,6 +150,19 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
         //    SAssignNew(MaterialDetailsPanel, SMaterialDetailsPanel)
         //]
     ];
+
+    ComboBox->FUNC_GetExistGroups = [this] {
+        TArray<FString> Options;
+        if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
+            for (auto fuck : AssetData->MaterialGroupNameList) {
+                Options.Add(fuck);
+            }
+        }
+        return Options;
+    };
+
+    ComboBox->CB_SelectionChange = [this](FString Group) {
+    };
 
     // On solution changed
     SolutionSelector.CB_Active = [this](int SolutionIndex) {
