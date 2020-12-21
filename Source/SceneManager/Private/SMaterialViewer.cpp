@@ -50,7 +50,7 @@ private:
     TSharedPtr<SMaterialGroupComboBox> ComboBox;
 
     // DEBUG
-    // TSharedPtr<SMaterialDetailsPanel> MaterialDetailsPanel;
+    TArray<TSharedPtr<SMaterialDetailsPanel>> MaterialDetailsPanelContainer;
 };
 
 SMaterialViewer* SMaterialViewer::MaterialViewerInstance = nullptr;
@@ -121,6 +121,11 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
                     SNew(SButton)
                     .Text(FText::FromString("Add Empty Material"))
                     .OnClicked_Lambda([this]() -> FReply {
+                        if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
+                            FString GroupName = ComboBox->GetCurrentItemLabel().ToString();
+                            AssetData->AddMaterial(GroupName);
+                            ForceRefresh(SolutionSelector.GetCurrentSelectedSolutionIndex());
+                        }
                         return FReply::Handled();
                     })
                 ]
@@ -217,7 +222,9 @@ void SMaterialViewer::ForceRefresh(int SolutionIndex)
 
     for (int i = 0; i < AssetData->MaterialGroupNameList.Num(); ++i) {
         const FString GroupName = AssetData->MaterialGroupNameList[i];
-        MainLayout->AddSlot()[SNew(STextBlock).Text(FText::FromString(FString("Group: ") + GroupName))];
+        MainLayout->AddSlot()
+            .AutoHeight()
+            [SNew(STextBlock).Text(FText::FromString(FString("Group: ") + GroupName))];
 
         USolutionMaterialInfo* CurrentSolution = AssetData->MaterialSolutions[SolutionIndex];
         const int GroupBeginIndex = AssetData->MaterialGroupIndexList[i];
@@ -227,7 +234,15 @@ void SMaterialViewer::ForceRefresh(int SolutionIndex)
 
         for (int j = GroupBeginIndex; j < GroupEndIndex; ++j) {
             // TODO
-            CurrentSolution[j];
+            TSharedPtr<SMaterialDetailsPanel> DetailsPanel;
+            MainLayout->AddSlot()
+                .AutoHeight()
+                [
+                    SAssignNew(DetailsPanel, SMaterialDetailsPanel)
+                ];
+            UMaterialInfo *MaterialInfo = CurrentSolution->SolutionItems[j];
+            DetailsPanel->BindDataField(MaterialInfo);
+            MaterialDetailsPanelContainer.Add(DetailsPanel);
         }
     }
 }

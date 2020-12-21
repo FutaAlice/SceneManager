@@ -134,6 +134,7 @@ public:
 
     void AddMaterialSolution();
     void AddMaterialGroup();
+    void AddMaterial(FString GroupName, FSoftObjectPath DefaultValue = FSoftObjectPath());
     void DuplicateMaterialSolution(int SolutionIndex);
     void RemoveMaterialSolution(int SolutionIndex);
     void RenameMaterialSolution(int SolutionIndex, const FString& SolutionName);
