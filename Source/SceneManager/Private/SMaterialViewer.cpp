@@ -9,9 +9,10 @@
 #include "Widgets/Input/SCheckBox.h"    // SCheckBox
 #include "Widgets/Text/STextBlock.h"    // STextBlock
 #include "Widgets/Images/SImage.h"  // SImage
+#include "Widgets/Layout/SBox.h"    // SBox
+#include "Widgets/Layout/SScrollBox.h"  // SScrollBox
 #include "Widgets/Layout/SSpacer.h" // SSpacer
 #include "Widgets/Input/SButton.h"  // SButton
-#include "Widgets/Layout/SBox.h"    // SBox
 
 #include "Modules/ModuleManager.h"  // FModuleManager
 #include "IDetailsView.h"   // FDetailsViewArgs
@@ -145,15 +146,14 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
                 .Padding(4)
                 .BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
                 [
-                    SAssignNew(MainLayout, SVerticalBox)
+                    SNew(SScrollBox)
+                    + SScrollBox::Slot()
+                    [
+                        SAssignNew(MainLayout, SVerticalBox)
+                    ]
                 ]
             ]
         ]
-        //+ SHorizontalBox::Slot()
-        //.Padding(1, 1, 1, 1)
-        //[
-        //    SAssignNew(MaterialDetailsPanel, SMaterialDetailsPanel)
-        //]
     ];
 
     ComboBox->FUNC_GetExistGroups = [this] {

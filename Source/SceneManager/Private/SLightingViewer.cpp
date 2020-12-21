@@ -6,6 +6,7 @@
 #include "Framework/Docking/TabManager.h"   // FTabManager, FSpawnTabArgs
 #include "Widgets/SCompoundWidget.h"    // SCompoundWidget
 #include "Widgets/Docking/SDockTab.h"   // SDockTab
+#include "Widgets/Layout/SScrollBox.h"  // SScrollBox
 
 #include "SolutionSelector.h"
 #include "SLightActorComboBox.h"
@@ -90,7 +91,11 @@ void SLightingViewer::Construct(const FArguments& InArgs, ELightCategory LightCa
             .Padding(4)
             .BorderImage(FEditorStyle::GetBrush("ToolPanel.GroupBorder"))
             [
-                SAssignNew(MainLayout, SVerticalBox)
+                SNew(SScrollBox)
+                + SScrollBox::Slot()
+                [
+                    SAssignNew(MainLayout, SVerticalBox)
+                ]
             ]
         ]
     ];
