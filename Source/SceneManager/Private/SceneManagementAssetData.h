@@ -87,15 +87,15 @@ public:
     UPROPERTY(EditAnywhere, meta=(AllowedClasses="MaterialInstance"))
         FSoftObjectPath SoftObjectPath;
 
-    UPROPERTY(EditAnywhere)
-        TMap<FString, float> ScalarParams;
-    UPROPERTY(EditAnywhere)
-        TMap<FString, FLinearColor> VectorParams;
-
-    //UPROPERTY(BlueprintReadOnly)
+    //UPROPERTY(EditAnywhere)
     //    TMap<FString, float> ScalarParams;
-    //UPROPERTY(BlueprintReadOnly)
+    //UPROPERTY(EditAnywhere)
     //    TMap<FString, FLinearColor> VectorParams;
+
+    UPROPERTY(BlueprintReadOnly)
+        TMap<FString, float> ScalarParams;
+    UPROPERTY(BlueprintReadOnly)
+        TMap<FString, FLinearColor> VectorParams;
 };
 
 UCLASS()
@@ -125,6 +125,8 @@ public:
         TSet<FString> GroupName;
 
     bool IsEmpty() const;
+    static UEnabledGroupName* Get();
+    static bool Contains(FString Name);
 };
 
 /**

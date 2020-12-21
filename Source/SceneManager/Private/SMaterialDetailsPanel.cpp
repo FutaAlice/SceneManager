@@ -13,6 +13,7 @@
 #include "Widgets/Colors/SColorBlock.h" // SColorBlock
 #include "Widgets/Input/SButton.h"  // SButton
 #include "Widgets/Layout/SBox.h"    // SBox
+#include "Materials/MaterialInstance.h" // UMaterialInstance
 
 #include "Editor.h"
 #include "Engine.h"
@@ -105,6 +106,34 @@ FReply FMaterialInfoCustomization::OnClickColorBlock(const FGeometry&, const FPo
     return FReply::Handled();
 }
 
+static void DEBUG_PRINT_GROUP_NAME(UMaterialInstance* MaterialInstance)
+{
+    TArray<FGuid> OutParameterIds;
+    TArray<FMaterialParameterInfo> OutParameterInfo;
+    MaterialInstance->GetAllParameterInfo<UMaterialExpressionParameter>(OutParameterInfo, OutParameterIds);
+    for (auto MaterialParaterInfo : OutParameterInfo) {
+        FName OutGroup;
+        MaterialInstance->GetGroupName(MaterialParaterInfo, OutGroup);
+        UE_LOG(LogTemp, Warning, TEXT("%s: %s"), *OutGroup.ToString(), *MaterialParaterInfo.Name.ToString());
+    }
+}
+
+
+static FName GetMaterialGroupName(UMaterialInstance* MaterialInstance, FName ParameterName)
+{
+    TArray<FGuid> OutParameterIds;
+    TArray<FMaterialParameterInfo> OutParameterInfo;
+    MaterialInstance->GetAllParameterInfo<UMaterialExpressionParameter>(OutParameterInfo, OutParameterIds);
+    for (auto MaterialParaterInfo : OutParameterInfo) {
+        if (MaterialParaterInfo.Name == ParameterName) {
+            FName OutGroup;
+            MaterialInstance->GetGroupName(MaterialParaterInfo, OutGroup);
+            return OutGroup;
+        }
+    }
+    return FName();
+}
+
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void FMaterialInfoCustomization::CustomizeDetails(IDetailLayoutBuilder & DetailBuilder)
 {
@@ -130,8 +159,18 @@ void FMaterialInfoCustomization::CustomizeDetails(IDetailLayoutBuilder & DetailB
         return;
     }
 
+    UMaterialInstance* Material = MaterialInfo->GetMaterial<UMaterialInstance>();
+    if (!Material) {
+        return;
+    }
+    DEBUG_PRINT_GROUP_NAME(Material);
+
     for (auto Item : MaterialInfo->ScalarParams) {
         const FString ParameterName = Item.Key;
+        const FString ParameterGroup = GetMaterialGroupName(Material, FName(*ParameterName)).ToString();
+        if (!UEnabledGroupName::Contains(ParameterGroup)) {
+            continue;
+        }
         TSharedRef<SHorizontalBox> HorizontalBox = SNew(SHorizontalBox)
             + SHorizontalBox::Slot()
             [
@@ -151,6 +190,10 @@ void FMaterialInfoCustomization::CustomizeDetails(IDetailLayoutBuilder & DetailB
 
     for (auto Item : MaterialInfo->VectorParams) {
         const FString ParameterName = Item.Key;
+        const FString ParameterGroup = GetMaterialGroupName(Material, FName(*ParameterName)).ToString();
+        if (!UEnabledGroupName::Contains(ParameterGroup)) {
+            continue;
+        }
         TSharedRef<SHorizontalBox> HorizontalBox = SNew(SHorizontalBox)
             + SHorizontalBox::Slot()
             [

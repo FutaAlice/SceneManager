@@ -439,3 +439,28 @@ bool UEnabledGroupName::IsEmpty() const
     return GroupName.Num() == 0 ||
         (GroupName.Num() == 1 && GroupName.Contains(""));
 }
+
+UEnabledGroupName* UEnabledGroupName::Get()
+{
+    USceneManagementAssetData *AssetData = USceneManagementAssetData::GetSelected(false);
+    if (AssetData) {
+        return AssetData->EnabledGroupName;
+    }
+    return nullptr;
+}
+
+bool UEnabledGroupName::Contains(FString Name)
+{
+    UEnabledGroupName* Self = Get();
+    // block when asset data not load
+    if (!Self) {
+        return false;
+    }
+
+    // enable all if not set
+    if (Self->IsEmpty()) {
+        return true;
+    }
+
+    return Self->GroupName.Contains(Name);
+}
