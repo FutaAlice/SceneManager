@@ -350,14 +350,27 @@ void SMaterialViewer::AddFromContentBrowser()
     IContentBrowserSingleton& ContentBrowserSingleton = ContentBrowserModule.Get();
     ContentBrowserSingleton.GetSelectedAssets(AssetDataList);
 
-
+    // grep by asset type and convert to soft path
+    TArray<FSoftObjectPath> Paths;
     for (auto AssetData : AssetDataList) {
         if (AssetData.GetClass()->GetFName() == "MaterialInstanceConstant") {
-            // FSoftObjectPath SoftObjectPath = UAssetManager::GetAssetPathForData(AssetData);
-            // SoftObjectPath.
+            Paths.Add(UAssetManager::Get().GetAssetPathForData(AssetData));
         }
     }
 
+    // add to data field
+    if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
+        FString GroupName = ComboBox->GetCurrentItemLabel().ToString();
+        int Unused;
+        if (AssetData->GetGroupRange(GroupName, Unused, Unused)) {
+            for (FSoftObjectPath SoftObjectPath : Paths) {
+                AssetData->AddMaterial(GroupName, SoftObjectPath);
+            }
+        }
+    }
+
+    // refresh
+    ForceRefresh(SolutionSelector.GetCurrentSelectedSolutionIndex());
 }
 
 namespace MaterialViewer {
