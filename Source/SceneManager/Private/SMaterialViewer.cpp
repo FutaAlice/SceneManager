@@ -176,6 +176,10 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
     // On solution changed
     SolutionSelector.CB_Active = [this](int SolutionIndex) {
         ForceRefresh(SolutionIndex);
+        if (SolutionIndex < 0) {
+            return;
+        }
+
         //// Sync to materials
         USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected();
         ensure(AssetData);
@@ -294,7 +298,6 @@ void SMaterialViewer::CreateRenameDialog()
                 .HintText(FText::FromString("Input new solution name"))
                 .SelectAllTextWhenFocused(true)
                 .MinDesiredWidth(160)
-
             ]
             + SVerticalBox::Slot()
             .HAlign(HAlign_Center)

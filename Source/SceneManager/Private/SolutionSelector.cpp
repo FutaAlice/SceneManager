@@ -13,6 +13,8 @@
 #include "Editor/EditorEngine.h"    // UEditorEngine::EditorAddModalWindow
 #include "Editor.h" // GEditor
 
+#define LOCTEXT_NAMESPACE "SolutionSelector"
+
 #define SetImageBrush(Name) Me() [          \
     SNew(SImage)                            \
     .Image(FEditorStyle::GetBrush(Name))    \
@@ -179,20 +181,32 @@ void FSolutionSelector::RenameSolution(int SolutionIndex, FString SolutionName, 
 
 void FSolutionSelector::RemoveSolution(int SolutionIndex)
 {
-    if (SolutionIndex >= 0) {
-        // remove target slot and array instance
-        auto Widget = SlateWidgetRef[SolutionIndex];
-        auto RemoveSlotIndex = SolutionWidgetContainer->RemoveSlot(Widget);
-        ensure(RemoveSlotIndex >= 0);
-        SlateWidgetRef.RemoveAt(SolutionIndex);
-        SolutionTextMapping.Remove(Widget);
-        // callback
-        ensure(CB_Remove);
-        CB_Remove(SolutionIndex);
-        // update solution list UI
-        UpdateClickButtonState(SolutionIndex - 1);
-        UpdateToolTips();
+    if (SolutionIndex < 0) {
+        return;
     }
+    
+    // show confirm message
+    auto Widget = SlateWidgetRef[SolutionIndex];
+    auto TextBlock = SolutionTextMapping[Widget];
+    const FText ConfirmMessage = FText::Format(LOCTEXT("RemoveSolutionConfirmation",
+        "You are about to delete '{0}' solution. There is no undo available. \nDo you want to do this now?"),
+        FText::AsCultureInvariant(TextBlock->GetText()));
+    const EAppReturnType::Type Choice = FMessageDialog::Open(EAppMsgType::YesNo, ConfirmMessage);
+    if (Choice == EAppReturnType::No) {
+        return;
+    }
+
+    // remove target slot and array instance
+    auto RemoveSlotIndex = SolutionWidgetContainer->RemoveSlot(Widget);
+    ensure(RemoveSlotIndex >= 0);
+    SlateWidgetRef.RemoveAt(SolutionIndex);
+    SolutionTextMapping.Remove(Widget);
+    // callback
+    ensure(CB_Remove);
+    CB_Remove(SolutionIndex);
+    // update solution list UI
+    UpdateClickButtonState(SolutionIndex - 1);
+    UpdateToolTips();
 }
 
 void FSolutionSelector::DuplicateSolution(int SolutionIndex)
@@ -298,7 +312,6 @@ int FSolutionSelector::InferClickedButtonIndex(ECheckBoxState CheckState)
 
 void FSolutionSelector::CreateRenameDialog(int Index)
 {
-#define LOCTEXT_NAMESPACE "SolutionSelector"
     if (Index < 0) {
         FText Title = FText::FromString("Warning");
         FText Content = FText::FromString(TEXT("Please select a target solution to rename!"));
@@ -323,7 +336,6 @@ void FSolutionSelector::CreateRenameDialog(int Index)
                 .HintText(FText::FromString("Input new solution name"))
                 .SelectAllTextWhenFocused(true)
                 .MinDesiredWidth(160)
-
             ]
             + SVerticalBox::Slot()
             .HAlign(HAlign_Center)
@@ -340,7 +352,6 @@ void FSolutionSelector::CreateRenameDialog(int Index)
                 })
             ]
         ]);
-
+}
 
 #undef LOCTEXT_NAMESPACE
-}
