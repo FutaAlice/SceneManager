@@ -36,7 +36,6 @@ public:
     void ForceRefresh();
 
 private:
-    void ResetDataBySelectedAsset();
     void OnFinishedChangingProperties(const FPropertyChangedEvent& InEvent);
     
 private:

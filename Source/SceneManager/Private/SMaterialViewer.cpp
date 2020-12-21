@@ -173,13 +173,13 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
     // On solution changed
     SolutionSelector.CB_Active = [this](int SolutionIndex) {
         ForceRefresh(SolutionIndex);
-        ////// Sync to materials
-        //USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected();
-        //ensure(AssetData);
-        //auto & AllMaterials = AssetData->MaterialSolutions[SolutionIndex]->SolutionItems;
-        //for (UMaterialInfo* MaterialInfo : AllMaterials) {
-        //    MaterialInfo->ToMaterial();
-        //}
+        //// Sync to materials
+        USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected();
+        ensure(AssetData);
+        auto & AllMaterials = AssetData->MaterialSolutions[SolutionIndex]->SolutionItems;
+        for (UMaterialInfo* MaterialInfo : AllMaterials) {
+            MaterialInfo->ToMaterial();
+        }
     };
     
     // On solution rename
@@ -257,10 +257,6 @@ void SMaterialViewer::OnAssetDataChanged(USceneManagementAssetData* AssetData)
             const FString& SolutionName = AssetData->MaterialSolutionNameList[i];
             SolutionSelector.AddSolution(SolutionName, "", false);
         }
-        //if (!AssetData->TestMaterialInfo) {
-        //    AssetData->TestMaterialInfo = NewObject<UMaterialInfo>(AssetData);
-        //}
-        // MaterialDetailsPanel->BindDataField(AssetData->TestMaterialInfo);
     }
     ForceRefresh(-1);
 }

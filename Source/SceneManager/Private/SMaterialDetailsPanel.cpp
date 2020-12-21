@@ -95,7 +95,7 @@ FReply FMaterialInfoCustomization::OnClickColorBlock(const FGeometry&, const FPo
 {
     FColorPickerArgs PickerArgs;
     PickerArgs.bUseAlpha = true;
-    PickerArgs.bOnlyRefreshOnOk = true;
+    PickerArgs.bOnlyRefreshOnOk = false;
     PickerArgs.bOnlyRefreshOnMouseUp = false;
     PickerArgs.DisplayGamma = TAttribute<float>::Create(TAttribute<float>::FGetter::CreateUObject(GEngine, &UEngine::GetDisplayGamma));
     PickerArgs.InitialColorOverride = GetVector(Name);
@@ -191,7 +191,7 @@ void SMaterialDetailsPanel::BindDataField(UObject* InObject)
 {
     MaterialInfo = Cast<UMaterialInfo>(InObject);
     DetailView->SetObject(InObject);
-    ResetDataBySelectedAsset();
+    ForceRefresh();
 }
 
 UMaterialInfo* SMaterialDetailsPanel::GetDataField()
@@ -204,16 +204,12 @@ void SMaterialDetailsPanel::ForceRefresh()
     DetailView->ForceRefresh();
 }
 
-void SMaterialDetailsPanel::ResetDataBySelectedAsset()
-{
-    MaterialInfo->FromMaterial();
-    DetailView->ForceRefresh();
-}
-
 void SMaterialDetailsPanel::OnFinishedChangingProperties(const FPropertyChangedEvent& InEvent)
 {
     if (InEvent.GetPropertyName() == "SoftObjectPath") {
-        ResetDataBySelectedAsset();
+        // TODO
+        MaterialInfo->FromMaterial();
+        ForceRefresh();
     } 
     else {
         UE_LOG(LogTemp, Warning, TEXT("SMaterialDetailsPanel::OnFinishedChangingProperties"));
