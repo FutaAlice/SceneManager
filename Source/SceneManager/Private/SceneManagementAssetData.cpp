@@ -325,10 +325,14 @@ void USceneManagementAssetData::SyncMaterialByName()
 {
 }
 
-void USceneManagementAssetData::SyncDataByMaterial()
+void USceneManagementAssetData::SyncDataByMaterial(int SolutionIndex)
 {
-    // DEBUG
-    TestMaterialInfo->FromMaterial();
+    if (SolutionIndex < 0) {
+        return;
+    }
+    for (UMaterialInfo* MaterialInfo : MaterialSolutions[SolutionIndex]->SolutionItems) {
+        MaterialInfo->FromMaterial();
+    }
 }
 
 void USceneManagementAssetData::CleanUp()

@@ -95,7 +95,7 @@ FReply FMaterialInfoCustomization::OnClickColorBlock(const FGeometry&, const FPo
 {
     FColorPickerArgs PickerArgs;
     PickerArgs.bUseAlpha = true;
-    PickerArgs.bOnlyRefreshOnOk = false;
+    PickerArgs.bOnlyRefreshOnOk = true;
     PickerArgs.bOnlyRefreshOnMouseUp = false;
     PickerArgs.DisplayGamma = TAttribute<float>::Create(TAttribute<float>::FGetter::CreateUObject(GEngine, &UEngine::GetDisplayGamma));
     PickerArgs.InitialColorOverride = GetVector(Name);

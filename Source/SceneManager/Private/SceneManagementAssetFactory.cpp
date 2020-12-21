@@ -13,7 +13,5 @@ UObject* USceneManagementAssetFactory::FactoryCreateNew(UClass *InClass, UObject
     EObjectFlags Flags, UObject *Context, FFeedbackContext *Warn, FName CallingContext)
 {
     auto NewObjectAsset = NewObject<USceneManagementAssetData>(InParent, InClass, InName, Flags);
-    // DEBUG
-    NewObjectAsset->TestMaterialInfo = NewObject<UMaterialInfo>(this);
     return NewObjectAsset;
 }

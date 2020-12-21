@@ -54,8 +54,7 @@ EventHub::EventHub()
             UClass *InClass = InObject->GetClass();
             if (Fuck.Contains(InClass->GetName())) {
                 UE_LOG(LogTemp, Warning, TEXT("Material modified"));
-                USceneManagementAssetData *AssetData = USceneManagementAssetData::GetSelected(false);
-                AssetData->SyncDataByMaterial();
+                MaterialViewer::OnEditorModified();
             }
 
         }

@@ -43,6 +43,7 @@ public:
 
     static SMaterialViewer* MaterialViewerInstance;
     void OnAssetDataChanged(USceneManagementAssetData* AssetData);
+    void OnEditorModified();
 
 private:
     FSolutionSelector SolutionSelector;
@@ -172,10 +173,13 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
     // On solution changed
     SolutionSelector.CB_Active = [this](int SolutionIndex) {
         ForceRefresh(SolutionIndex);
-        //// Sync to actor
-        //LightParams->ToActor();
-        //// update groups
-        //LightActorGroup->OnSolutionChanged(SolutionIndex);
+        ////// Sync to materials
+        //USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected();
+        //ensure(AssetData);
+        //auto & AllMaterials = AssetData->MaterialSolutions[SolutionIndex]->SolutionItems;
+        //for (UMaterialInfo* MaterialInfo : AllMaterials) {
+        //    MaterialInfo->ToMaterial();
+        //}
     };
     
     // On solution rename
@@ -210,13 +214,11 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
 void SMaterialViewer::ForceRefresh(int SolutionIndex)
 {
     MainLayout->ClearChildren();
-    USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected();
-    if (!AssetData) {
-        // TODO
-        return;
-    }
+    MaterialDetailsPanelContainer.Empty();
 
-    if (SolutionIndex < 0) {
+
+    USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected();
+    if (!AssetData || SolutionIndex < 0) {
         return;
     }
 
@@ -233,7 +235,6 @@ void SMaterialViewer::ForceRefresh(int SolutionIndex)
             AssetData->MaterialGroupIndexList[i + 1];
 
         for (int j = GroupBeginIndex; j < GroupEndIndex; ++j) {
-            // TODO
             TSharedPtr<SMaterialDetailsPanel> DetailsPanel;
             MainLayout->AddSlot()
                 .AutoHeight()
@@ -262,6 +263,13 @@ void SMaterialViewer::OnAssetDataChanged(USceneManagementAssetData* AssetData)
         // MaterialDetailsPanel->BindDataField(AssetData->TestMaterialInfo);
     }
     ForceRefresh(-1);
+}
+
+void SMaterialViewer::OnEditorModified()
+{
+    if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
+        AssetData->SyncDataByMaterial(SolutionSelector.GetCurrentSelectedSolutionIndex());
+    }
 }
 
 namespace MaterialViewer {
@@ -296,6 +304,13 @@ void OnAssetDataChanged(USceneManagementAssetData* AssetData)
 {
     if (SMaterialViewer::MaterialViewerInstance) {
         SMaterialViewer::MaterialViewerInstance->OnAssetDataChanged(AssetData);
+    }
+}
+
+void OnEditorModified()
+{
+    if (SMaterialViewer::MaterialViewerInstance) {
+        SMaterialViewer::MaterialViewerInstance->OnEditorModified();
     }
 }
 

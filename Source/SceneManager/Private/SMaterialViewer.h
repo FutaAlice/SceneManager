@@ -10,5 +10,6 @@ FName GetTabName();
 void RegisterTabSpawner(FTabManager& TabManager);
 
 void OnAssetDataChanged(USceneManagementAssetData* AssetData);
+void OnEditorModified();
 
 } // namespace MaterialViewer

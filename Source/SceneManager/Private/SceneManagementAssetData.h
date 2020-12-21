@@ -87,15 +87,15 @@ public:
     UPROPERTY(EditAnywhere, meta=(AllowedClasses="MaterialInstance"))
         FSoftObjectPath SoftObjectPath;
 
-    //UPROPERTY(EditAnywhere)
-    //    TMap<FString, float> ScalarParams;
-    //UPROPERTY(EditAnywhere)
-    //    TMap<FString, FLinearColor> VectorParams;
-
-    UPROPERTY(BlueprintReadOnly)
+    UPROPERTY(EditAnywhere)
         TMap<FString, float> ScalarParams;
-    UPROPERTY(BlueprintReadOnly)
+    UPROPERTY(EditAnywhere)
         TMap<FString, FLinearColor> VectorParams;
+
+    //UPROPERTY(BlueprintReadOnly)
+    //    TMap<FString, float> ScalarParams;
+    //UPROPERTY(BlueprintReadOnly)
+    //    TMap<FString, FLinearColor> VectorParams;
 };
 
 UCLASS()
@@ -143,7 +143,7 @@ public:
     void SyncDataByActor();
 
     void SyncMaterialByName();
-    void SyncDataByMaterial();
+    void SyncDataByMaterial(int SolutionIndex);
 
     void CleanUp();
 
@@ -173,10 +173,7 @@ public:
     UPROPERTY(EditAnywhere, EditFixedSize, Category = "Material")
         TArray<int> MaterialGroupIndexList; // group start index
 
-    UPROPERTY(EditAnywhere, EditFixedSize, Category = "Material")
+    UPROPERTY(EditAnywhere, Instanced, EditFixedSize, Category = "Material")
         TArray<USolutionMaterialInfo*> MaterialSolutions;
 
-
-    UPROPERTY(VisibleAnywhere, Instanced, Category = "Material")
-        UMaterialInfo* TestMaterialInfo;
 };
