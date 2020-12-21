@@ -138,6 +138,7 @@ public:
     void DuplicateMaterialSolution(int SolutionIndex);
     void RemoveMaterialSolution(int SolutionIndex);
     void RenameMaterialSolution(int SolutionIndex, const FString& SolutionName);
+    bool RenameMaterialGroup(FString OldName, FString NewName);
     
     void SyncActorByName();
     void SyncDataByActor();

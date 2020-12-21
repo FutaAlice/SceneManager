@@ -250,6 +250,18 @@ void USceneManagementAssetData::RenameMaterialSolution(int SolutionIndex, const 
     MaterialSolutionNameList[SolutionIndex] = SolutionName;
 }
 
+bool USceneManagementAssetData::RenameMaterialGroup(FString OldName, FString NewName)
+{
+    int GroupIndex = MaterialGroupNameList.Find(OldName);
+    if (GroupIndex != INDEX_NONE) {     // Do contain OldName
+        if (MaterialGroupNameList.Find(NewName) == INDEX_NONE) {    // Not contain NewName
+            MaterialGroupNameList[GroupIndex] = NewName;
+            return true;
+        }
+    }
+    return false;
+}
+
 void USceneManagementAssetData::SyncActorByName()
 {
     // gather all ALight actor in level

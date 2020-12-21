@@ -34,6 +34,12 @@ FText SMaterialGroupComboBox::GetCurrentItemLabel() const
     return LOCTEXT("InvalidComboEntryText", "<<Invalid option>>");
 }
 
+void SMaterialGroupComboBox::SetCurrentItemLabel(const FString& Label)
+{
+    if (CurrentItem.IsValid()) {
+        *CurrentItem = Label;
+    }
+}
 
 TSharedRef<SWidget> SMaterialGroupComboBox::OnGenerateWidget(ItemType InOption)
 {

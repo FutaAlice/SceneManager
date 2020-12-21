@@ -13,11 +13,10 @@
 #include "Widgets/Layout/SScrollBox.h"  // SScrollBox
 #include "Widgets/Layout/SSpacer.h" // SSpacer
 #include "Widgets/Input/SButton.h"  // SButton
+#include "Widgets/Input/SEditableText.h"    // SEditableText
 
-#include "Modules/ModuleManager.h"  // FModuleManager
-#include "IDetailsView.h"   // FDetailsViewArgs
-#include "PropertyEditorModule.h"   // FPropertyEditorModule
-#include "Widgets/Layout/SUniformGridPanel.h"   // SUniformGridPanel
+#include "Editor/EditorEngine.h"    // UEditorEngine::EditorAddModalWindow
+#include "Editor.h" // GEditor
 
 #include "SolutionSelector.h"
 #include "SceneManagementAssetData.h"
@@ -44,6 +43,9 @@ public:
     static SMaterialViewer* MaterialViewerInstance;
     void OnAssetDataChanged(USceneManagementAssetData* AssetData);
     void OnEditorModified();
+
+    void CreateRenameDialog();
+    void RenameGroup(FString NewName);
 
 private:
     FSolutionSelector SolutionSelector;
@@ -107,6 +109,7 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
                     SNew(SButton)
                     .Text(FText::FromString("Rename Selected Group"))
                     .OnClicked_Lambda([this]() -> FReply {
+                        CreateRenameDialog();
                         return FReply::Handled();
                     })
                 ]
@@ -265,6 +268,56 @@ void SMaterialViewer::OnEditorModified()
 {
     if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
         AssetData->SyncDataByMaterial(SolutionSelector.GetCurrentSelectedSolutionIndex());
+    }
+}
+
+void SMaterialViewer::CreateRenameDialog()
+{
+    USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected();
+    if (!AssetData) {
+        return;
+    }
+
+    TSharedPtr<SEditableText> EditableText;
+    TSharedPtr<SWindow> ModalWindow;
+    GEditor->EditorAddModalWindow(SAssignNew(ModalWindow, SWindow)
+        .Title(FText::FromString("Rename Solution"))
+        .HasCloseButton(true)
+        .SizingRule(ESizingRule::FixedSize)
+        .ClientSize(FVector2D(200.0f, 60.0f))
+        [
+            SNew(SVerticalBox)
+            + SVerticalBox::Slot()
+            [
+                SAssignNew(EditableText, SEditableText)
+                .HintText(FText::FromString("Input new solution name"))
+            ]
+            + SVerticalBox::Slot()
+            [
+                SNew(SButton)
+                .Text(FText::FromString("OK"))
+                .OnClicked_Lambda([&]() -> FReply {
+                    FText Text = EditableText->GetText();
+                    ModalWindow->RequestDestroyWindow();
+                    RenameGroup(Text.ToString());
+                    ForceRefresh(SolutionSelector.GetCurrentSelectedSolutionIndex());
+                    return FReply::Handled();
+                })
+            ]
+        ]);
+}
+
+void SMaterialViewer::RenameGroup(FString NewName)
+{
+    USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected();
+    if (!AssetData) {
+        return;
+    }
+
+    FString OldName = ComboBox->GetCurrentItemLabel().ToString();
+    if (AssetData->RenameMaterialGroup(OldName, NewName)) {
+        ComboBox->SetCurrentItemLabel(NewName);
+        ForceRefresh(SolutionSelector.GetCurrentSelectedSolutionIndex());
     }
 }
 

@@ -20,6 +20,7 @@ public:
     void Construct(const FArguments& InArgs);
  
     FText GetCurrentItemLabel() const;
+    void SetCurrentItemLabel(const FString& Label);
     
 public:
     std::function<void(FString)> CB_SelectionChange;
