@@ -14,7 +14,9 @@
 #include "Widgets/Layout/SSpacer.h" // SSpacer
 #include "Widgets/Input/SButton.h"  // SButton
 #include "Widgets/Input/SEditableText.h"    // SEditableText
-
+#include "ContentBrowserModule.h"   // FContentBrowserModule
+#include "IContentBrowserSingleton.h"   // IContentBrowserSingleton
+#include "Engine/AssetManager.h"    // UAssetManager::GetAssetPathForData
 #include "Editor/EditorEngine.h"    // UEditorEngine::EditorAddModalWindow
 #include "Editor.h" // GEditor
 
@@ -46,6 +48,7 @@ public:
 
     void CreateRenameDialog();
     void RenameGroup(FString NewName);
+    void AddFromContentBrowser();
 
 private:
     FSolutionSelector SolutionSelector;
@@ -144,6 +147,10 @@ void SMaterialViewer::Construct(const FArguments& InArgs)
                     SNew(SButton)
                     .Text(FText::FromString("Add From Content Browser"))
                     .OnClicked_Lambda([this]() -> FReply {
+                        if (USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected()) {
+                            AddFromContentBrowser();
+                            ForceRefresh(SolutionSelector.GetCurrentSelectedSolutionIndex());
+                        }
                         return FReply::Handled();
                     })
                 ]
@@ -333,6 +340,24 @@ void SMaterialViewer::RenameGroup(FString NewName)
         ComboBox->SetCurrentItemLabel(NewName);
         ForceRefresh(SolutionSelector.GetCurrentSelectedSolutionIndex());
     }
+}
+
+void SMaterialViewer::AddFromContentBrowser()
+{
+    // query all selected asset
+    TArray<FAssetData> AssetDataList;
+    FContentBrowserModule& ContentBrowserModule = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+    IContentBrowserSingleton& ContentBrowserSingleton = ContentBrowserModule.Get();
+    ContentBrowserSingleton.GetSelectedAssets(AssetDataList);
+
+
+    for (auto AssetData : AssetDataList) {
+        if (AssetData.GetClass()->GetFName() == "MaterialInstanceConstant") {
+            // FSoftObjectPath SoftObjectPath = UAssetManager::GetAssetPathForData(AssetData);
+            // SoftObjectPath.
+        }
+    }
+
 }
 
 namespace MaterialViewer {

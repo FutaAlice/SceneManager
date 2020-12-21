@@ -30,6 +30,7 @@ public class SceneManager : ModuleRules
 			// ... add private dependencies that you statically link with here ...
             "AssetTools",
             "AppFramework",
+            "ContentBrowser",
             "DesktopPlatform",
             "EditorStyle",
             "InputCore",
