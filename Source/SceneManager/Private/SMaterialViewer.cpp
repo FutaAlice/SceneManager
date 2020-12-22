@@ -376,15 +376,17 @@ void SMaterialViewer::AddFromContentBrowser()
     }
 
     // hit message dialog
-    FString args;
-    for (auto SoftObjectPath : PathFailedToAdd) {
-        args += "\n\t\"";
-        args += SoftObjectPath.ToString();
-        args += "\'";
+    if (PathFailedToAdd.Num() != 0) {
+        FString args;
+        for (auto SoftObjectPath : PathFailedToAdd) {
+            args += "\n\t\"";
+            args += SoftObjectPath.ToString();
+            args += "\'";
+        }
+        const FText Message = FText::Format(LOCTEXT("AddFromContentBrowser_Message",
+            "SoftObjectPath:{0}, already exist."), FText::AsCultureInvariant(args));
+        FMessageDialog::Open(EAppMsgType::Ok, Message);
     }
-    const FText Message = FText::Format(LOCTEXT("AddFromContentBrowser_Message",
-        "SoftObjectPath:{0}, already exist."), FText::AsCultureInvariant(args));
-    FMessageDialog::Open(EAppMsgType::Ok, Message);
 
     // refresh
     ForceRefresh(SolutionSelector.GetCurrentSelectedSolutionIndex());
