@@ -19,9 +19,10 @@ typedef int EMPCOwner;
 #define MPCOwner_Wind           3
 #define MPCOwner_PostProc       4
 
-#define ERR_MAT_SOLUTION    -1
-#define ERR_MAT_GROUP       -2
-#define ERR_MAT_EXIST_INS   -3
+#define ERR_MAT_UNKNOWN     -1
+#define ERR_MAT_SOLUTION    -2
+#define ERR_MAT_GROUP       -3
+#define ERR_MAT_EXIST_INS   -4
 
 
 UCLASS(hideCategories = Light)
@@ -159,6 +160,7 @@ public:
     void RemoveMaterialGroup(FString GroupName);
     void RenameMaterialSolution(int SolutionIndex, const FString& SolutionName);
     bool RenameMaterialGroup(FString OldName, FString NewName);
+    int ReplaceMaterial(UMaterialInfo* InMaterialInfo, FSoftObjectPath InPath);
     
     void SyncActorByName();
     void SyncDataByActor();

@@ -314,6 +314,46 @@ bool USceneManagementAssetData::RenameMaterialGroup(FString OldName, FString New
     return false;
 }
 
+int USceneManagementAssetData::ReplaceMaterial(UMaterialInfo* InMaterialInfo, FSoftObjectPath InPath)
+{
+    if (MaterialSolutions.Num() <= 0) {
+        return ERR_MAT_SOLUTION;
+    }
+
+    TSet<FSoftObjectPath> PathCollection;
+    for (UMaterialInfo* MaterialInfo : MaterialSolutions[0]->SolutionItems) {
+        PathCollection.Add(MaterialInfo->SoftObjectPath);
+    }
+    if (PathCollection.Contains(InPath)) {
+        return ERR_MAT_EXIST_INS;
+    }
+
+    // find Material index
+    int MaterialIndex = INDEX_NONE;
+    for (auto SO : MaterialSolutions) {
+        for (int i = 0; i < SO->SolutionItems.Num(); ++i) {
+            UMaterialInfo* MaterialInfo = SO->SolutionItems[i];
+            if (MaterialInfo == InMaterialInfo) {
+                MaterialIndex = i;
+                break;
+            }
+        }
+        if (MaterialIndex != INDEX_NONE) {
+            break;
+        }
+    }
+    if (MaterialIndex == INDEX_NONE) {
+        return ERR_MAT_UNKNOWN;
+    }
+
+    for (auto SO : MaterialSolutions) {
+        UMaterialInfo* MaterialInfo = SO->SolutionItems[MaterialIndex];
+        MaterialInfo->SoftObjectPath = InPath;
+        MaterialInfo->FromMaterial();
+    }
+    return 0;
+}
+
 void USceneManagementAssetData::SyncActorByName()
 {
     // gather all ALight actor in level

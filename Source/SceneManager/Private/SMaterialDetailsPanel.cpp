@@ -1,5 +1,6 @@
 #include "SMaterialDetailsPanel.h"
 #include "SlateOptMacros.h"
+#include "Misc/MessageDialog.h" // FMessageDialog
 #include "Widgets/Colors/SColorPicker.h"
 #include "Modules/ModuleManager.h"  // FModuleManager
 #include "IDetailsView.h"   // FDetailsViewArgs
@@ -250,8 +251,25 @@ void SMaterialDetailsPanel::ForceRefresh()
 void SMaterialDetailsPanel::OnFinishedChangingProperties(const FPropertyChangedEvent& InEvent)
 {
     if (InEvent.GetPropertyName() == "SoftObjectPath") {
-        // TODO
-        MaterialInfo->FromMaterial();
+        FSoftObjectPath SoftObjectPath = MaterialInfo->SoftObjectPath;
+        MaterialInfo->SoftObjectPath.Reset();
+
+        USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected();
+        ensure(AssetData);
+
+        if (SoftObjectPath.IsNull()) {
+            // TODO
+        }
+        else {
+            int Err = AssetData->ReplaceMaterial(MaterialInfo, SoftObjectPath);
+            if (Err == ERR_MAT_EXIST_INS) {
+                FString Message = "SoftObjectPath: ";
+                Message += SoftObjectPath.ToString();
+                Message += ", already exist.";
+                FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(Message));
+            }
+        }
+
         ForceRefresh();
     } 
     else {
