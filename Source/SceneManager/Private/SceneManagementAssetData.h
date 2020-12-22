@@ -158,6 +158,7 @@ public:
     void DuplicateMaterialSolution(int SolutionIndex);
     void RemoveMaterialSolution(int SolutionIndex);
     void RemoveMaterialGroup(FString GroupName);
+    void RemoveMaterial(UMaterialInfo* InMaterialInfo);
     void RenameMaterialSolution(int SolutionIndex, const FString& SolutionName);
     bool RenameMaterialGroup(FString OldName, FString NewName);
     int ReplaceMaterial(UMaterialInfo* InMaterialInfo, FSoftObjectPath InPath);

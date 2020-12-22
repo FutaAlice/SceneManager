@@ -41,4 +41,5 @@ private:
 private:
     UMaterialInfo* MaterialInfo;
     IDetailsView* DetailView;
+    FSoftObjectPath CachedPath;
 };

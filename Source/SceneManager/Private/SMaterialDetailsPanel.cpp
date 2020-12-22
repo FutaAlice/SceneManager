@@ -234,7 +234,8 @@ END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SMaterialDetailsPanel::BindDataField(UObject* InObject)
 {
     MaterialInfo = Cast<UMaterialInfo>(InObject);
-    DetailView->SetObject(InObject);
+    DetailView->SetObject(MaterialInfo);
+    CachedPath = MaterialInfo ? MaterialInfo->SoftObjectPath : FSoftObjectPath();
     ForceRefresh();
 }
 
@@ -257,8 +258,9 @@ void SMaterialDetailsPanel::OnFinishedChangingProperties(const FPropertyChangedE
         USceneManagementAssetData* AssetData = USceneManagementAssetData::GetSelected();
         ensure(AssetData);
 
-        if (SoftObjectPath.IsNull()) {
-            // TODO
+        if (SoftObjectPath.IsNull() && CachedPath.IsNull()) {
+            AssetData->RemoveMaterial(MaterialInfo);
+            BindDataField(nullptr);
         }
         else {
             int Err = AssetData->ReplaceMaterial(MaterialInfo, SoftObjectPath);
@@ -268,6 +270,7 @@ void SMaterialDetailsPanel::OnFinishedChangingProperties(const FPropertyChangedE
                 Message += ", already exist.";
                 FMessageDialog::Open(EAppMsgType::Ok, FText::FromString(Message));
             }
+            CachedPath = MaterialInfo->SoftObjectPath;
         }
 
         ForceRefresh();

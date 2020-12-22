@@ -297,6 +297,47 @@ void USceneManagementAssetData::RemoveMaterialGroup(FString GroupName)
     }
 }
 
+void USceneManagementAssetData::RemoveMaterial(UMaterialInfo* InMaterialInfo)
+{
+    // find Material index
+    int MaterialIndex = INDEX_NONE;
+    for (auto SO : MaterialSolutions) {
+        for (int i = 0; i < SO->SolutionItems.Num(); ++i) {
+            UMaterialInfo* MaterialInfo = SO->SolutionItems[i];
+            if (MaterialInfo == InMaterialInfo) {
+                MaterialIndex = i;
+                break;
+            }
+        }
+        if (MaterialIndex != INDEX_NONE) {
+            break;
+        }
+    }
+    ensure(MaterialIndex != INDEX_NONE);
+
+    // remove from all solutions
+    for (auto SO : MaterialSolutions) {
+        SO->SolutionItems.RemoveAt(MaterialIndex);
+    }
+
+    // find belong group
+    int BelongGroup = INDEX_NONE;
+    for (int i = 0; i < MaterialGroupIndexList.Num(); ++i) {
+        int BeginIndex, EndIndex;
+        GetGroupRange(MaterialGroupNameList[i], BeginIndex, EndIndex);
+        if (BeginIndex <= MaterialIndex && EndIndex >= MaterialIndex) {
+            BelongGroup = i;
+            break;
+        }
+    }
+    ensure(BelongGroup != INDEX_NONE);
+
+    // fix group index
+    for (int i = BelongGroup + 1; i < MaterialGroupIndexList.Num(); ++i) {
+        MaterialGroupIndexList[i] += 1;
+    }
+}
+
 void USceneManagementAssetData::RenameMaterialSolution(int SolutionIndex, const FString & SolutionName)
 {
     MaterialSolutionNameList[SolutionIndex] = SolutionName;
@@ -320,12 +361,14 @@ int USceneManagementAssetData::ReplaceMaterial(UMaterialInfo* InMaterialInfo, FS
         return ERR_MAT_SOLUTION;
     }
 
-    TSet<FSoftObjectPath> PathCollection;
-    for (UMaterialInfo* MaterialInfo : MaterialSolutions[0]->SolutionItems) {
-        PathCollection.Add(MaterialInfo->SoftObjectPath);
-    }
-    if (PathCollection.Contains(InPath)) {
-        return ERR_MAT_EXIST_INS;
+    if (!InPath.IsNull()) {
+        TSet<FSoftObjectPath> PathCollection;
+        for (UMaterialInfo* MaterialInfo : MaterialSolutions[0]->SolutionItems) {
+            PathCollection.Add(MaterialInfo->SoftObjectPath);
+        }
+        if (PathCollection.Contains(InPath)) {
+            return ERR_MAT_EXIST_INS;
+        }
     }
 
     // find Material index
