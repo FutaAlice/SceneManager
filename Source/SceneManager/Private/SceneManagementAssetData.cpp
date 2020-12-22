@@ -334,7 +334,7 @@ void USceneManagementAssetData::RemoveMaterial(UMaterialInfo* InMaterialInfo)
 
     // fix group index
     for (int i = BelongGroup + 1; i < MaterialGroupIndexList.Num(); ++i) {
-        MaterialGroupIndexList[i] += 1;
+        MaterialGroupIndexList[i] -= 1;
     }
 }
 
