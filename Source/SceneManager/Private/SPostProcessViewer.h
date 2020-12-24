@@ -5,7 +5,7 @@ class FTabManager;
 
 namespace PostProcessViewer {
 
-FName GetTabName(int LightCategory);
+FName GetTabName();
 void RegisterTabSpawner(FTabManager& TabManager);
 
 } // namespace LightingViewer

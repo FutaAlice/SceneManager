@@ -7,9 +7,9 @@
 #include "Widgets/SCompoundWidget.h"    // SCompoundWidget
 #include "Widgets/Docking/SDockTab.h"   // SDockTab
 #include "Widgets/Layout/SScrollBox.h"  // SScrollBox
-//
-//#include "SolutionSelector.h"
-//#include "SLightActorComboBox.h"
+#include "Engine/PostProcessVolume.h"   // APostProcessVolume
+
+#include "SPostProcessComboBox.h"
 //#include "SLightActorDetailPanel.h"
 //#include "SLightActorGroup.h"
 //#include "SMPCDetialsPanel.h"
@@ -35,13 +35,21 @@ public:
 
     // Instance Members
 private:
-    TSharedPtr<SVerticalBox> MainLayout;
-    // TSharedPtr<SLightActorComboBox> LightActorComboBox;
+    TSharedPtr<SPostProcessComboBox> PostProcessComboBox;
+    IDetailsView *DetailsView;
 };
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SPostProcessViewer::Construct(const FArguments& InArgs)
 {
+    FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    FDetailsViewArgs DetailsViewArgs(false, false, false, FDetailsViewArgs::HideNameArea, true);
+    TSharedRef<IDetailsView> DetailsViewRef = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
+    DetailsView = DetailsViewRef.operator->();
+    //DetailsView->OnFinishedChangingProperties().AddRaw(this, &SMPCDetialsPanel::OnFinishedChangingProperties);
+    //DetailsView->RegisterInstancedCustomPropertyLayout(UMaterialParameterCollection::StaticClass(),
+    //    FOnGetDetailCustomizationInstance::CreateRaw(this, &SMPCDetialsPanel::CreateDetailCustomizationInstance));
+
     ChildSlot
     [
         SNew(SHorizontalBox)
@@ -56,14 +64,22 @@ void SPostProcessViewer::Construct(const FArguments& InArgs)
                 SNew(SScrollBox)
                 + SScrollBox::Slot()
                 [
-                    SAssignNew(MainLayout, SVerticalBox)
+                    SAssignNew(PostProcessComboBox, SPostProcessComboBox)
+                ]
+                + SScrollBox::Slot()
+                [
+                    DetailsViewRef
                 ]
             ]
         ]
     ];
-}
 
+    PostProcessComboBox->CB_SelectionChange = [this](FString, APostProcessVolume *Volume) {
+        DetailsView->SetObject(Volume);
+    };
+}
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
+
 namespace PostProcessViewer {
 
 FName GetTabName()

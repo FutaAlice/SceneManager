@@ -17,6 +17,7 @@
 #include "SSettingsView.h"
 #include "SMaterialViewer.h"
 #include "SLightingViewer.h"
+#include "SPostProcessViewer.h"
 #include "SceneManagementAssetData.h"
 #include "SceneManagementAssetActions.h"
 #include "EventHub.h"
@@ -174,7 +175,7 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
     const FName TabName_Meterial = MaterialViewer::GetTabName();
     const FName TabName_SceneLighting = LightingViewer::GetTabName(LightCategory_SceneLight);
     const FName TabName_CharacterLighting = LightingViewer::GetTabName(LightCategory_CharacterLight);
-    const FName TabName_PostProcessing = FName(TEXT("Post-Processing"));
+    const FName TabName_PostProcessing = PostProcessViewer::GetTabName();
     const FName TabName_Wind = FName(TEXT("Wind"));
     const FName TabName_Misc = FName(TEXT("Miscellaneous"));
     const FName TabName_Settings = FName(TEXT("Settings"));
@@ -198,7 +199,7 @@ TSharedRef<SDockTab> FSceneManagerImpl::CreateSceneManagerTab(const FSpawnTabArg
         MaterialViewer::RegisterTabSpawner(*ToolsTabManager);
         LightingViewer::RegisterTabSpawner(*ToolsTabManager, LightCategory_SceneLight);
         LightingViewer::RegisterTabSpawner(*ToolsTabManager, LightCategory_CharacterLight);
-        //WatchViewer::RegisterTabSpawner(*DebuggingToolsTabManager);
+        PostProcessViewer::RegisterTabSpawner(*ToolsTabManager);
 
         SceneManagerLayout = FTabManager::NewLayout("Standalone_SceneManager_Layout_v3");
         SceneManagerLayout->AddArea(
